@@ -1,0 +1,8 @@
+[[device]]
+dt.compatible = "lenovo,tb520fu"
+device = "lenovo_tb520fu"
+variant = "YogaTabPlus"
+friendly_name = "Lenovo Yoga Tab Plus (TB520FU)"
+
+[inputplumber]
+target_devices = ["deck-uhid", "keyboard"]

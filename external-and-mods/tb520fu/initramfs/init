@@ -1,0 +1,36 @@
+#!/bin/busybox sh
+# External image only: resolve its explicit filesystem UUID.
+# No STORAGE/userdata fallback and no writes to the Android GPT.
+export PATH=/bin:/sbin
+/bin/busybox --install -s /bin
+mount -t devtmpfs devtmpfs /dev
+mount -t proc proc /proc
+mount -t sysfs sysfs /sys
+mkdir -p /newroot
+rootarg=""
+for arg in $(cat /proc/cmdline); do
+    case "$arg" in root=UUID=*) rootarg="${arg#root=}";; esac
+done
+if [ -z "$rootarg" ]; then
+    echo "TB520FU: explicit root=UUID= required" >/dev/kmsg
+    exec /bin/sh
+fi
+rootdev=""
+for i in $(seq 1 120); do
+    rootdev="$(findfs "$rootarg" 2>/dev/null)" && break
+    sleep 0.5
+done
+if [ -z "$rootdev" ] || ! mount -t ext4 -o rw "$rootdev" /newroot; then
+    echo "TB520FU: could not mount $rootarg" >/dev/kmsg
+    exec /bin/sh
+fi
+o=/newroot/var/lib/overlays/etc
+mkdir -p "$o/upper" "$o/work"
+if ! mount -t overlay overlay -o "lowerdir=/newroot/etc,upperdir=$o/upper,workdir=$o/work" /newroot/etc; then
+    echo "TB520FU: /etc overlay failed" >/dev/kmsg
+    exec /bin/sh
+fi
+mount --move /dev /newroot/dev
+mount --move /proc /newroot/proc
+mount --move /sys /newroot/sys
+exec switch_root /newroot /sbin/init

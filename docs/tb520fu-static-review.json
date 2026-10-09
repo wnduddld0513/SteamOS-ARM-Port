@@ -1,0 +1,26 @@
+{
+  "device": "TB520FU",
+  "base_commit": "9499fec5c9eb607cccfc6b67cb406e74d624e96d",
+  "kernel_source_commit": "82214104148ef8c75ed983fa8f7a755733fc1476",
+  "existing_code_files_preserved": 4205,
+  "builds_executed": [],
+  "device_boot_executed": false,
+  "checks": {
+    "new_shell_scripts_bash_n": 9,
+    "python_including_shell_heredocs": "AST parse",
+    "toml_json": "parse",
+    "firmware": "274 exact files, hashes and sizes",
+    "inputplumber_patches": "5 kernel-fork patches + 2 existing SteamOS HID fixes; 48 hunks applied with no fuzz",
+    "ucm": "private codec include targets exist at pinned source",
+    "kconfig": "56 additional symbol names exist; no dependency resolution or compilation",
+    "installer": "dedicated rootfs guard, namespace isolation, idempotence, escaping usr and etc symlinks rejected before writes",
+    "push_hook": "fork/tb520fu accepted; upstream and main rejected without contacting remote",
+    "uefi": "pinned Mu source prepared from stock; 69 hardware/raw entries, DEPEX hashes, 41 memory regions and generated source verified"
+  },
+  "limits": [
+    "No UEFI boot.img compiled",
+    "No kernel/userspace/DTB/OS image built",
+    "No claim of successful Linux boot or hardware functionality",
+    "Camera/authentication and other unfinished kernel features remain unfinished"
+  ]
+}

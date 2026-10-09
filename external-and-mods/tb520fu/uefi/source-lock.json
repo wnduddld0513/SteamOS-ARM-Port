@@ -1,0 +1,13 @@
+{
+  "mu_url": "https://github.com/Project-Silicium/Mu-Silicium.git",
+  "mu_commit": "8d73b66ab554f9ab6134b58839bb1e46ebd47688",
+  "stock": {
+    "uefi.elf": "a2abba64ac0c56cf301b811da7e9a21a262cdcb0d7c62ff14d3ef741708b9b8c",
+    "xbl_config.elf": "1b618c1cb9d5207b03e9ec332d08b0d8a73b4edd44215badeac7b52340317765",
+    "boot.img": "35a2eceda1934a909c5537df7b38f9013130cf29f66537f563bb69544b35ca4e"
+  },
+  "firmware_volume_base": "0xa7100000",
+  "firmware_volume_size": "0x300000",
+  "linux_boot_tested": false,
+  "build_tested": false
+}

@@ -99,3 +99,7 @@ _agent_*
 # Allow overlay usr/bin scripts to be tracked despite user global gitignore
 !*overlay/usr/bin/
 !*overlay/usr/bin/**
+
+# TB520FU local build inputs and outputs
+/external-and-mods/tb520fu/local/
+/tb520fu-work/

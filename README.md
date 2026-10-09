@@ -76,12 +76,24 @@ itself up. I only own a Pocket FIT, so if you have one of the others please
 |---|---|---|
 | Lenovo Legion Y700 Gen 3 (TB321FU) | Snapdragon 8 Gen 3 | Testing |
 | Lenovo Legion Y700 Gen 4 (TB322FC) | Snapdragon 8 Elite | Testing |
+| Lenovo Yoga Tab Plus / YOGA Pad Pro AI元启 (TB520FU) | Snapdragon 8 Gen 3 | Source integration only — [TB520FU guide](docs/tb520fu.md) |
 | REDMAGIC 6 (NX669J) | Snapdragon 888 | Build it yourself ([guide](docs/redmagic6.md)) |
 
 The Lenovo tablets boot from a USB drive and install to internal storage,
 nobody has run them on a real tablet yet. If you have one and want to help,
 ask on [Discord](https://discord.gg/EP53nZYvg) and see the
 [Lenovo page](https://steamos-arm-port.github.io/devices/lenovo/).
+
+### TB520FU fork branch
+
+This fork's `tb520fu` branch adds an opt-in, separate image recipe using
+[our TB520FU kernel port](https://github.com/wnduddld0513/linux-tb520fu/tree/tb520fu).
+It includes Tianma and BOE panel configurations (2944×1840, currently 120 Hz).
+Existing device builders and overlays are unchanged. **No TB520FU kernel/image
+build or Linux boot has been verified.** A dedicated [TB520FU UEFI source port](external-and-mods/tb520fu/uefi/README.md)
+is included; it has not been compiled or booted. The Y700 boot images and generic ABL/internal-storage
+installation instructions do not establish compatibility with this tablet.
+See [docs/tb520fu.md](docs/tb520fu.md) for the dedicated paths and limitations.
 
 ## Documentation
 

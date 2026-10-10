@@ -4,9 +4,9 @@
   "compiled": true,
   "boot_tested": false,
   "size": 1269760,
-  "sha256": "a3b8b1e5b7d1fe8f0a3d27963157749eee86abece2c3f044fdac431b4059fa09",
+  "sha256": "d8889121a3ad3e569485018c2b8d025478a1f8866ea75533df4cb00f8e7c319b",
   "mu_commit": "8d73b66ab554f9ab6134b58839bb1e46ebd47688",
-  "source_patch_sha256": "063ae84f7fdcd8fdef4cc3a5f83348cdfde081b72a14302ec3bf83c950bedd1f",
+  "source_patch_sha256": "66bcedeebfb4000f6d6ad4c92c02678d329e06c4d52bd07389e417464ec3cd14",
   "display": "SimpleFbDxe inherits ABL framebuffer; stock DisplayDxe excluded in v5",
   "ramoops": {
     "address": "0xA2000000",
@@ -19,8 +19,9 @@
     "DXE ENTER/EXIT strings present",
     "ring writer host test passed",
     "4205 original files preserved",
-    "Guarded clock patch changes only the verified four-byte DCD call",
-    "SimpleFbDxe GUID present; stock DisplayDxe GUID absent"
+    "SimpleFbDxe GUID present; stock DisplayDxe GUID absent",
+    "Final FV ClockDxe hash matches CESTA candidate; RVA 0x7D3C bypass present; original inner DCD call retained",
+    "Final DxeCore contains ENTER/EXIT markers and no ClockDxe skip marker"
   ],
   "source_overrides_sha256": {
     "external-and-mods/tb520fu/uefi/Platforms/Lenovo/tb520fuPkg/DeviceBuild.py": "72bac059ed89016566cd9c7de9f731276394cfa45e027b0ffd499f8d34e4d391",
@@ -39,11 +40,11 @@
     "external-and-mods/tb520fu/uefi/Platforms/Lenovo/tb520fuPkg/tb520fu.dec": "cefa6405e42d9573a5824002be82b7d2cf65d39a43813c6003e80f581789e393",
     "external-and-mods/tb520fu/uefi/Platforms/Lenovo/tb520fuPkg/tb520fu.dsc": "124c9b441673b1c76d21d3bd8925768963ebca6a449bc74d7e8be0334a31b7e5",
     "external-and-mods/tb520fu/uefi/Platforms/Lenovo/tb520fuPkg/tb520fu.fdf": "a6e898d7af83e61436669657393f9537c627a671c3a2e8aa4b7e076b0c6b2a92",
-    "external-and-mods/tb520fu/uefi/patches/clock-display-handoff.json": "13faa7be3b55b994396a3aea26c78f008c6994bc312f3aefe9270b16613d251b",
-    "external-and-mods/tb520fu/uefi/patches/dxe-dispatch-trace.patch": "063ae84f7fdcd8fdef4cc3a5f83348cdfde081b72a14302ec3bf83c950bedd1f",
+    "external-and-mods/tb520fu/uefi/patches/clock-display-handoff.json": "5a7f40ac19a9a50a88b9ddb37d5b3c15e974db1690ad8c5c5399ccaa2889b484",
+    "external-and-mods/tb520fu/uefi/patches/dxe-dispatch-trace.patch": "66bcedeebfb4000f6d6ad4c92c02678d329e06c4d52bd07389e417464ec3cd14",
     "external-and-mods/tb520fu/uefi/patches/pmic-warm-boot.json": "d9704a611dfc8d55a14043fe26799bacacc549976d8ee34e9f296ab1f1227a4f"
   },
-  "artifact": "tb520fu-uefi-clockskip-debug-v7.img",
+  "artifact": "tb520fu-uefi-cestafix-debug-v8.img",
   "pmic_patch": {
     "module": "PmicDxe",
     "input_sha256": "b42833333e78bd5bab193577dd0b181a8ba5cfa043f33650214b4ab4c28b84fb",
@@ -58,17 +59,18 @@
   "clock_patch": {
     "module": "ClockDxe",
     "input_sha256": "ce93cbee7189ba0609dc215a2891649a2e65094073876d654cc00f957d30a6fe",
-    "output_sha256": "6fbcb26e60a8717038c12b25ed0660fe59dea93cbf3b82185c50f442fae8afb4",
-    "rva": "0xA810",
-    "before": "96ffff97",
+    "output_sha256": "b9f81ed4836c6ed978c1665a94311d7d6952bef157e755a41d5e79f65d7408f3",
+    "rva": "0x7D3C",
+    "before": "6e0a0094",
     "after": "e0031f2a",
-    "meaning": "Replace bl 0xA668 (DCDDisableDependencies) with mov w0, wzr to preserve inherited clock dependencies",
+    "meaning": "Replace Clock_InitCESTA call bl 0xA6F4 with mov w0, wzr; retain ClockDxe and its clock protocol initialization",
     "reference_commit": "a1501e0c2e642d6ac0d8f52c85af2a67b75a7799",
-    "reference": "https://github.com/Project-Silicium/Device-Binaries/blob/a1501e0c2e642d6ac0d8f52c85af2a67b75a7799/giulia/README.md",
-    "evidence": "TB520FU stock RVA 0xA668..0xA843 is byte-identical to the same-SoC giulia unpatched routine and caller; reference patched module differs only at the four-byte call site",
-    "boot_tested": false
+    "reference": "https://github.com/Project-Silicium/Device-Binaries/blob/a1501e0c2e642d6ac0d8f52c85af2a67b75a7799/onyx/README.md",
+    "evidence": "Clock driver init at 0x795C calls 0xA6F4 at RVA 0x7D3C. Error branch loads string 0x11F0C: Clock_InitCESTA failed. Previous DCD-only call at 0xA810 is nested in this CESTA function; excluding the caller avoids its complete cold reinitialization.",
+    "boot_tested": false,
+    "reference_scope": "Onyx uses another SoC: precedent for the function-level workaround only. Addresses and bytes are derived from TB520FU.",
+    "compiled": false
   },
   "debug_dispatch_delay_us": 250000,
-  "diagnostic_only": true,
-  "debug_skip_driver": "ClockDxe"
+  "diagnostic_only": false
 }

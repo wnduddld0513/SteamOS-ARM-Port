@@ -55,7 +55,7 @@ verified on hardware. The existing SteamOS USB image was not rebuilt.
 From Windows CMD with the tablet in bootloader mode:
 
 ```cmd
-fastboot boot "%USERPROFILE%\Documents\TB520FU\install-tb520fu\tb520fu-uefi-clockskip-debug-v7.img"
+fastboot boot "%USERPROFILE%\Documents\TB520FU\install-tb520fu\tb520fu-uefi-cestafix-debug-v8.img"
 ```
 
 This command boots the image temporarily. Do not flash it to a boot partition.
@@ -210,3 +210,13 @@ instruction remains in effect. Existing v7 images and their metadata remain
 unchanged and do not contain this source candidate. A further hardware test
 is required before calling this a fix. CESTA-managed clock/power behavior
 may be incomplete with this initialization excluded.
+
+## Eighth image: CESTA candidate compiled
+
+After the user requested compilation, the source candidate above was built
+as tb520fu-uefi-cestafix-debug-v8.img. Android v4 packing and the exact gzip
+BootShim/FD payload were checked. The final FV contains the hash-locked CESTA
+ClockDxe, with 0x7D3C bypassed and the original inner DCD call restored.
+The DxeCore skip marker is absent; ClockDxe executes normally. SimpleFb and
+the existing PMIC workaround remain. DEBUG pacing remains at 250 ms.
+This is an experimental image; hardware boot is not yet verified.

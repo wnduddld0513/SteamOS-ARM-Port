@@ -73,14 +73,14 @@ BSD-2-Clause-Patent notices; see `LICENSE.Mu-Silicium`. The preparation/build
 scripts are BSD-2-Clause-Patent. Stock module ownership stays with their vendors;
 all binaries and build checkouts are local ignored files, not Git contents.
 
-Current bring-up candidate (v5) uses SimpleFbDxe at the stock DisplayDxe slot
-to keep the ABL panel scanout. It retains the v4 clock-dependency workaround
-and v3 PMIC workaround. The current inventory has 69 stock module/raw entries;
+The current bring-up candidate uses SimpleFbDxe at the stock DisplayDxe slot
+to keep the ABL panel scanout and retains the v3 PMIC workaround. The current inventory has 69 stock module/raw entries;
 previous builds with stock DisplayDxe had 70. USE_CUSTOM_DISPLAY_DRIVER=1
 prevents a duplicate common GOP driver; SimpleFbDxe is explicitly included.
 The stock Tianma/BOE resources are retained. Hardware boot is still unverified.
 
-The latest source candidate replaces the earlier DCD-only clock patch with
+The v8 DEBUG image replaces the earlier DCD-only clock patch with
 a guarded Clock_InitCESTA call bypass. ClockDxe executes normally again in
-DEBUG; the v7 diagnostic skip is removed. This source candidate has not been
-compiled or tested on the tablet; existing v7 files contain the older code.
+DEBUG; the v7 diagnostic skip is removed. The image was compiled and its
+embedded ClockDxe patch verified, but has not been tested on the tablet.
+See the debug build record for its hash and the remaining limitations.

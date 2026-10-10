@@ -274,3 +274,65 @@ registered, special and invalid source behavior. The patch is applied only
 in the dedicated TB520FU checkout by its preparation script.
 
 The v10 DEBUG image was compiled and verified against BootShim/FD, the compiled GIC driver and all three stock PE patches. Local artifact: `tb520fu-uefi-gicfix-debug-v10.img` (1269760 bytes), SHA-256 `818f49159bd4338808d4011db0ded3d19dfc58f11f011b13785b6a1c6527f8cd`. Actual device boot is pending.
+
+
+## Eleventh candidate: second-stage PMIC, secure-app and partition handoff
+
+The complete 15-second v10 video reaches ClockDxe/UFS/FAT success, then
+reports QSEE and featenabler TA failures, SPSS spunvm lookup failure, one
+masked IRQ 0x105 and finally a synchronous external abort inside SPMI.
+The fatal path is QcomChargerDxeLA -> PmicDxe -> SPMI, with ELR
+0xD1FD87F0, SPMI RVA 0x37F0 (`ldr w9, [x3, x4]`), X3=0x0C500008,
+X4=0x27A000 and FAR=0x0C77A008. SP=0xA764B680 remains inside the
+configured stack. This is a different fault from v9's stack exhaustion.
+The final ArmCpuDxe ASSERT is an exception-handler stop, not CPU init failure.
+
+Three hash-locked changes are made only to locally extracted TB520FU PEs:
+
+- SPMI: pair the earlier PMIC minimal-init workaround with the Giulia
+  same-SoC transaction-wrapper workaround at 0x154C. The complete wrapper
+  0x154C..0x15FB is byte-identical before patching. It returns zero without
+  executing the protected transaction. This contains the observed access;
+  it does not provide functioning PMIC writes or verified charging status.
+  Other transaction wrappers remain intact and may need separate work.
+- TzDxeLA: initialize its local global-applet-loaded flag at 0xE5A8 to 1.
+  Both load/start wrappers use this flag to avoid repeating global secure-app
+  initialization after ABL. This follows the Onyx approach but derives the
+  address from TB520FU disassembly; no foreign executable is included.
+- FeatureEnablerDxe: the optional TA acquisition helper at 0x2370 returns
+  EFI_UNSUPPORTED rather than attempting failed featenabler_a, featenabler
+  and embedded-TA loads. Its original caller records feature status 2 and
+  skips gated callbacks. Protocol registration remains. This explicitly
+  defers secure feature gates; it does not repair QSEE or claim enabled
+  features. ABL scanout is inherited through SimpleFbDxe.
+
+Stock DiskIoDxe and PartitionDxe replace the generic source substitutes.
+SPSS label lookup requests Qualcomm GUID fe2555be-d716-4686-b9d0-79db5921b70d
+and partition-type GUID protocol 6848de61-eb61-4def-9a8e-3817cbeb8f1c.
+Both exist in stock PartitionDxe; the generic Mu driver does not publish
+the Qualcomm GPT record interface. Restoring these exact local modules
+addresses the missing interface without changing partition contents or
+suppressing SPSS errors. Whether spunvm is found and mounted still requires
+a tablet test. The inventory now has 71 stock module/raw entries.
+
+The previous Clock CESTA, UFS wakeup, GIC containment, framebuffer and PMIC
+patches remain. No new driver is removed, no storage is formatted, and no
+memory permissions are relaxed. Other devices' sources remain unchanged.
+
+`tools/test-tb520fu-second-stage.py` runs the actual ARM64 patched code with
+Unicorn 2.1.4. It verifies SPMI returns without I/O, the feature helper and
+original caller's unavailable path, the TZ guard branch, exact patch scope,
+input/double-application rejection, and the restored partition protocols.
+These are host checks, not secure-world, charging, filesystem or boot tests.
+
+References: [Giulia paired PMIC/SPMI patches](https://github.com/Project-Silicium/Device-Binaries/blob/a1501e0c2e642d6ac0d8f52c85af2a67b75a7799/giulia/README.md),
+[Onyx second-stage TZ flag](https://github.com/Project-Silicium/Device-Binaries/blob/a1501e0c2e642d6ac0d8f52c85af2a67b75a7799/onyx/README.md).
+
+
+The v11 DEBUG build completed successfully and its final Android-v4 gzip
+payload equals BootShim plus the generated FD. All 71 stock module/raw records
+and DEPEX hashes match the final compressed FV; ArmGicDxe, DxeCore and
+SimpleFbDxe match their compiled PEs. The local artifact is
+`tb520fu-uefi-secondstage-debug-v11.img` (1273856 bytes), SHA-256
+`1adb98a5956b973b423b25865e33f910adb07cd6cc60b32840aa17a044f324a5`.
+The Windows install copy matches. Actual v11 tablet boot remains untested.

@@ -1,0 +1,14 @@
+{
+  "module": "TzDxeLA",
+  "input_sha256": "56cbf22d5edb0dea3f084c0775a41a1551adae0fb17c1dc9d8e6f8f0ad3b3e6d",
+  "output_sha256": "e561ff01bc667d6ebfe477e1c79dcddc50dd6faeedbbd9e5818f146ac37f8f2d",
+  "rva": "0xe5a8",
+  "before": "00",
+  "after": "01",
+  "meaning": "Initialize the local global-applet-loaded flag for second-stage entry after ABL, avoiding repeated cold initialization of global secure apps.",
+  "evidence": "TB520FU load/start wrappers at 0x2FA4 and 0x3304 read 0xE5A8, call LoadSecureApps 0x31A0 if clear, then set the flag. Corresponding Onyx wrappers use 0xF5B0; its patch changes that byte from 0 to 1.",
+  "reference_commit": "a1501e0c2e642d6ac0d8f52c85af2a67b75a7799",
+  "reference": "https://github.com/Project-Silicium/Device-Binaries/blob/a1501e0c2e642d6ac0d8f52c85af2a67b75a7799/onyx/README.md",
+  "limitations": "Onyx is a different SoC; its address is not copied. This preserves the ABL handoff assumption and does not repair the secure-world ABI or support arbitrary new TA loads.",
+  "boot_tested": false
+}

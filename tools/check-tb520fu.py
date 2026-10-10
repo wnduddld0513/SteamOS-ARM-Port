@@ -39,7 +39,7 @@ def main():
         for p in folder.rglob('*.toml'): tomllib.loads(p.read_text())
     for p in (ROOT/'external-and-mods/tb520fu/uefi').rglob('*.json'): json.loads(p.read_text())
     uefi=json.loads((ROOT/'external-and-mods/tb520fu/uefi/stock-inventory.json').read_text())
-    assert len(uefi['stock_modules']) == 69 and len(uefi['memory_regions']) == 43
+    assert len(uefi['stock_modules']) == 71 and len(uefi['memory_regions']) == 43
     assert uefi['compile_performed'] is False and uefi['boot_tested'] is False
     mem={m['name']: m for m in uefi['memory_regions']}
     assert mem['FD Reserved']['address'] == 0xA7000000 and mem['FD Reserved']['length'] == 0x100000
@@ -133,7 +133,7 @@ def main():
             if src.is_file() and '__pycache__' not in src.parts:
                 assert src.read_bytes() == (mu/'Platforms/Lenovo/tb520fuPkg'/src.relative_to(template)).read_bytes(), str(src)
         assert (mu/'Resources/Configs/tb520fu.toml').read_bytes() == (ROOT/'external-and-mods/tb520fu/uefi/Resources/Configs/tb520fu.toml').read_bytes()
-        print('Prepared UEFI source: 69 module/raw hashes, DEPEX, 43 memory regions and all platform source files match')
+        print('Prepared UEFI source: 71 module/raw hashes, DEPEX, 43 memory regions and all platform source files match')
     # Exercise push restrictions without contacting or mutating any Git remote.
     hook=ROOT/'.githooks/pre-push'
     refs='refs/heads/main '+('1'*40)+' refs/heads/main '+('0'*40)+'\n'

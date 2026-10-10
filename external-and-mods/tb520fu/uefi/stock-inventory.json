@@ -34,8 +34,22 @@
     {
       "name": "TzDxeLA",
       "guid": "cf6dfc66-14ab-4e13-84db-9c02912d1404",
-      "pe_sha256": "56cbf22d5edb0dea3f084c0775a41a1551adae0fb17c1dc9d8e6f8f0ad3b3e6d",
-      "depex_sha256": null
+      "pe_sha256": "e561ff01bc667d6ebfe477e1c79dcddc50dd6faeedbbd9e5818f146ac37f8f2d",
+      "depex_sha256": null,
+      "binary_patch": {
+        "module": "TzDxeLA",
+        "input_sha256": "56cbf22d5edb0dea3f084c0775a41a1551adae0fb17c1dc9d8e6f8f0ad3b3e6d",
+        "output_sha256": "e561ff01bc667d6ebfe477e1c79dcddc50dd6faeedbbd9e5818f146ac37f8f2d",
+        "rva": "0xe5a8",
+        "before": "00",
+        "after": "01",
+        "meaning": "Initialize the local global-applet-loaded flag for second-stage entry after ABL, avoiding repeated cold initialization of global secure apps.",
+        "evidence": "TB520FU load/start wrappers at 0x2FA4 and 0x3304 read 0xE5A8, call LoadSecureApps 0x31A0 if clear, then set the flag. Corresponding Onyx wrappers use 0xF5B0; its patch changes that byte from 0 to 1.",
+        "reference_commit": "a1501e0c2e642d6ac0d8f52c85af2a67b75a7799",
+        "reference": "https://github.com/Project-Silicium/Device-Binaries/blob/a1501e0c2e642d6ac0d8f52c85af2a67b75a7799/onyx/README.md",
+        "limitations": "Onyx is a different SoC; its address is not copied. This preserves the ABL handoff assumption and does not repair the secure-world ABI or support arbitrary new TA loads.",
+        "boot_tested": false
+      }
     },
     {
       "name": "PsStateDxe",
@@ -113,6 +127,18 @@
         "evidence": "v2 recovery log reaches PmicDxe and contains an SPMI exception; SPMI RVA 0x37F0 is a register load and PMIC return RVA 0x11D30 identifies this init sequence",
         "boot_tested": false
       }
+    },
+    {
+      "name": "DiskIoDxe",
+      "guid": "6b38f7b4-ad98-40e9-9093-aca2b5a253c4",
+      "pe_sha256": "3db34a47e61d51b8c89d4c2343a09789b9f0c45a85efbb95ff5a5cfccac29689",
+      "depex_sha256": null
+    },
+    {
+      "name": "PartitionDxe",
+      "guid": "1fa1f39e-feff-4aae-bd7b-38a070a3b609",
+      "pe_sha256": "a6a27abb368860d0a5473056d37fb400db54ecfb360a2e3c4cb737a9e96977ba",
+      "depex_sha256": null
     },
     {
       "name": "UFSDxe",
@@ -194,8 +220,22 @@
     {
       "name": "SPMI",
       "guid": "2a7b4bef-80cd-49e1-b473-374ba4d673fc",
-      "pe_sha256": "fd6b11d13950ff62a45bb23fc8120c95115611d8460956902f6308c0cb77e65f",
-      "depex_sha256": "557c754d26e2667287367a856ea5fcd584f35ab796d24a6a875d1648a4637d23"
+      "pe_sha256": "6eddedc79cb543b0c83e9efa313bcf2c440a3d0d261cfbc1f83801f0f0859acb",
+      "depex_sha256": "557c754d26e2667287367a856ea5fcd584f35ab796d24a6a875d1648a4637d23",
+      "binary_patch": {
+        "module": "SPMI",
+        "input_sha256": "fd6b11d13950ff62a45bb23fc8120c95115611d8460956902f6308c0cb77e65f",
+        "output_sha256": "6eddedc79cb543b0c83e9efa313bcf2c440a3d0d261cfbc1f83801f0f0859acb",
+        "rva": "0x154c",
+        "before": "400500b4fd7bbaa9",
+        "after": "e0031f2ac0035fd6",
+        "meaning": "Pair the existing PMIC minimal-init workaround with the same-SoC SPMI transaction-wrapper bypass. Preserve driver registration. This is a bring-up workaround, not working PMIC writes.",
+        "evidence": "v10 QcomChargerDxeLA -> PmicDxe -> SPMI return RVA 0x15C0, faulting at RVA 0x37F0 with FAR=0x0C77A008. TB520FU wrapper 0x154C..0x15FB is byte-identical to the unpatched Giulia wrapper; its published patch changes these same eight bytes.",
+        "reference_commit": "a1501e0c2e642d6ac0d8f52c85af2a67b75a7799",
+        "reference": "https://github.com/Project-Silicium/Device-Binaries/blob/a1501e0c2e642d6ac0d8f52c85af2a67b75a7799/giulia/README.md",
+        "limitations": "The wrapper returns zero without hardware I/O. Do not interpret this as valid battery or charging status. Other SPMI wrappers remain unchanged.",
+        "boot_tested": false
+      }
     },
     {
       "name": "ICBDxe",
@@ -259,8 +299,20 @@
     {
       "name": "FeatureEnablerDxe",
       "guid": "1c04f529-0612-4319-9315-b2e75c16810a",
-      "pe_sha256": "87f09fad39723da338e8b2f6e9b103beb39af0464f785b5355541e153d81b56a",
-      "depex_sha256": null
+      "pe_sha256": "e04413278e70112da653328df8139273c84e81dda79f7150bd766b505001ea12",
+      "depex_sha256": null,
+      "binary_patch": {
+        "module": "FeatureEnablerDxe",
+        "input_sha256": "87f09fad39723da338e8b2f6e9b103beb39af0464f785b5355541e153d81b56a",
+        "output_sha256": "e04413278e70112da653328df8139273c84e81dda79f7150bd766b505001ea12",
+        "rva": "0x2370",
+        "before": "ff8301d1fd7b03a9",
+        "after": "e00b41b2c0035fd6",
+        "meaning": "Return EFI_UNSUPPORTED from the optional featenabler TA acquisition helper. The original caller records feature status 2 and skips gated callbacks, retaining protocol registration and ABL hardware state.",
+        "evidence": "v10 feature TA and debug-policy SMC requests fail. Helper 0x2370 tries featenabler_a at 0x2448, featenabler at 0x2460 and an embedded TA at 0x2484. Caller 0x154C branches on nonzero to 0x1554, records status 2 and skips to 0x1600.",
+        "limitations": "Optional secure feature gates are deferred, not successfully enabled. The framebuffer is inherited from ABL. This is an explicit second-stage policy and does not claim that QSEE was repaired.",
+        "boot_tested": false
+      }
     },
     {
       "name": "QRKSDxe",
@@ -914,8 +966,6 @@
     "ArmGicDxe": "ArmPkg/Drivers/ArmGicDxe/ArmGicDxe.inf",
     "ArmTimerDxe": "ArmPkg/Drivers/TimerDxe/TimerDxe.inf",
     "DevicePathDxe": "MdeModulePkg/Universal/DevicePathDxe/DevicePathDxe.inf",
-    "DiskIoDxe": "MdeModulePkg/Universal/Disk/DiskIoDxe/DiskIoDxe.inf",
-    "PartitionDxe": "MdeModulePkg/Universal/Disk/PartitionDxe/PartitionDxe.inf",
     "Fat": "FatPkg/EnhancedFatDxe/Fat.inf",
     "EnglishDxe": "MdeModulePkg/Universal/Disk/UnicodeCollation/EnglishDxe/EnglishDxe.inf",
     "QcomBds": "MdeModulePkg/Universal/BdsDxe/BdsDxe.inf",

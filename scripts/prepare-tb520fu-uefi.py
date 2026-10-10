@@ -31,7 +31,8 @@ def need(ok, message):
 def patch_stock_pe(name, pe):
     """Apply hash-locked workarounds to locally extracted TB520FU modules."""
     manifests = {"PmicDxe": "pmic-warm-boot.json", "ClockDxe": "clock-display-handoff.json",
-                 "UFSDxe": "ufs-device-wakeup.json"}
+                 "UFSDxe": "ufs-device-wakeup.json", "SPMI": "spmi-second-stage.json",
+                 "TzDxeLA": "tz-second-stage.json", "FeatureEnablerDxe": "feature-second-stage.json"}
     if name not in manifests:
         return pe, None
     manifest = json.loads((PORT / "patches" / manifests[name]).read_text())
@@ -204,6 +205,8 @@ def memory_map(xbl):
 
 # Stock hardware drivers keep their original GUID, executable and DEPEX.
 # Standard PI/UEFI services use Mu's source implementations.
+# Keep stock DiskIoDxe/PartitionDxe: Qualcomm callers require GPT record and
+# partition-label protocols absent from the generic Mu partition driver.
 REPLACE = {
     # Preserve ABL scanout; avoid a second panel initialization during bring-up.
     "DisplayDxe": "SiliciumPkg/Drivers/SimpleFbDxe/SimpleFbDxe.inf",
@@ -224,8 +227,6 @@ REPLACE = {
     "ArmGicDxe": "ArmPkg/Drivers/ArmGicDxe/ArmGicDxe.inf",
     "ArmTimerDxe": "ArmPkg/Drivers/TimerDxe/TimerDxe.inf",
     "DevicePathDxe": "MdeModulePkg/Universal/DevicePathDxe/DevicePathDxe.inf",
-    "DiskIoDxe": "MdeModulePkg/Universal/Disk/DiskIoDxe/DiskIoDxe.inf",
-    "PartitionDxe": "MdeModulePkg/Universal/Disk/PartitionDxe/PartitionDxe.inf",
     "Fat": "FatPkg/EnhancedFatDxe/Fat.inf",
     "EnglishDxe": "MdeModulePkg/Universal/Disk/UnicodeCollation/EnglishDxe/EnglishDxe.inf",
     "QcomBds": "MdeModulePkg/Universal/BdsDxe/BdsDxe.inf",

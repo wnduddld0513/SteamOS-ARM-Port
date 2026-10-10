@@ -31,8 +31,8 @@
   INF Binaries/tb520fu/DALTLMM/DALTLMM.inf
   INF Binaries/tb520fu/PmicDxe/PmicDxe.inf
   INF MdeModulePkg/Universal/DevicePathDxe/DevicePathDxe.inf
-  INF MdeModulePkg/Universal/Disk/DiskIoDxe/DiskIoDxe.inf
-  INF MdeModulePkg/Universal/Disk/PartitionDxe/PartitionDxe.inf
+  INF Binaries/tb520fu/DiskIoDxe/DiskIoDxe.inf
+  INF Binaries/tb520fu/PartitionDxe/PartitionDxe.inf
   INF FatPkg/EnhancedFatDxe/Fat.inf
   INF MdeModulePkg/Universal/Disk/UnicodeCollation/EnglishDxe/EnglishDxe.inf
   INF Binaries/tb520fu/UFSDxe/UFSDxe.inf

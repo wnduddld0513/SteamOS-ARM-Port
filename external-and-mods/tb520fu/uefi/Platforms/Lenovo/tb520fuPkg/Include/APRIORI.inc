@@ -34,8 +34,8 @@ APRIORI DXE {
   INF Binaries/tb520fu/SPMI/SPMI.inf
   INF MdeModulePkg/Universal/ResetSystemRuntimeDxe/ResetSystemRuntimeDxe.inf
   INF Binaries/tb520fu/PmicDxe/PmicDxe.inf
-  INF MdeModulePkg/Universal/Disk/DiskIoDxe/DiskIoDxe.inf
-  INF MdeModulePkg/Universal/Disk/PartitionDxe/PartitionDxe.inf
+  INF Binaries/tb520fu/DiskIoDxe/DiskIoDxe.inf
+  INF Binaries/tb520fu/PartitionDxe/PartitionDxe.inf
   INF MdeModulePkg/Universal/Disk/UnicodeCollation/EnglishDxe/EnglishDxe.inf
   INF Binaries/tb520fu/SdccDxe/SdccDxe.inf
   INF Binaries/tb520fu/UFSDxe/UFSDxe.inf

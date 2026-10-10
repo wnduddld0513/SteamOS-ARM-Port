@@ -1,0 +1,12 @@
+{
+  "module": "FeatureEnablerDxe",
+  "input_sha256": "87f09fad39723da338e8b2f6e9b103beb39af0464f785b5355541e153d81b56a",
+  "output_sha256": "e04413278e70112da653328df8139273c84e81dda79f7150bd766b505001ea12",
+  "rva": "0x2370",
+  "before": "ff8301d1fd7b03a9",
+  "after": "e00b41b2c0035fd6",
+  "meaning": "Return EFI_UNSUPPORTED from the optional featenabler TA acquisition helper. The original caller records feature status 2 and skips gated callbacks, retaining protocol registration and ABL hardware state.",
+  "evidence": "v10 feature TA and debug-policy SMC requests fail. Helper 0x2370 tries featenabler_a at 0x2448, featenabler at 0x2460 and an embedded TA at 0x2484. Caller 0x154C branches on nonzero to 0x1554, records status 2 and skips to 0x1600.",
+  "limitations": "Optional secure feature gates are deferred, not successfully enabled. The framebuffer is inherited from ABL. This is an explicit second-stage policy and does not claim that QSEE was repaired.",
+  "boot_tested": false
+}

@@ -11,7 +11,7 @@ import tarfile
 REPO = Path(__file__).resolve().parents[1]
 DEVICE = REPO / 'external-and-mods/tb520fu'
 PRIVATE_FW = 'usr/lib/firmware/steamos-arm/tb520fu'
-SOURCE_COMMIT = '82214104148ef8c75ed983fa8f7a755733fc1476'
+SOURCE_COMMIT = '54ed573a816532658f411e0cabf93072740976e2'
 FIRMWARE_SHA = '315f7d7f349fef84fbe05211fbbc55eaad3d93c750326bc80baca6e849da4328'
 MASKED = (
     'konkrd.service', 'konkr-sleep.service', 'konkr-pd-kick.service',

@@ -1,0 +1,10 @@
+{
+  "repository": "hashtagbasit/SteamOS-ARM-Port",
+  "tag": "v1.3.0",
+  "soc": "sm8650",
+  "assets": {
+    "steamos-arm-port-sm8650-v1.3.0.7z.001": "ea22c1b48892194ad30fd10f9c6c76fc55705f75d76dc22e470407b1ad3aaebd",
+    "steamos-arm-port-sm8650-v1.3.0.7z.002": "b640722117b49bca6498ee2e2be120b007b2ff8f769c0a268e58378343c42042",
+    "steamos-arm-port-sm8650-v1.3.0.7z.003": "376a07c7889f25dce2f65d99d4c8ff5707e5d16e0cf85c13964bd380884f7fe2"
+  }
+}

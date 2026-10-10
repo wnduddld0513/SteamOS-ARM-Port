@@ -40,6 +40,7 @@ SKIP_APPLY=0
 SKIP_BOX64=0
 IMAGE_ONLY=0
 PREPARE_ROOTFS_ONLY=0
+BASE_RELEASE=0
 
 log() { printf '==> %s\n' "$*"; }
 die() { printf 'ERROR: %s\n' "$*" >&2; exit 1; }
@@ -60,6 +61,7 @@ usage() {
   cat <<EOF
 Usage: $0 [options]
 
+  --base-release    Import pinned common SM8650 userspace, then build TB520FU runtime/image
   --skip-download   Reuse existing official rootfs/ chunks
   --skip-apply      Do not re-run scripts/apply-overlays.sh
   --skip-box64      Do not rebuild Box64
@@ -76,6 +78,7 @@ EOF
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
+    --base-release) BASE_RELEASE=1; SKIP_APPLY=1; SKIP_BOX64=1 ;;
     --prepare-rootfs) PREPARE_ROOTFS_ONLY=1 ;;
     --skip-download) SKIP_DOWNLOAD=1 ;;
     --skip-apply) SKIP_APPLY=1 ;;
@@ -100,6 +103,9 @@ fi
 mkdir -p "$R" "$WORKDIR"
 printf 'TB520FU dedicated development rootfs\n' > "$R/.tb520fu-rootfs"
 export STEAMOS_ROOTFS="$R"
+if [[ "$BASE_RELEASE" == 1 ]]; then
+  sudo_run python3 "$SCRIPTS/import-tb520fu-rootfs.py" "$R" --cache "$WORKDIR/base-release"
+fi
 STEAMOS_BUILD="${STEAMOS_BUILD:-20261002.6232440}"
 STEAMOS_BUNDLE="deckard-${STEAMOS_BUILD}-${STEAMOS_VERSION:-0.5.3}"
 STEAMOS_URL="https://steamdeck-images.steamos.cloud/vr/${STEAMOS_BUILD}"
@@ -322,7 +328,7 @@ build_image() {
   if [[ -n "${TB520FU_UEFI_BOOT_IMG:-}" ]]; then
     [[ -s "$TB520FU_UEFI_BOOT_IMG" && "${TB520FU_UEFI_SHA256:-}" =~ ^[a-f0-9]{64}$ ]] || die "explicit TB520FU UEFI image/SHA256 required"
   else
-    [[ -s "$WORKDIR/uefi/output/tb520fu-uefi-boot.img" && -s "$WORKDIR/uefi/output/boot-image.json" ]] || die "generate the TB520FU UEFI first (scripts/build-tb520fu-uefi.sh --build STOCK_DIR)"
+    [[ -s "$ROOT/external-and-mods/tb520fu/uefi/release.env" ]] || die "TB520FU UEFI release lock missing"
   fi
 
   if [[ "${AUTO_ROOT}" -eq 1 ]]; then
@@ -482,6 +488,13 @@ if [[ "$IMAGE_ONLY" -eq 0 ]]; then
   apply_mods
   build_box64
 fi
+# An imported common rootfs must use only this port's modules. This also
+# refreshes modules when --image-only is used after a new kernel build.
+[[ -f "$R/.tb520fu-rootfs" && "$R" != / ]] || die "dedicated rootfs marker missing"
+sudo_run mkdir -p "$R/usr/lib/modules" "$R/boot"
+sudo_run find "$R/usr/lib/modules" -mindepth 1 -maxdepth 1 -exec rm -rf -- {} +
+sudo_run cp -a "$KOUT/modules/$(basename "$KOUT")" "$R/usr/lib/modules/"
+sudo_run cp "$KOUT/boot/KERNEL" "$KOUT/boot/KERNEL.md5" "$R/boot/"
 # Always refresh runtime bits before packing
 [[ -x "${R}/usr/local/bin/box64" ]] || install_box64_rootfs
 # Decky's plugin_loader.service execs /usr/bin/box64. A rootfs that already
@@ -494,6 +507,10 @@ if [[ "$PREPARE_ROOTFS_ONLY" == 1 ]]; then
   exit 0
 fi
 runtime="${TB520FU_RUNTIME_STAGE:-$R/opt/tb520fu-runtime-stage}"
+if [[ ! -f "$runtime/TB520FU-RUNTIME.json" ]]; then
+  sudo_run env BUILD_JOBS="${BUILD_JOBS:-2}" TB520FU_SOURCE_DIR="${TB520FU_SOURCE_DIR:-}" \
+    bash "$SCRIPTS/build-tb520fu-runtime.sh" "$R"
+fi
 firmware="${TB520FU_FIRMWARE:-$ROOT/external-and-mods/tb520fu/local/firmware-lenovo-tb520fu.tar.gz}"
 python3 "$SCRIPTS/install-tb520fu.py" --rootfs "$R" --runtime-stage "$runtime" --firmware "$firmware"
 build_image

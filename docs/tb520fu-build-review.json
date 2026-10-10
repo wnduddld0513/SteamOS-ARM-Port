@@ -1,0 +1,144 @@
+{
+  "date": "2026-10-10",
+  "compiled_artifacts": {
+    "device": "TB520FU",
+    "boot_tested": false,
+    "kernel": {
+      "release": "7.2.6-tb520fu-steamos",
+      "source_commit": "54ed573a816532658f411e0cabf93072740976e2",
+      "image_sha256": "2c5179e0752721040b8efbdcb2aee9f59f58a3d4e93649464d36f78581c4d22b",
+      "dtbs": {
+        "sm8650-lenovo-tb520fu.dtb": "8f20b04b916158b93afd44ff7d3bd9f426fd9c338f60ce68d2141c77c106149e",
+        "sm8650-lenovo-tb520fu-boe.dtb": "78efce3120b1515e5a0f5a1059fb6e50af414cf032aa07f9a8312d6967e8f406"
+      },
+      "module_count": 1594,
+      "driver_config": {
+        "DRM_PANEL_NOVATEK_NT36532": "y",
+        "BACKLIGHT_TB520FU_KTZ8866": "y",
+        "TOUCHSCREEN_NT36532_SPI": "m",
+        "KEYBOARD_LENOVO_YOGA_SERDEV": "m",
+        "TB520FU_GOODIX_CONTROL": "m",
+        "INPUT_QCOM_HV_HAPTICS": "m",
+        "SND_SOC_AW882XX": "m",
+        "SND_SOC_WCD939X_SDW": "m",
+        "VIDEO_QCOM_IRIS": "m",
+        "ATH12K": "m",
+        "TYPEC_MUX_PS5169": "y",
+        "TYPEC_MUX_WCD939X_USBSS": "y",
+        "QCOM_FASTRPC": "y",
+        "BATTERY_QCOM_BATTMGR": "y"
+      }
+    },
+    "uefi": {
+      "device": "TB520FU",
+      "mu_commit": "8d73b66ab554f9ab6134b58839bb1e46ebd47688",
+      "stock_inputs": {
+        "uefi.elf": "a2abba64ac0c56cf301b811da7e9a21a262cdcb0d7c62ff14d3ef741708b9b8c",
+        "xbl_config.elf": "1b618c1cb9d5207b03e9ec332d08b0d8a73b4edd44215badeac7b52340317765",
+        "boot.img": "35a2eceda1934a909c5537df7b38f9013130cf29f66537f563bb69544b35ca4e"
+      },
+      "sha256": "41409e12b33cabd3f3488d0f620cd63e8b1deea69263d661da750e6cb1a25bcb",
+      "compiled": true,
+      "boot_tested": false
+    },
+    "rootfs": {
+      "identity": {
+        "device": "lenovo,tb520fu",
+        "source_commit": "54ed573a816532658f411e0cabf93072740976e2",
+        "panels": [
+          "tianma",
+          "boe"
+        ],
+        "resolution": [
+          2944,
+          1840
+        ],
+        "refresh_rates": [
+          120
+        ],
+        "linux_verified": false
+      },
+      "executables": {
+        "usr/bin/bash": "9aa08703e6362dedea6a1a13b1ef1a37b96fa195c966ff471ed073886046280e",
+        "usr/bin/inputplumber": "c84e2bf9c7838baa0fb9c7eeda42e18a521367424db0d9c996476232d1fdaa05",
+        "usr/bin/hexagonrpcd": "60db59f8bf4279a7110d4eb8ea273eaf31666e249ed34ed589d61bde984f0c25",
+        "usr/libexec/tb321fu-imu-bridge": "8d11e8c8e7e26f9f7c0a4977c21fffb29be095384e122c7761e1e294b371b633",
+        "usr/libexec/iio-sensor-proxy": "1e127c4286df3eb6e47ac0357e7fa4e094c7d83839c559835d14553b9be402bc"
+      },
+      "common_base": {
+        "repository": "hashtagbasit/SteamOS-ARM-Port",
+        "tag": "v1.3.0",
+        "soc": "sm8650",
+        "assets": {
+          "steamos-arm-port-sm8650-v1.3.0.7z.001": "ea22c1b48892194ad30fd10f9c6c76fc55705f75d76dc22e470407b1ad3aaebd",
+          "steamos-arm-port-sm8650-v1.3.0.7z.002": "b640722117b49bca6498ee2e2be120b007b2ff8f769c0a268e58378343c42042",
+          "steamos-arm-port-sm8650-v1.3.0.7z.003": "376a07c7889f25dce2f65d99d4c8ff5707e5d16e0cf85c13964bd380884f7fe2"
+        }
+      },
+      "runtime_manifest_sha256": "5fdc2e672da774a551ae6c7b581d64ddef9bbfd6e54f298f664d8cc16bc03dcd"
+    }
+  },
+  "usb_image": {
+    "device": "TB520FU",
+    "boot_tested": false,
+    "image": "steamos-tb520fu.img",
+    "bytes": 16594763776,
+    "sha256": "a463eb599beb0853872dcfe58c6899f36195d6edc5c36a7817d943c9bc56107c",
+    "root_uuid": "6e4caa36-c65d-4487-992c-8e33197c4c74",
+    "partition_table": {
+      "label": "dos",
+      "id": "0xe216ac65",
+      "device": "/home/wnduddld0513/SteamOS-ARM-Port/tb520fu-work/steamos-tb520fu.img",
+      "unit": "sectors",
+      "sectorsize": 512,
+      "partitions": [
+        {
+          "node": "/home/wnduddld0513/SteamOS-ARM-Port/tb520fu-work/steamos-tb520fu.img1",
+          "start": 2048,
+          "size": 1048576,
+          "type": "c",
+          "bootable": true
+        },
+        {
+          "node": "/home/wnduddld0513/SteamOS-ARM-Port/tb520fu-work/steamos-tb520fu.img2",
+          "start": 1050624,
+          "size": 24225792,
+          "type": "83"
+        },
+        {
+          "node": "/home/wnduddld0513/SteamOS-ARM-Port/tb520fu-work/steamos-tb520fu.img3",
+          "start": 25276416,
+          "size": 7135232,
+          "type": "83"
+        }
+      ]
+    },
+    "identity": {
+      "device": "lenovo,tb520fu",
+      "source_commit": "54ed573a816532658f411e0cabf93072740976e2",
+      "panels": [
+        "tianma",
+        "boe"
+      ],
+      "resolution": [
+        2944,
+        1840
+      ],
+      "refresh_rates": [
+        120
+      ],
+      "linux_verified": false
+    },
+    "checks": [
+      "all three filesystems clean (read-only check)",
+      "two panel DTBs match",
+      "Image and UEFI hashes match",
+      "GRUB and both fstab layers select root UUID",
+      "empty machine-id",
+      "build caches excluded"
+    ]
+  },
+  "arm64_execution": "inputplumber --version: inputplumber 0.81.0 (exit 0)",
+  "audio_topology": "alsatplg exit 0; external kernel DAI widget references warned; sound/DSP operation untested",
+  "device_writes": false
+}

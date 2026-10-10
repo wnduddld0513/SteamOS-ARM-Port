@@ -7,24 +7,26 @@ tb520fu_source() {
     local cache="${TB520FU_SOURCE_CACHE:-${STEAMOS_WORK:-/work/tb520fu}/source-cache}"
     if [[ -n "${TB520FU_SOURCE_DIR:-}" ]]; then
         cache="$TB520FU_SOURCE_DIR"
-        [[ "$(git -C "$cache" rev-parse HEAD)" == "$TB520FU_SOURCE_COMMIT" ]] || tb520fu_die "source HEAD differs from pinned commit"
-        [[ -z "$(git -C "$cache" status --porcelain --untracked-files=no)" ]] || tb520fu_die "source has tracked modifications"
+        # Export always archives the exact pin, even if a later README commit
+        # has advanced the local branch. Working-tree contents are never copied.
+        git -c safe.directory="$cache" -C "$cache" cat-file -e "$TB520FU_SOURCE_COMMIT^{commit}" || tb520fu_die "pinned source commit missing from local repository"
+        [[ -z "$(git -c safe.directory="$cache" -C "$cache" status --porcelain --untracked-files=no)" ]] || tb520fu_die "source has tracked modifications"
     else
         if [[ ! -d "$cache/.git" ]]; then
             mkdir -p "$cache"
-            git -C "$cache" init -q >&2
-            git -C "$cache" remote add origin "$TB520FU_SOURCE_URL"
+            git -c safe.directory="$cache" -C "$cache" init -q >&2
+            git -c safe.directory="$cache" -C "$cache" remote add origin "$TB520FU_SOURCE_URL"
         fi
-        [[ "$(git -C "$cache" remote get-url origin)" == "$TB520FU_SOURCE_URL" ]] || tb520fu_die "unexpected source cache remote"
-        git -C "$cache" cat-file -e "$TB520FU_SOURCE_COMMIT^{commit}" 2>/dev/null ||
-            git -C "$cache" fetch --depth=1 origin "$TB520FU_SOURCE_COMMIT" >&2
+        [[ "$(git -c safe.directory="$cache" -C "$cache" remote get-url origin)" == "$TB520FU_SOURCE_URL" ]] || tb520fu_die "unexpected source cache remote"
+        git -c safe.directory="$cache" -C "$cache" cat-file -e "$TB520FU_SOURCE_COMMIT^{commit}" 2>/dev/null ||
+            git -c safe.directory="$cache" -C "$cache" fetch --depth=1 origin "$TB520FU_SOURCE_COMMIT" >&2
     fi
     printf '%s\n' "$cache"
 }
 tb520fu_export() {
     local source="$1" dest="$2"; shift 2
     mkdir -p "$dest"
-    git -C "$source" archive "$TB520FU_SOURCE_COMMIT" "$@" | tar -x -C "$dest"
+    git -c safe.directory="$source" -C "$source" archive "$TB520FU_SOURCE_COMMIT" "$@" | tar -x -C "$dest"
 }
 tb520fu_rootfs() {
     local root

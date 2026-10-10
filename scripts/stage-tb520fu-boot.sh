@@ -54,12 +54,21 @@ CFG
     done
 } > "$boot/EFI/BOOT/qcomramp.cfg"
 # Prefer our TB520FU Mu output with provenance; an explicitly supplied TB520FU
-# image also needs an exact SHA256. No device-specific image is downloaded.
+# image also needs an exact SHA256. Otherwise fetch only the pinned TB520FU release.
 uefi="${TB520FU_UEFI_BOOT_IMG:-}"
 uefi_sha="${TB520FU_UEFI_SHA256:-}"
 if [[ -z "$uefi" ]]; then
     uefi_dir="${STEAMOS_WORK:-/work/tb520fu}/uefi/output"
     uefi="$uefi_dir/tb520fu-uefi-boot.img"
+    if [[ ! -s "$uefi" || ! -s "$uefi_dir/boot-image.json" ]]; then
+        source "$TB520FU_REPO_ROOT/external-and-mods/tb520fu/uefi/release.env"
+        mkdir -p "$uefi_dir"
+        curl -fL --retry 3 "$TB520FU_UEFI_RELEASE_URL/tb520fu-uefi-boot.img" -o "$uefi.part"
+        echo "$TB520FU_UEFI_RELEASE_SHA256  $uefi.part" | sha256sum -c --quiet
+        curl -fL --retry 3 "$TB520FU_UEFI_RELEASE_URL/boot-image.json" -o "$uefi_dir/boot-image.json.part"
+        mv "$uefi.part" "$uefi"
+        mv "$uefi_dir/boot-image.json.part" "$uefi_dir/boot-image.json"
+    fi
     uefi_sha="$(python3 - "$uefi_dir/boot-image.json" "$TB520FU_REPO_ROOT/external-and-mods/tb520fu/uefi/source-lock.json" <<'PY'
 import json, sys
 meta = json.load(open(sys.argv[1])); lock = json.load(open(sys.argv[2]))

@@ -13,7 +13,7 @@ import tomllib
 
 ROOT = Path(__file__).resolve().parents[1]
 BASE = '9499fec5c9eb607cccfc6b67cb406e74d624e96d'
-PIN = '82214104148ef8c75ed983fa8f7a755733fc1476'
+PIN = '54ed573a816532658f411e0cabf93072740976e2'
 
 def main():
     ap=argparse.ArgumentParser(description=__doc__)
@@ -33,7 +33,7 @@ def main():
     for p in scripts:
         subprocess.run(['bash','-n',str(p)],check=True)
         for body in re.findall(r"<<'PY'\n(.*?)\nPY(?:\n|$)", p.read_text(), re.S): ast.parse(body)
-    for p in [ROOT/'scripts/install-tb520fu.py', ROOT/'scripts/prepare-tb520fu-uefi.py', Path(__file__),
+    for p in [*ROOT.glob('scripts/*tb520fu*.py'), *ROOT.glob('tools/*tb520fu*.py'),
               *ROOT.glob('external-and-mods/tb520fu/uefi/Platforms/**/*.py')]: ast.parse(p.read_text())
     for folder in (ROOT/'tb520fu-overlay', ROOT/'external-and-mods/tb520fu/uefi'):
         for p in folder.rglob('*.toml'): tomllib.loads(p.read_text())
@@ -133,6 +133,6 @@ def main():
         result=subprocess.run(['sh',str(hook),'origin',remote],input=data,text=True,capture_output=True)
         assert (result.returncode == 0) == accepted
     print(f'Shell syntax: {len(scripts)} scripts; Python/TOML/JSON parsed; installer isolation/idempotence passed')
-    print('No UEFI, kernel, userspace, DTB or image build and no device boot performed.')
+    print('This static checker invokes no compiler or device boot; inspect compiled artifacts separately.')
 
 if __name__=='__main__': main()

@@ -4,6 +4,7 @@ set -euo pipefail
 source "$(dirname "$0")/tb520fu-common.sh"
 work="${STEAMOS_WORK:-/work/tb520fu}/kernel"
 mkdir -p "$work"
+export CCACHE_DIR="${CCACHE_DIR:-$work/ccache}"
 source_repo="$(tb520fu_source)"
 exported="$(mktemp -d "$work/source.XXXXXX")"
 trap 'rm -rf -- "$exported"' EXIT
@@ -42,6 +43,10 @@ for name, data in blobs.items():
         target.write_bytes(data); found.add(target.name)
 assert found == names, 'missing early display/touch firmware'
 PY
+# This source already enables FUNCTION_TRACER, which selects TRACING and
+# hides ENABLE_DEFAULT_TRACERS. ATH11K AHB is unrelated to WCN7850 (ATH12K).
+sed -i '/^CONFIG_ENABLE_DEFAULT_TRACERS=/d; /^CONFIG_ATH11K_AHB=/d' "$pkg/config/armada-kernel.config.overrides"
+printf '\nCONFIG_TRACING=y\nCONFIG_ATH11K_AHB=n\n' >> "$pkg/config/armada-kernel.config.overrides"
 # Keep NTSYNC built in as required by the pinned kernel recipe. Normalize the
 # merged fragment so its strict =y check sees only effective final assignments.
 printf '\nCONFIG_NTSYNC=y\n' >> "$pkg/config/armada-kernel.config.overrides"
@@ -55,8 +60,16 @@ last = {match[1]: i for i, match in enumerate(keys) if match}
 path.write_text("\n".join(line for i, (line, match) in enumerate(zip(lines, keys))
                            if not match or last[match[1]] == i) + "\n")
 PY
-# FAST could silently reuse another kernel configuration.
-env -u FAST KERNEL_VERSION="$TB520FU_KERNEL_VERSION" WORK_DIR="$work/build" OUT_DIR="$work/archives" \
+# Resume is opt-in and must match the pinned source and effective fragment.
+# merge_config.sh still resolves and validates the configuration on every run.
+recipe_sha="$( { printf '%s\n' "$TB520FU_SOURCE_COMMIT"; cat "$pkg/config/armada-kernel.config.overrides"; sha256sum "$ird/bin/busybox" "$ird/init"; } | sha256sum | cut -d' ' -f1)"
+resume=()
+if [[ "${TB520FU_RESUME:-0}" == 1 ]]; then
+    [[ -f "$work/build/TB520FU-RECIPE.sha256" && "$(cat "$work/build/TB520FU-RECIPE.sha256")" == "$recipe_sha" && -f "$work/build/linux-$TB520FU_KERNEL_VERSION/.config" ]] || tb520fu_die "resume recipe does not match this pinned build"
+    resume=(FAST=1)
+fi
+mkdir -p "$work/build"; printf '%s\n' "$recipe_sha" > "$work/build/TB520FU-RECIPE.sha256"
+env -u FAST "${resume[@]}" KERNEL_VERSION="$TB520FU_KERNEL_VERSION" WORK_DIR="$work/build" OUT_DIR="$work/archives" \
     bash "$pkg/scripts/build-kernel.sh"
 release="${TB520FU_KERNEL_VERSION}-tb520fu-steamos"
 archive="$work/archives/armada-kernel-${release}.tar.zst"

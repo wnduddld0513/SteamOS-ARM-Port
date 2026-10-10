@@ -1,8 +1,22 @@
-# TB520FU: SteamOS ARM 소스 통합
+# TB520FU: SteamOS ARM 포트
 
 이 포크의 `tb520fu` 브랜치에 Lenovo Yoga Tab Plus / YOGA Pad Pro AI元启
 (TB520FU, lapis, SM8650)용 별도 구성을 추가했습니다.
-**빌드·DTB/이미지 생성·Linux 부팅은 하지 않았습니다. 동작 확인된 배포판이나 설치 이미지가 아닙니다.**
+**커널·모듈·Tianma/BOE DTB·UEFI boot.img·ARM64 런타임·SteamOS USB 이미지 빌드를 완료했습니다. 실기기 Linux 부팅·하드웨어 동작은 아직 확인하지 않았습니다.**
+
+## 생성 파일과 검증
+
+[TB520FU 시험판 다운로드](https://github.com/wnduddld0513/SteamOS-ARM-Port/releases/tag/tb520fu-experimental-20261010) · [빌드 검토 기록](tb520fu-build-review.json)
+
+- `steamos-tb520fu-experimental-20261010.img.7z.001`부터 모든 분할 파일을 같은 디렉터리에 받은 후 첫 파일을 7-Zip으로 풉니다. 내부 파일은 `steamos-tb520fu.img`입니다.
+- USB 이미지는 **16,594,763,776바이트**이므로 **32 GB 이상**의 외부 저장 장치가 필요합니다. 이미지와 별도로 전용 `tb520fu-uefi-boot.img`, 커널·모듈 archive, ARM64 런타임 archive, 출처·해시 manifest를 제공합니다.
+- 커널 7.2.6, 모듈 1,594개와 두 패널 DTB를 생성했습니다. 터치·밝기·오디오·진동 등 핵심 설정/모듈과 패널별 터치 펌웨어 참조를 확인했습니다.
+- ARM64 chroot에서 센서·RPC·IMU bridge·InputPlumber를 컴파일하고 동적 라이브러리 누락을 검사했습니다. `inputplumber --version`은 `0.81.0`, 종료 코드 0으로 실행됐습니다.
+- 이미지의 세 파일시스템을 읽기 전용으로 검사했고, 커널·DTB·UEFI 해시, GRUB/fstab UUID, 두 패널 메뉴, 빌드 캐시 제외와 초기 machine-id를 확인했습니다.
+- 오디오 토폴로지는 `alsatplg` 종료 코드 0으로 생성됐으나 커널이 제공하는 외부 DAI widget 경고가 있습니다. DSP·스피커·마이크 실동작 확인을 뜻하지 않습니다.
+
+USB 이미지 SHA256: `a463eb599beb0853872dcfe58c6899f36195d6edc5c36a7817d943c9bc56107c`.
+분할 파일 및 개별 배포 파일의 해시는 릴리스의 `SHA256SUMS`를 확인합니다. 이번 작업에서 기기에 플래시하거나 재부팅하지 않았습니다.
 
 ## 기존 기기와의 분리
 
@@ -16,7 +30,7 @@
 ## 커널·화면·입력
 
 커널 소스는 [linux-tb520fu](https://github.com/wnduddld0513/linux-tb520fu/tree/tb520fu)의
-`82214104148ef8c75ed983fa8f7a755733fc1476`으로 고정했습니다. 해당 소스의 전체 패치 series,
+`54ed573a816532658f411e0cabf93072740976e2`으로 고정했습니다. 해당 소스의 전체 패치 series,
 DT, 설정을 사용하고 SteamOS용 설정과 외부 USB 루트 UUID를 처리하는 initramfs를 더합니다.
 내장 DRM의 초기 probing에 필요한 Adreno 마이크로코드와 두 터치 펌웨어도 initramfs에 담습니다.
 ROCKNIX/Y700 커널 패치를 이 커널 위에 다시 섞지 않습니다.
@@ -65,24 +79,27 @@ USB 이미지의 FAT 파티션에 ARM64 GRUB·Image·두 DTB를 준비합니다.
 전용 UEFI는 [Mu-Silicium TB520FU 포트](../external-and-mods/tb520fu/uefi/README.md)로 추가했습니다.
 공개 Mu-Silicium의 SM8650/Lanai 지원을 고정 commit으로 사용하며, 이 태블릿의 순정 `uefi.elf`·
 `xbl_config.elf`에서 하드웨어 모듈과 메모리 맵을 추출합니다. 순정 모듈·설정 69개와 메모리 영역
-41개를 추출해 소스 준비까지 실행했습니다. **UEFI도 컴파일하지 않았으므로 현재 생성된 boot.img는 없습니다.**
+41개를 추출해 전용 UEFI를 컴파일했습니다. Mu 빌드의 이미지 검증 49개가 통과했고, Android v4 헤더·ARM64 BootShim·FV·SHA256을 별도로 확인했습니다.
+생성된 `tb520fu-uefi-boot.img`는 1,155,072바이트이며 SHA256은
+`41409e12b33cabd3f3488d0f620cd63e8b1deea69263d661da750e6cb1a25bcb`입니다.
 USB 열거·패널 framebuffer 유지·GRUB 진입·Linux 전환은 실기기 검증이 남아 있습니다.
 
-향후 전용 UEFI를 빌드하면 `$STEAMOS_WORK/uefi/output/tb520fu-uefi-boot.img`와 출처 manifest를
+전용 UEFI를 직접 빌드하면 `$STEAMOS_WORK/uefi/output/tb520fu-uefi-boot.img`와 출처 manifest를
 이미지 생성기가 검증하여 함께 담습니다. 별도로 확보한 TB520FU 파일을 쓸 때만
-`TB520FU_UEFI_BOOT_IMG`와 `TB520FU_UEFI_SHA256`을 지정합니다. 파일이나 출처가 없으면
-이미지 제작을 중단합니다. SHA256은 무결성 확인이며 기기 호환성 검증은 아닙니다.
+`TB520FU_UEFI_BOOT_IMG`와 `TB520FU_UEFI_SHA256`을 지정합니다. 로컬 파일이 없으면
+[고정된 포크 릴리스](../external-and-mods/tb520fu/uefi/release.env)에서 TB520FU 전용 파일과 출처 manifest를 받습니다. 검증할 파일이나 출처가 없으면 이미지 제작을 중단합니다. SHA256은 무결성 확인이며 기기 호환성 검증은 아닙니다.
 Y700의 reserved-memory 제거 목록, ROCKNIX ABL, 내부 userdata 설치/자동 GPT·슬롯 변경은 적용하지 않습니다.
 중간 출력의 `boot/KERNEL`은 기존 루트파일시스템 준비 코드와 연결하기 위한 carrier이며 **기기에 플래시할 boot.img가 아닙니다.**
 
 공용 SoC OTA는 다른 기기 커널과 기존 부팅 레이아웃을 설치하므로 TB520FU 이미지에서 막습니다.
 TB520FU 전용 서명·업데이트 manifest 및 복구 절차는 후속 작업입니다. Steam 클라이언트 자체 업데이트와 별개입니다.
 
-## 향후 빌드 절차 — 이번 작업에서는 실행하지 않음
+## 빌드 절차
 
 기존 [빌드 환경 준비](building.md)를 먼저 따릅니다. 사용자 공간은 ARM64 Linux 호스트에서
-전용 SteamOS 루트파일시스템을 chroot하여 빌드합니다. WSL x86에서는 커널을 크로스 빌드할 수 있지만,
-사용자 공간까지 같은 방법으로 바로 빌드할 수 있다는 뜻은 아닙니다.
+전용 SteamOS 루트파일시스템을 chroot하여 빌드합니다. WSL x86에서는 커널을 크로스 빌드하고,
+사용자 공간은 `qemu-user-static`의 ARM64 binfmt를 등록한 후 같은 루트파일시스템에서 실행합니다.
+고정된 Rust 1.90.0 도구 체인과 빌드 전용 호환 라이브러리는 최종 이미지에서 제외합니다.
 커널 준비에는 **static ARM64 BusyBox**가 필요합니다. ARM64 호스트에서는 `busybox-static`을 사용할 수 있고,
 x86 호스트에서는 ARM64 파일을 `TB520FU_BUSYBOX`로 지정해야 합니다.
 
@@ -90,20 +107,23 @@ x86 호스트에서는 ARM64 파일을 `TB520FU_BUSYBOX`로 지정해야 합니�
 # 새 체크아웃의 push를 이 포크/tb520fu로 제한
 bash tools/setup-fork.sh
 
-# 아래는 향후 실행할 빌드 명령이며 이번 변경에서는 실행하지 않음
 export STEAMOS_WORK=/work/tb520fu
 export TB520FU_SOURCE_DIR=/path/to/clean/linux-tb520fu
-# 위 경로는 source.env의 고정 commit과 일치해야 하며 생략하면 고정 소스를 가져옴
+# 위 저장소에 source.env의 고정 commit이 있어야 하며 생략하면 고정 소스를 가져옴
+# 실제 빌드 파일은 현재 HEAD가 아닌 고정 commit에서 git archive로 추출
 bash scripts/build-tb520fu-kernel.sh
 
 # UEFI 빌드 환경은 Mu-Silicium의 LLVM/ARM64 도구·Python 의존성을 별도로 준비
 export TB520FU_STOCK_DIR=/path/to/TB520FU-stock/image
 bash scripts/build-tb520fu-uefi.sh --build "$TB520FU_STOCK_DIR"
 
-# 기존 프로젝트가 요구하는 gamescope·Box64·InputPlumber 등 빌드 전제도 필요
-sudo -E bash make-steamos-tb520fu.sh --prepare-rootfs
-sudo -E bash scripts/build-tb520fu-runtime.sh "$STEAMOS_WORK/rootfs"
-sudo -E bash make-steamos-tb520fu.sh --image-only
+# 공용 SM8650 v1.3.0 사용자 공간을 SHA256 검증 후 가져옴
+# gamescope·Box64·Steam 클라이언트 등 공용 프로그램을 재사용하고
+# 커널·모듈·펌웨어·센서·입력·오디오·부팅 구성을 TB520FU용으로 교체
+sudo -E bash make-steamos-tb520fu.sh --base-release
+
+# 중단 후 전용 루트파일시스템에서 다시 패킹
+# sudo -E bash make-steamos-tb520fu.sh --image-only
 ```
 
 완성 이미지 이름은 기본 `steamos-tb520fu.img`입니다. `TB520FU_PANEL=tianma|boe|both`로 메뉴 구성을

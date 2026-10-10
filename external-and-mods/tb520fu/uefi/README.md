@@ -3,7 +3,7 @@
 This is a separate Lenovo TB520FU / lapis / SM8650 platform for
 [Project Silicium Mu](https://github.com/Project-Silicium/Mu-Silicium/tree/8d73b66ab554f9ab6134b58839bb1e46ebd47688).
 It does not repurpose a Y700 UEFI binary. Existing SteamOS device support is unchanged.
-**Source preparation has run; UEFI compilation and boot have not run. No boot.img exists yet.**
+**The TB520FU UEFI boot image has been compiled. Mu verified 49 images; Android v4/BootShim/FV and SHA256 checks passed. Hardware boot remains untested.**
 
 `source-lock.json` fixes the Mu commit and SHA256 of this tablet's stock
 `uefi.elf`, `xbl_config.elf`, and `boot.img`. The stock release is
@@ -44,7 +44,7 @@ export STEAMOS_WORK=/work/tb520fu
 bash scripts/build-tb520fu-uefi.sh --prepare-only /path/to/stock/image
 ```
 
-For a future build, follow the pinned project's [build dependencies](https://github.com/Project-Silicium/Mu-Silicium/blob/8d73b66ab554f9ab6134b58839bb1e46ebd47688/Building.md),
+To rebuild, follow the pinned project's [build dependencies](https://github.com/Project-Silicium/Mu-Silicium/blob/8d73b66ab554f9ab6134b58839bb1e46ebd47688/Building.md),
 including its Python requirements, LLVM/CLANGPDB, ARM64 binutils and make. Then:
 
 ```bash
@@ -56,7 +56,7 @@ image, and writes `uefi/output/tb520fu-uefi-boot.img` and provenance metadata.
 The SteamOS TB520FU media builder accepts this output after checking source pins
 and image hash. It never flashes the image. An unsigned output remains unverified
 until a controlled boot and recovery path are established on the actual tablet.
-Kernel/OS build validation was intentionally omitted at the user's request.
+The kernel has also been compiled; see the [TB520FU guide](../../../docs/tb520fu.md) for OS build results and limitations.
 
 The platform template is adapted from Mu's QRD8550 source, retaining its
 BSD-2-Clause-Patent notices; see `LICENSE.Mu-Silicium`. The preparation/build

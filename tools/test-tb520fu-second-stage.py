@@ -55,6 +55,7 @@ patched = {}
 for name, expected_rva, expected_size in (
     ("SPMI", 0x154C, 8), ("TzDxeLA", 0xE5A8, 1),
     ("FeatureEnablerDxe", 0x2370, 8),
+    ("RscDxe", 0x14E4, 8),
 ):
     original = modules[name]
     result, manifest = prepare.patch_stock_pe(name, original)
@@ -72,6 +73,18 @@ for name, expected_rva, expected_size in (
         else:
             raise AssertionError("mismatched or already patched input was accepted")
     patched[name] = result
+
+# Defer RSC before its protocol install and MMIO/clock sequence. There are no
+# boot services or MMIO mappings in this machine; either access would fail.
+uc = machine(patched["RscDxe"])
+uc.emu_start(0x14E4, 0x18000, count=10)
+assert uc.reg_read(UC_ARM64_REG_PC) == 0x18000
+assert uc.reg_read(UC_ARM64_REG_X0) == 0x8000000000000003
+rsc_protocol = uuid.UUID("3806cdf0-c281-4345-9b1e-49dfb3126923").bytes_le
+assert rsc_protocol in modules["RscDxe"]
+for name, pe in modules.items():
+    if name not in prepare.SKIP and name not in prepare.REPLACE and name != "RscDxe":
+        assert rsc_protocol not in pe, "review RSC dependency: " + name
 
 # Execute the real wrapper: it must return without touching unconfigured MMIO
 # or changing caller buffers. This proves containment, not functional PMIC I/O.
@@ -111,5 +124,5 @@ for name in ("DiskIoDxe", "PartitionDxe"):
     assert name not in prepare.REPLACE
     assert modules[name] == (args.uefi_prepared / "Binaries/tb520fu" / name / (name + ".efi")).read_bytes()
 print("Second-stage checks passed: ARM64 SPMI containment, feature error path,")
-print("TZ loader guard, exact patch scope/input rejection, stock partition protocols.")
+print("TZ loader guard, RSC deferral, exact patch scope/input rejection, stock partition protocols.")
 print("Hardware PMIC, secure-world and filesystem operation remain unverified.")

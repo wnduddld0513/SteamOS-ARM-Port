@@ -336,3 +336,41 @@ SimpleFbDxe match their compiled PEs. The local artifact is
 `tb520fu-uefi-secondstage-debug-v11.img` (1273856 bytes), SHA-256
 `1adb98a5956b973b423b25865e33f910adb07cd6cc60b32840aa17a044f324a5`.
 The Windows install copy matches. Actual v11 tablet boot remains untested.
+
+## v12: isolate the camera/PCIe RSC initializer
+
+The subsequent v11 tablet screenshots show UFS, SPSS and QcomChargerDxe
+returning Success. SPSS now reports two installed FAT filesystems instead of
+the previous missing spunvm interface. These entry returns do not prove
+working charging, secure features or filesystem contents. USB driver entries
+also return Success. The last visible driver is RscDxe, GUID
+ea888df7-d431-44af-844c-7b29390f2758, with ENTER and no visible EXIT.
+The user reports persistent black output with the backlight still on.
+
+Stock disassembly identifies this as the camera/PCIe resource-state controller,
+not the report-status-code router RscRtDxe. Main RVA 0x14E4 installs protocol
+3806cdf0-c281-4345-9b1e-49dfb3126923, then calls its initializer for cam at
+0x1558 and pcie at 0x1570. That path maps HWIO, enables camera/PCIe clocks,
+programs the sequencer and disables camera clocks. The screenshots alone
+cannot identify which call stalls, or exclude a later loss of console output.
+
+v12 changes only this module's initializer: eight hash-locked bytes at
+0x14E4 return EFI_UNSUPPORTED before protocol registration or hardware access.
+It preserves the previous workarounds and explicitly defers this boot-time
+service. No other retained stock PE or DEPEX contains the RSC protocol GUID;
+this does not exclude dependencies that construct it dynamically. RscRtDxe
+remains enabled. This is a controlled diagnostic workaround, not a verified
+repair of the internal RSC problem or proof of camera/PCIe operation.
+
+The ARM64 test executes the patched initializer without boot services or MMIO
+mapped and verifies EFI_UNSUPPORTED and return to the caller. It also checks
+the input hash, exact patch scope, prepared PE and direct protocol consumers.
+The DEBUG image still logs driver ENTER/EXIT, so an RSC EXIT with Unsupported
+followed by later entries will establish whether deferral advances boot.
+
+The v12 DEBUG build and post-build validation passed. Unpacking its final
+Android-v4 gzip payload verifies exact BootShim/FD contents, all 71 stock
+module/raw and DEPEX hashes, and compiled ArmGicDxe/DxeCore/SimpleFbDxe PEs.
+Artifact: tb520fu-uefi-secondstage-debug-v12.img, 1273856 bytes, SHA-256
+2487a692316be7d0c195d46c8db8a55adf87418f08369f89a49ee155c26e6c03.
+The Windows install copy matches. Tablet boot has not yet been verified.

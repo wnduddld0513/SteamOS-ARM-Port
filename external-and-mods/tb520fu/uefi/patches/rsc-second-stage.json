@@ -1,0 +1,12 @@
+{
+  "module": "RscDxe",
+  "input_sha256": "b9109dd93c708f749e9fa07f78c24b342e03750d3ad9c105b7452a1c0920c223",
+  "output_sha256": "b86b761f7dfa3ecb86c40bb85bbd13c8d705003d3e0560ce45753169fd099698",
+  "rva": "0x14E4",
+  "before": "ffc300d1fd7b01a9",
+  "after": "e00b41b2c0035fd6",
+  "meaning": "Defer the stock camera/PCIe resource-state controller initializer with EFI_UNSUPPORTED before registering its protocol or performing clock, HWIO and sequencer operations.",
+  "evidence": "v11 reaches RscDxe ENTER without a visible EXIT, followed by a persistent black screen with backlight. Main 0x14E4 installs protocol 3806cdf0-c281-4345-9b1e-49dfb3126923 and invokes its initializer for cam at 0x1558 and pcie at 0x1570. Init 0x1584 maps HWIO, enables camera/PCIe clocks, programs RSC state and disables camera clocks. No other retained stock PE or DEPEX contains this protocol GUID.",
+  "limitations": "Diagnostic containment, not proof of the internal failing instruction or a functional camera/PCIe RSC implementation. No success is fabricated. The existing ABL hardware state is left untouched by this initializer. Tablet boot and later driver dependencies remain unverified.",
+  "boot_tested": false
+}

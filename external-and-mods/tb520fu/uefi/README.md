@@ -55,6 +55,12 @@ may lose these logs; blank recovery pstore is inconclusive.
   callbacks. Secure features are not claimed enabled.
 - SPSS: restore the stock partition interfaces. Actual spunvm mount and data
   access still need tablet verification; no partition is formatted or changed.
+- RscDxe: v11 stops visibly at entry before a persistent black screen. Defer
+  its camera/PCIe resource-state controller initialization with EFI_UNSUPPORTED
+  before protocol registration or hardware access. This isolates a suspected
+  second-stage initialization problem; it does not establish its exact cause
+  or functional camera/PCIe RSC support. It is unrelated to RscRtDxe, the
+  report-status-code router, which remains enabled.
 
 These are experimental second-stage boot workarounds. Runtime charging,
 secure apps, remaining SPMI paths, USB and ExitBootServices need hardware tests.

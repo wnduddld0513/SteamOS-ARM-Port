@@ -44,7 +44,7 @@ APRIORI DXE {
   INF MdeModulePkg/Universal/Variable/RuntimeDxe/VariableRuntimeDxe.inf
   INF Binaries/tb520fu/DDRInfoDxe/DDRInfoDxe.inf
   INF Binaries/tb520fu/FeatureEnablerDxe/FeatureEnablerDxe.inf
-  INF SiliciumPkg/Drivers/SimpleFbDxe/SimpleFbDxe.inf
+  INF Binaries/tb520fu/DisplayDxe/DisplayDxe.inf
   INF Binaries/tb520fu/PILProxyDxe/PILProxyDxe.inf
   INF Binaries/tb520fu/PILDxe/PILDxe.inf
   INF Binaries/tb520fu/SPSSDxe/SPSSDxe.inf

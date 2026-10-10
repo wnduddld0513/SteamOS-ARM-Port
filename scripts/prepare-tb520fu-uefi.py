@@ -150,11 +150,23 @@ def memory_map(xbl):
         if name == "UEFI_FD":
             need((address, length) == (0xa7000000, 0x400000), "unexpected UEFI FD")
             regions = [("FD Reserved", address, 0x100000), (name, 0xa7100000, 0x300000)]
+        # Keep the verified stock ramoops console reserved and CPU-accessible.
+        # The original PIL reservation covers it with no cache mapping.
+        # A SYSTEM_MEMORY resource with EfiReservedMemoryType emits an allocation
+        # HOB, so RamManagerDxe cannot add the console to its usable page pool.
+        if name == "PIL_Reserved":
+            log_base, log_size = 0xa2000000, 0x200000
+            need(address <= log_base and log_base + log_size <= address + length,
+                 "ramoops console outside PIL reservation")
+            regions = [(name, address, log_base - address),
+                       ("TB520FU_Ramoops", log_base, log_size),
+                       ("PIL_Reserved_Tail", log_base + log_size,
+                        address + length - log_base - log_size)]
         for label, addr, size in regions:
             output.append({"name": label, "address": addr, "length": size,
-                           "hob": hob[raw["BuildHob"]], "resource_type": raw["ResourceType"],
-                           "resource_attribute": raw["ResourceAttribute"], "memory_type": raw["MemoryType"],
-                           "cache": cache[raw["CacheAttributes"]]})
+                           "hob": "AddMem" if label == "TB520FU_Ramoops" else hob[raw["BuildHob"]], "resource_type": 0 if label == "TB520FU_Ramoops" else raw["ResourceType"],
+                           "resource_attribute": 0x703c07 if label == "TB520FU_Ramoops" else raw["ResourceAttribute"], "memory_type": raw["MemoryType"],
+                           "cache": "UNCACHED_UNBUFFERED_XN" if label == "TB520FU_Ramoops" else cache[raw["CacheAttributes"]]})
     names = {x["name"]: x for x in output}
     need(names["UEFI_Stack"]["address"] == 0xa760d000 and names["UEFI_Stack"]["length"] == 0x40000,
          "unexpected UEFI stack")
@@ -195,7 +207,6 @@ REPLACE = {
     "UsbBusDxe": "MdeModulePkg/Bus/Usb/UsbBusDxe/UsbBusDxe.inf",
     "UsbKbDxe": "MdeModulePkg/Bus/Usb/UsbKbDxe/UsbKbDxe.inf",
     "UsbMassStorageDxe": "MdeModulePkg/Bus/Usb/UsbMassStorageDxe/UsbMassStorageDxe.inf",
-    "DisplayDxe": "SiliciumPkg/Drivers/SimpleFbDxe/SimpleFbDxe.inf",
 }
 SKIP = {"VerifiedBootDxe", "FvSimpleFileSystem", "FvDxe"}
 RAW = {"SecParti.cfg", "uefipil.cfg", "QcomChargerCfg.cfg",
@@ -215,6 +226,12 @@ def prepare(mu, stock, require_pin=True):
          struct.unpack_from("<I", data["boot.img"], 40)[0] == 4, "unexpected stock Android boot header")
     memory = memory_map(data["xbl_config.elf"])
     entries = volumes_from_elf(data["uefi.elf"])
+    # Apply only in this dedicated, pinned TB520FU build checkout.
+    patch = PORT / "patches/dxe-dispatch-trace.patch"
+    if subprocess.run(["git", "-C", str(mu), "apply", "--ignore-whitespace", "--reverse", "--check", str(patch)],
+                      stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode:
+        subprocess.run(["git", "-C", str(mu), "apply", "--ignore-whitespace", "--check", str(patch)], check=True)
+        subprocess.run(["git", "-C", str(mu), "apply", "--ignore-whitespace", str(patch)], check=True)
     platform = mu / "Platforms/Lenovo/tb520fuPkg"
     platform.parent.mkdir(parents=True, exist_ok=True)
     shutil.copytree(PORT / "Platforms/Lenovo/tb520fuPkg", platform, dirs_exist_ok=not require_pin)

@@ -1,0 +1,44 @@
+{
+  "device": "TB520FU",
+  "build_type": "DEBUG",
+  "compiled": true,
+  "boot_tested": false,
+  "size": 1363968,
+  "sha256": "e7856ad2b0aa1ea013355d2f6a9227cb0c9df56b856991c30de972b21046d235",
+  "mu_commit": "8d73b66ab554f9ab6134b58839bb1e46ebd47688",
+  "source_patch_sha256": "53107ccc4fb094f3a75f85565e81d23f258399c15361bcc402cdf7c8401c4e20",
+  "display": "stock DisplayDxe restored; inherited framebuffer retained for early text",
+  "ramoops": {
+    "address": "0xA2000000",
+    "size": "0x200000",
+    "signature": "0x43474244",
+    "readback": "console-ramoops-0 after direct warm recovery boot; hardware retention not verified"
+  },
+  "checks": [
+    "49 Mu images verified",
+    "Android v4 + gzip + exact BootShim/FD",
+    "DXE ENTER/EXIT strings present",
+    "stock DisplayDxe GUID present; SimpleFbDxe GUID absent",
+    "ring writer host test passed",
+    "4205 original files preserved"
+  ],
+  "source_overrides_sha256": {
+    "external-and-mods/tb520fu/uefi/Platforms/Lenovo/tb520fuPkg/DeviceBuild.py": "72bac059ed89016566cd9c7de9f731276394cfa45e027b0ffd499f8d34e4d391",
+    "external-and-mods/tb520fu/uefi/Platforms/Lenovo/tb520fuPkg/Include/APRIORI.inc": "6c066950ba96a7618fe64fd237dab1dad15ab25bd7fdb7499f7d9a17d89eca4a",
+    "external-and-mods/tb520fu/uefi/Platforms/Lenovo/tb520fuPkg/Include/DXE.inc": "60f9e7b3c360905e8499c4a562586ef628b9cb1ee4210649cc9c3970447e04e0",
+    "external-and-mods/tb520fu/uefi/Platforms/Lenovo/tb520fuPkg/Include/RAW.inc": "fc37bb7df873619bff427b516241b8ccd9f4887a441c7c83c40564c06c201bdf",
+    "external-and-mods/tb520fu/uefi/Platforms/Lenovo/tb520fuPkg/Library/ConfigurationMapLib/ConfigurationMapLib.c": "279878464d04dc2991b55c0027e806b84bdb1be31598d20754ea822a15e16998",
+    "external-and-mods/tb520fu/uefi/Platforms/Lenovo/tb520fuPkg/Library/ConfigurationMapLib/ConfigurationMapLib.inf": "d43514ac5ee1f0758fe3bec0e73c5ff2f4f9b31e0d3546377c54e9214cc6a7b7",
+    "external-and-mods/tb520fu/uefi/Platforms/Lenovo/tb520fuPkg/Library/MemoryMapLib/MemoryMapLib.c": "465dda83dfca758173ce585798f7be2c23b2958285f1162a96a4c6e71cbe1867",
+    "external-and-mods/tb520fu/uefi/Platforms/Lenovo/tb520fuPkg/Library/MemoryMapLib/MemoryMapLib.inf": "159424f05f845ecb993029636bd30ac167784697855a654bf95c7a202a3378ae",
+    "external-and-mods/tb520fu/uefi/Platforms/Lenovo/tb520fuPkg/Library/Tb520fuSerialPortLib/Font.h": "d2a3687db67b069f4e34a961e17fd28b0242986e3fa8dd8a7545cab70834fa8e",
+    "external-and-mods/tb520fu/uefi/Platforms/Lenovo/tb520fuPkg/Library/Tb520fuSerialPortLib/FrameBuffer.h": "92916a1eedb81dc86324ff66a8d87e63d188897fecbb068ae77f08506dd40fd8",
+    "external-and-mods/tb520fu/uefi/Platforms/Lenovo/tb520fuPkg/Library/Tb520fuSerialPortLib/FrameBufferSerialPortLib.c": "f6e3f2b35f01ed5a51189b956efe85241377a49dbfcfc0f63ce2e5dcfd3cf34c",
+    "external-and-mods/tb520fu/uefi/Platforms/Lenovo/tb520fuPkg/Library/Tb520fuSerialPortLib/FrameBufferSerialPortLib.inf": "4769e24bd35f9185ec44a84ddfe666a1bf973994a49227f9966e9aa97557acdd",
+    "external-and-mods/tb520fu/uefi/Platforms/Lenovo/tb520fuPkg/Library/Tb520fuSerialPortLib/RamoopsLog.c": "2beb4aefab3772c337945015a885043aca96a860a9715b958e06eac362221720",
+    "external-and-mods/tb520fu/uefi/Platforms/Lenovo/tb520fuPkg/tb520fu.dec": "cefa6405e42d9573a5824002be82b7d2cf65d39a43813c6003e80f581789e393",
+    "external-and-mods/tb520fu/uefi/Platforms/Lenovo/tb520fuPkg/tb520fu.dsc": "512c0b439dcdc9db1064a67497f294c323fd78a06a260d5ea9799afc40ff1bb4",
+    "external-and-mods/tb520fu/uefi/Platforms/Lenovo/tb520fuPkg/tb520fu.fdf": "a6e898d7af83e61436669657393f9537c627a671c3a2e8aa4b7e076b0c6b2a92",
+    "external-and-mods/tb520fu/uefi/patches/dxe-dispatch-trace.patch": "53107ccc4fb094f3a75f85565e81d23f258399c15361bcc402cdf7c8401c4e20"
+  }
+}

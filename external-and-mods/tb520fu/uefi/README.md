@@ -3,7 +3,7 @@
 This is a separate Lenovo TB520FU / lapis / SM8650 platform for
 [Project Silicium Mu](https://github.com/Project-Silicium/Mu-Silicium/tree/8d73b66ab554f9ab6134b58839bb1e46ebd47688).
 It does not repurpose a Y700 UEFI binary. Existing SteamOS device support is unchanged.
-**The TB520FU UEFI boot image has been compiled. Mu verified 49 images; Android v4/BootShim/FV and SHA256 checks passed. Hardware boot remains untested.**
+The initial DEBUG image reached DXE on the tablet, then the display went black near ClockDxe. The current display restoration and persistent trace build has compiled but has not been boot-tested. See [debugging](../../../docs/tb520fu-uefi-debug.md).
 
 `source-lock.json` fixes the Mu commit and SHA256 of this tablet's stock
 `uefi.elf`, `xbl_config.elf`, and `boot.img`. The stock release is
@@ -12,8 +12,8 @@ Other firmware releases deliberately fail until their contents are reviewed and 
 
 The preparation script parses ELF load segments, checks FV header checksums,
 extracts both gzip-compressed FVs, preserves AARCH64 PE modules and their DEPEX,
-and reads the actual XBL UEFI memory map. It generates 69 stock hardware/raw
-entries, 41 memory regions, the APRIORI/DXE order and the numeric configuration
+and reads the actual XBL UEFI memory map. It generates 70 stock hardware/raw
+entries, 43 memory regions, the APRIORI/DXE order and the numeric configuration
 map. `stock-inventory.json` records hashes and addresses; it contains no blobs.
 Two Lapis NT36532 panel XMLs are retained; unrelated panel XMLs are omitted.
 
@@ -23,17 +23,25 @@ PlatformPeiLib can find the original scheduler and DT-extension context.
 The new firmware occupies `0xA7100000..0xA7400000`; its stack is the stock
 `0xA760D000` region. ABL's kernel staging starts at `0xA8000000` in the stock map.
 This layout follows the same preservation mechanism as Mu's QRD8550 platform,
-using **TB520FU addresses and modules** rather than its board blobs.
+using TB520FU addresses and modules rather than its board blobs.
 
-SimpleFbDxe reuses the ABL-initialized framebuffer at `0xD5100000`, with
-2944×1840 BGRA32 and a 2944-pixel stride. Those mode parameters are an initial
-port assumption; framebuffer color order/stride, stock SEC context survival,
-USB-host init, removable-media discovery and ExitBootServices need hardware checks.
-UEFI does not initialize either Linux panel or touchscreen driver; Linux chooses
-its Tianma/BOE DTB in GRUB. No foreign ACPI tables are installed.
+The stock DisplayDxe is retained to reinitialize the Lapis panel after the
+clock and power drivers run. SimpleFbDxe is not installed alongside it. Early
+text still uses the inherited framebuffer at `0xD5100000`, with 2944x1840
+BGRA32 and a 2944-pixel stride. The DEBUG image proved early text output works;
+GOP initialization, color order, USB discovery and ExitBootServices still need
+hardware testing. Linux selects its Tianma/BOE DTB in GRUB.
+
+The platform serial library mirrors text to the stock ramoops console at
+`0xA2000000` (2 MiB), leaving its adjacent 2 MiB pmsg area untouched. The map
+keeps this range reserved and uncached. DXE entry and return records include
+module GUIDs and return status. A direct warm boot into TWRP may expose them in
+`/sys/fs/pstore/console-ramoops-0`; retention across the bootloader is unverified.
+Do not boot Android before collecting the log, because another kernel boot can
+replace it. No foreign ACPI tables are installed.
 
 The stock AVB/Android BDS implementation is replaced by standard Mu BDS in this
-experimental second-stage firmware. This is **not** a signed Lenovo update,
+experimental second-stage firmware. This is not a signed Lenovo update,
 and does not unlock a locked bootloader. No ABL/XBL/TZ partition is modified by
 these scripts. No flashing commands are included or executed.
 
@@ -49,6 +57,8 @@ including its Python requirements, LLVM/CLANGPDB, ARM64 binutils and make. Then:
 
 ```bash
 bash scripts/build-tb520fu-uefi.sh --build /path/to/stock/image
+# For framebuffer and persistent DXE diagnostics:
+bash scripts/build-tb520fu-uefi.sh --build-debug /path/to/stock/image
 ```
 
 That explicit command compiles Mu/BootShim, packs an Android header-v4 gzip (matching the stock header version)

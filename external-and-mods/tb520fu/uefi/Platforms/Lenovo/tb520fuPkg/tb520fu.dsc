@@ -23,7 +23,7 @@
   BUILD_TARGETS                  = RELEASE|DEBUG
   SKUID_IDENTIFIER               = DEFAULT
   FLASH_DEFINITION               = tb520fuPkg/tb520fu.fdf
-  USE_CUSTOM_DISPLAY_DRIVER      = 0
+  USE_CUSTOM_DISPLAY_DRIVER      = 1
 
   #
   # 0 = SM8650-AA
@@ -67,6 +67,7 @@
   gQcomPkgTokenSpaceGuid.PcdPlatformType|"LA"
 
 [LibraryClasses]
+  SerialPortLib|tb520fuPkg/Library/Tb520fuSerialPortLib/FrameBufferSerialPortLib.inf
   #
   # Memory Libraries
   #

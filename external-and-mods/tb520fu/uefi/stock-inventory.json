@@ -223,6 +223,12 @@
       "depex_sha256": null
     },
     {
+      "name": "DisplayDxe",
+      "guid": "4138022f-06c7-4f79-9c94-7e33b511a4e7",
+      "pe_sha256": "bb6cb25a45eb54fa23a77bf6c02155529d84453e2365311cb52749ada71b648b",
+      "depex_sha256": "1160a8a2f29f1ca18fa4b8384384536925bac48301e59f7235e43b0aff451b62"
+    },
+    {
       "name": "QRKSDxe",
       "guid": "3cf7f36e-5a97-496a-bb4b-d4f9937fa311",
       "pe_sha256": "f34becbeb02f8ac3785925bfc170706d7f0fff183246e81d418b7bd236ffac07",
@@ -507,7 +513,27 @@
     {
       "name": "PIL_Reserved",
       "address": 2344615936,
-      "length": 385351680,
+      "length": 373293056,
+      "hob": "AddMem",
+      "resource_type": 5,
+      "resource_attribute": 1024,
+      "memory_type": 0,
+      "cache": "UNCACHED_UNBUFFERED_XN"
+    },
+    {
+      "name": "TB520FU_Ramoops",
+      "address": 2717908992,
+      "length": 2097152,
+      "hob": "AddMem",
+      "resource_type": 0,
+      "resource_attribute": 7355399,
+      "memory_type": 0,
+      "cache": "UNCACHED_UNBUFFERED_XN"
+    },
+    {
+      "name": "PIL_Reserved_Tail",
+      "address": 2720006144,
+      "length": 9961472,
       "hob": "AddMem",
       "resource_type": 5,
       "resource_attribute": 1024,
@@ -865,8 +891,7 @@
     "GraphicsConsoleDxe": "MdeModulePkg/Universal/Console/GraphicsConsoleDxe/GraphicsConsoleDxe.inf",
     "UsbBusDxe": "MdeModulePkg/Bus/Usb/UsbBusDxe/UsbBusDxe.inf",
     "UsbKbDxe": "MdeModulePkg/Bus/Usb/UsbKbDxe/UsbKbDxe.inf",
-    "UsbMassStorageDxe": "MdeModulePkg/Bus/Usb/UsbMassStorageDxe/UsbMassStorageDxe.inf",
-    "DisplayDxe": "SiliciumPkg/Drivers/SimpleFbDxe/SimpleFbDxe.inf"
+    "UsbMassStorageDxe": "MdeModulePkg/Bus/Usb/UsbMassStorageDxe/UsbMassStorageDxe.inf"
   },
   "configuration_count": 41,
   "compile_performed": false,

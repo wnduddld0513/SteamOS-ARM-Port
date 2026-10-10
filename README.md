@@ -99,6 +99,9 @@ modules, both panel DTBs and dedicated [TB520FU UEFI boot image](external-and-mo
 have been compiled and inspected. The ARM64 sensor/input/audio runtime and USB
 image have also been built and checked. The completed image and UEFI boot image are local build artifacts and have not been published to GitHub Releases.
 Linux boot and hardware operation on the tablet remain untested.
+The initial DEBUG UEFI reached DXE on hardware but lost display near ClockDxe.
+A [display restoration and persistent logging build](docs/tb520fu-uefi-debug.md)
+is available locally for the next temporary boot test.
 See [docs/tb520fu.md](docs/tb520fu.md) for the dedicated paths and limitations.
 
 ## Documentation

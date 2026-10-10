@@ -55,7 +55,7 @@ verified on hardware. The existing SteamOS USB image was not rebuilt.
 From Windows CMD with the tablet in bootloader mode:
 
 ```cmd
-fastboot boot "%USERPROFILE%\Documents\TB520FU\install-tb520fu\tb520fu-uefi-paced-debug-v6.img"
+fastboot boot "%USERPROFILE%\Documents\TB520FU\install-tb520fu\tb520fu-uefi-clockskip-debug-v7.img"
 ```
 
 This command boots the image temporarily. Do not flash it to a boot partition.
@@ -160,3 +160,20 @@ last readable Loading driver name and DXE ENTER GUID before gray identify
 the execution boundary for the next investigation. A final solid-color
 photograph alone cannot recover that information. Normal boot of v6 has not
 been verified. A blank pstore after forced recovery is inconclusive.
+
+## Seventh image: DEBUG-only ClockDxe isolation
+
+V6 reportedly lost the display immediately after the ClockDxe text. Whether
+the EXIT marker appeared is unknown. Independent FV inspection confirmed
+that v6 actually contained the expected patched TB520FU ClockDxe bytes.
+
+V7 skips CoreStartImage only for ClockDxe GUID
+4db5dea6-5302-4d1a-8a82-677a683b0d29 in DEBUG builds and reports EFI_UNSUPPORTED
+with a diagnostic marker. RELEASE builds still execute ClockDxe normally.
+All other dispatch behavior and v6 pacing remain unchanged. This is strictly
+a display-loss isolation experiment, not an installable firmware fix.
+Dependents may wait for missing clock protocols, fail, or assert.
+
+The requested observation is whether text remains visible instead of turning
+gray after the skip marker. It cannot demonstrate complete UEFI/OS support.
+The skip must be removed or gated off before treating DEBUG as a normal boot.

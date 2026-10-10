@@ -92,7 +92,7 @@ ask on [Discord](https://discord.gg/EP53nZYvg) and see the
 ### TB520FU development
 
 The `main` branch adds an opt-in, separate TB520FU image recipe using
-[our TB520FU kernel port](https://github.com/wnduddld0513/linux_kernel_lenovo_tb520fu/tree/main).
+[our TB520FU kernel port](https://github.com/wnduddld0513/linux-tb520fu/tree/main).
 It includes Tianma and BOE panel configurations (2944×1840, currently 120 Hz).
 Existing device builders and overlays are unchanged. The Linux 7.2.6 kernel,
 modules, both panel DTBs and dedicated [TB520FU UEFI boot image](external-and-mods/tb520fu/uefi/README.md)

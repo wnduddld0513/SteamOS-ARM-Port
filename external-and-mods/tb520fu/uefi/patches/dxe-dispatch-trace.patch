@@ -1,6 +1,6 @@
 --- a/Mu_Basecore/MdeModulePkg/Core/Dxe/Dispatcher/Dispatcher.c
 +++ b/Mu_Basecore/MdeModulePkg/Core/Dxe/Dispatcher/Dispatcher.c
-@@ -517,7 +517,24 @@
+@@ -517,7 +517,12 @@
            );
          ASSERT (DriverEntry->ImageHandle != NULL);
 -
@@ -9,20 +9,7 @@
 +#ifndef MDEPKG_NDEBUG
 +        CoreStall (250000);
 +#endif
--        Status = CoreStartImage (DriverEntry->ImageHandle, NULL, NULL);
-+#ifndef MDEPKG_NDEBUG
-+        {
-+          CONST EFI_GUID ClockGuid = {0x4db5dea6, 0x5302, 0x4d1a, {0x8a, 0x82, 0x67, 0x7a, 0x68, 0x3b, 0x0d, 0x29}};
-+          if (CompareGuid (&DriverEntry->FileName, &ClockGuid)) {
-+            DEBUG ((DEBUG_WARN, "TB520FU DIAG SKIP ClockDxe - NOT A NORMAL BOOT\n"));
-+            Status = EFI_UNSUPPORTED;
-+          } else {
-+            Status = CoreStartImage (DriverEntry->ImageHandle, NULL, NULL);
-+          }
-+        }
-+#else
-+        Status = CoreStartImage (DriverEntry->ImageHandle, NULL, NULL);
-+#endif
+         Status = CoreStartImage (DriverEntry->ImageHandle, NULL, NULL);
 +        DEBUG ((DEBUG_WARN, "TB520FU DXE EXIT %g Status=%r\n", &DriverEntry->FileName, Status));
 -
 +

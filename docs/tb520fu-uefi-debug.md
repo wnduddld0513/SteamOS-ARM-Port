@@ -177,3 +177,36 @@ Dependents may wait for missing clock protocols, fail, or assert.
 The requested observation is whether text remains visible instead of turning
 gray after the skip marker. It cannot demonstrate complete UEFI/OS support.
 The skip must be removed or gated off before treating DEBUG as a normal boot.
+
+## Clock investigation after v7: source candidate only
+
+The supplied v6 photo ends at DXE ENTER for ClockDxe GUID
+4db5dea6-5302-4d1a-8a82-677a683b0d29. It does not show the EXIT marker,
+and does not by itself prove a fatal stop inside ClockDxe. Earlier v2 RAM
+logs reached later drivers despite screen loss. The v7 skip has not been
+reported tested. The DEBUG-only skip is now removed from source.
+
+The stock init chain is entry 0x1000 -> entry wrapper 0x1144 -> 0x14D0
+-> 0x1B44 -> 0x7D78 -> driver init 0x795C. Driver init calls 0xA6F4 at
+RVA 0x7D3C; its failure branch references `Clock_InitCESTA failed.` at
+0x11F0C. The previously bypassed DCDDisableDependencies call at 0xA810
+is inside 0xA6F4. That old patch left the rest of CESTA initialization active.
+
+The source candidate replaces only the CESTA call at 0x7D3C with
+`mov w0, wzr`, retaining ClockDxe initialization and protocol registration.
+The old inner DCD patch is no longer applied. Full input/output SHA-256 and
+original instruction checks guard the replacement. A host transformation
+check confirmed that only four bytes differ and that already modified or
+incorrect inputs are rejected.
+
+The pinned upstream [onyx notes](https://github.com/Project-Silicium/Device-Binaries/blob/a1501e0c2e642d6ac0d8f52c85af2a67b75a7799/onyx/README.md)
+report removing CESTA init to keep display on. Onyx is a different SoC, so
+this is supporting precedent, not proof of the TB520FU cause. The same-SoC
+giulia notes document the narrower DCD workaround already tried here.
+No foreign executable is used.
+
+This candidate has not been compiled or boot-tested. The user's build-stop
+instruction remains in effect. Existing v7 images and their metadata remain
+unchanged and do not contain this source candidate. A further hardware test
+is required before calling this a fix. CESTA-managed clock/power behavior
+may be incomplete with this initialization excluded.

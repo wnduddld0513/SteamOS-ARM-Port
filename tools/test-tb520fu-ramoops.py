@@ -62,6 +62,10 @@ int main(void) {
   header[1] = capacity + 1;
   Tb520fuRamoopsWrite((UINT8 *)"OK", 2);
   assert(header[1] == 2 && header[2] == 2 && data[0] == 'O' && data[1] == 'K');
+  // Observed recovery rejection: both values fit, but start exceeds size.
+  header[1] = 485717; header[2] = 223573;
+  Tb520fuRamoopsWrite((UINT8 *)"OK", 2);
+  assert(header[1] == 2 && header[2] == 2);
   free(input);
   return 0;
 }

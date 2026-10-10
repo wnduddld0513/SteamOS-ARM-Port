@@ -31,7 +31,7 @@ Tb520fuRamoopsWrite (IN CONST UINT8 *Buffer, IN UINTN Count)
   ArmDisableInterrupts ();
   Start = Log->Start;
   Size = Log->Size;
-  if (Log->Sig != RAMOOPS_SIG || Start > Capacity || Size > Capacity) {
+  if (Log->Sig != RAMOOPS_SIG || Start > Size || Size > Capacity) {
     Start = 0;
     Size = 0;
     Log->Start = 0;
@@ -53,8 +53,9 @@ Tb520fuRamoopsWrite (IN CONST UINT8 *Buffer, IN UINTN Count)
   // The memory map keeps the console uncached and reserved, including after
   // RamManagerDxe. Publish data before its indices for the next recovery boot.
   MemoryFence ();
-  Log->Start = Start;
   Log->Size = Size;
+  MemoryFence ();
+  Log->Start = Start;
   MemoryFence ();
   if (Interrupts) {
     ArmEnableInterrupts ();

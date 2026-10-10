@@ -72,3 +72,13 @@ current recovery dmesg. It sends no reboot, mount or partition write commands.
 A valid `console-ramoops-0` may contain the previous UEFI log. A cold reset,
 bootloader memory clearing or another kernel boot can lose it; an empty log
 alone cannot prove the UEFI failed before logging.
+
+## Second hardware attempt
+
+The display-restoration image also produced a black screen. Direct recovery
+readback found an empty pstore and `found existing invalid buffer, size 223573,
+start 485717`. Linux rejects start greater than size; the writer now validates
+that invariant before reusing a buffer and publishes size before start. The
+regression test covers the observed values. This fixes a diagnostic defect;
+it does not establish the cause of the display failure or guarantee RAM
+retention across recovery boot.

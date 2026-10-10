@@ -521,3 +521,28 @@ address; PmicDxe already returns before its own init sequence. Expected result: 
 boot manager menu appears and the volume keys navigate it. The power button and USB
 VBUS stay inert until the PMIC/SPMI path is restored on purpose.
 
+## v18: stop the SPMI channel execute path without hiding the SPMI protocol
+
+v17 removed the abort but produced a new failure: with the SPMI entry point
+stubbed the driver installs no protocols, so PmicDxe's SPMI-lite wrapper prints
+"Locate protocol failed", then "ERROR: C90000002:V03000007 IO
+5776232E-082D-4B75-9A0E-FE1D13F7A5D9", then asserts in
+pm_comm_spmi_lite.c +66. The v17 console also confirms the original diagnosis:
+SPMI.efi loads at 0x000D1F2E000 with entry point 0x000D1F2F000, so the faulting
+ELR 0x00000000D1F317F0 is exactly RVA 0x37F0 inside SPMI.efi.
+
+v18 restores the SPMI entry point so the protocols are installed, and stubs the
+channel execute function instead. patches/spmi-second-stage.json now carries a
+sites array: RVA 0x3748 before b44101a9761300f9 after e0031f2ac0035fd6 (the
+function that builds the channel address used by the ldr at RVA 0x37F0), and the
+old wrapper site at RVA 0x154c kept as before. patch_stock_pe in
+scripts/prepare-tb520fu-uefi.py applies a sites array in order while single-site
+manifests keep working. Expected result: the boot manager menu appears and
+PmicDxe initialises without asserting. The power button and USB VBUS stay inert
+until the PMIC/SPMI path is restored on purpose.
+
+Artifact: tb520fu-uefi-spmi-stub-debug-v18.img, 1277952 bytes, SHA-256
+026d872202bea23bf108824a98fc6b191e799e7114680495f7da243af0e6c7c8. FVMAIN.Fv
+byte checks: 0 unstubbed prologue copies, 3 stub copies (two SPMI sites and the
+PmicDxe site), 0 old wrapper prologue copies.
+

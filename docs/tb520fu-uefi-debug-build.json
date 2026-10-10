@@ -3,11 +3,11 @@
   "build_type": "DEBUG",
   "compiled": true,
   "boot_tested": false,
-  "size": 1363968,
-  "sha256": "409e687b7c5d5e89dc704b70866be4424da1bdb8e6f9f234a3639179b74e5343",
+  "size": 1269760,
+  "sha256": "b0138afd0424f2c39d7621686d6c620d52eca13917e93fdcd7c51a34fa2f54ba",
   "mu_commit": "8d73b66ab554f9ab6134b58839bb1e46ebd47688",
   "source_patch_sha256": "53107ccc4fb094f3a75f85565e81d23f258399c15361bcc402cdf7c8401c4e20",
-  "display": "stock DisplayDxe restored; inherited framebuffer retained for early text",
+  "display": "SimpleFbDxe inherits ABL framebuffer; stock DisplayDxe excluded in v5",
   "ramoops": {
     "address": "0xA2000000",
     "size": "0x200000",
@@ -15,18 +15,17 @@
     "readback": "console-ramoops-0 after direct warm recovery boot; hardware retention not verified"
   },
   "checks": [
-    "49 Mu images verified",
     "Android v4 + gzip + exact BootShim/FD",
     "DXE ENTER/EXIT strings present",
-    "stock DisplayDxe GUID present; SimpleFbDxe GUID absent",
     "ring writer host test passed",
     "4205 original files preserved",
-    "Guarded clock patch changes only the verified four-byte DCD call"
+    "Guarded clock patch changes only the verified four-byte DCD call",
+    "SimpleFbDxe GUID present; stock DisplayDxe GUID absent"
   ],
   "source_overrides_sha256": {
     "external-and-mods/tb520fu/uefi/Platforms/Lenovo/tb520fuPkg/DeviceBuild.py": "72bac059ed89016566cd9c7de9f731276394cfa45e027b0ffd499f8d34e4d391",
-    "external-and-mods/tb520fu/uefi/Platforms/Lenovo/tb520fuPkg/Include/APRIORI.inc": "6c066950ba96a7618fe64fd237dab1dad15ab25bd7fdb7499f7d9a17d89eca4a",
-    "external-and-mods/tb520fu/uefi/Platforms/Lenovo/tb520fuPkg/Include/DXE.inc": "60f9e7b3c360905e8499c4a562586ef628b9cb1ee4210649cc9c3970447e04e0",
+    "external-and-mods/tb520fu/uefi/Platforms/Lenovo/tb520fuPkg/Include/APRIORI.inc": "8d109ba5c805e6e03efdf43f77c02f302eb3e5833f3dac9b4f4aa6ecbc8f8b43",
+    "external-and-mods/tb520fu/uefi/Platforms/Lenovo/tb520fuPkg/Include/DXE.inc": "d355065c33e55d75c5172be1ec4d735d432f2cc98a0d043d8c9e0be307f694fd",
     "external-and-mods/tb520fu/uefi/Platforms/Lenovo/tb520fuPkg/Include/RAW.inc": "fc37bb7df873619bff427b516241b8ccd9f4887a441c7c83c40564c06c201bdf",
     "external-and-mods/tb520fu/uefi/Platforms/Lenovo/tb520fuPkg/Library/ConfigurationMapLib/ConfigurationMapLib.c": "279878464d04dc2991b55c0027e806b84bdb1be31598d20754ea822a15e16998",
     "external-and-mods/tb520fu/uefi/Platforms/Lenovo/tb520fuPkg/Library/ConfigurationMapLib/ConfigurationMapLib.inf": "d43514ac5ee1f0758fe3bec0e73c5ff2f4f9b31e0d3546377c54e9214cc6a7b7",
@@ -38,13 +37,13 @@
     "external-and-mods/tb520fu/uefi/Platforms/Lenovo/tb520fuPkg/Library/Tb520fuSerialPortLib/FrameBufferSerialPortLib.inf": "4769e24bd35f9185ec44a84ddfe666a1bf973994a49227f9966e9aa97557acdd",
     "external-and-mods/tb520fu/uefi/Platforms/Lenovo/tb520fuPkg/Library/Tb520fuSerialPortLib/RamoopsLog.c": "3b38639ac6e633c671655079769ecba956bdd80dd7507a6427ebac15f25b908c",
     "external-and-mods/tb520fu/uefi/Platforms/Lenovo/tb520fuPkg/tb520fu.dec": "cefa6405e42d9573a5824002be82b7d2cf65d39a43813c6003e80f581789e393",
-    "external-and-mods/tb520fu/uefi/Platforms/Lenovo/tb520fuPkg/tb520fu.dsc": "512c0b439dcdc9db1064a67497f294c323fd78a06a260d5ea9799afc40ff1bb4",
+    "external-and-mods/tb520fu/uefi/Platforms/Lenovo/tb520fuPkg/tb520fu.dsc": "124c9b441673b1c76d21d3bd8925768963ebca6a449bc74d7e8be0334a31b7e5",
     "external-and-mods/tb520fu/uefi/Platforms/Lenovo/tb520fuPkg/tb520fu.fdf": "a6e898d7af83e61436669657393f9537c627a671c3a2e8aa4b7e076b0c6b2a92",
     "external-and-mods/tb520fu/uefi/patches/clock-display-handoff.json": "13faa7be3b55b994396a3aea26c78f008c6994bc312f3aefe9270b16613d251b",
     "external-and-mods/tb520fu/uefi/patches/dxe-dispatch-trace.patch": "53107ccc4fb094f3a75f85565e81d23f258399c15361bcc402cdf7c8401c4e20",
     "external-and-mods/tb520fu/uefi/patches/pmic-warm-boot.json": "d9704a611dfc8d55a14043fe26799bacacc549976d8ee34e9f296ab1f1227a4f"
   },
-  "artifact": "tb520fu-uefi-clockfix-debug-v4.img",
+  "artifact": "tb520fu-uefi-handoff-debug-v5.img",
   "pmic_patch": {
     "module": "PmicDxe",
     "input_sha256": "b42833333e78bd5bab193577dd0b181a8ba5cfa043f33650214b4ab4c28b84fb",

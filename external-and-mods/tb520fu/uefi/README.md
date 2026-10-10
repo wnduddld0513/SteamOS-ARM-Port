@@ -72,3 +72,10 @@ The platform template is adapted from Mu's QRD8550 source, retaining its
 BSD-2-Clause-Patent notices; see `LICENSE.Mu-Silicium`. The preparation/build
 scripts are BSD-2-Clause-Patent. Stock module ownership stays with their vendors;
 all binaries and build checkouts are local ignored files, not Git contents.
+
+Current bring-up candidate (v5) uses SimpleFbDxe at the stock DisplayDxe slot
+to keep the ABL panel scanout. It retains the v4 clock-dependency workaround
+and v3 PMIC workaround. The current inventory has 69 stock module/raw entries;
+previous builds with stock DisplayDxe had 70. USE_CUSTOM_DISPLAY_DRIVER=1
+prevents a duplicate common GOP driver; SimpleFbDxe is explicitly included.
+The stock Tianma/BOE resources are retained. Hardware boot is still unverified.

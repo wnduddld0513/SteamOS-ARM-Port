@@ -204,6 +204,8 @@ def memory_map(xbl):
 # Stock hardware drivers keep their original GUID, executable and DEPEX.
 # Standard PI/UEFI services use Mu's source implementations.
 REPLACE = {
+    # Preserve ABL scanout; avoid a second panel initialization during bring-up.
+    "DisplayDxe": "SiliciumPkg/Drivers/SimpleFbDxe/SimpleFbDxe.inf",
     "DxeCore": "MdeModulePkg/Core/Dxe/DxeMain.inf",
     "RscRtDxe": "MdeModulePkg/Universal/ReportStatusCodeRouter/RuntimeDxe/ReportStatusCodeRouterRuntimeDxe.inf",
     "SCHandlerRtDxe": "MdeModulePkg/Universal/StatusCodeHandler/RuntimeDxe/StatusCodeHandlerRuntimeDxe.inf",

@@ -79,4 +79,5 @@
   ConfigurationMapLib|tb520fuPkg/Library/ConfigurationMapLib/ConfigurationMapLib.inf
 
 [Components]
+  SiliciumPkg/Drivers/SimpleFbDxe/SimpleFbDxe.inf
   # Linux uses the selected external TB520FU DTB; no foreign ACPI tables.

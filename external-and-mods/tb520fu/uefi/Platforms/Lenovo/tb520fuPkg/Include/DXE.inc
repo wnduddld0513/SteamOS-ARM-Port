@@ -60,7 +60,7 @@
   INF Binaries/tb520fu/HSUART/HSUART.inf
   INF Binaries/tb520fu/SdccDxe/SdccDxe.inf
   INF Binaries/tb520fu/FeatureEnablerDxe/FeatureEnablerDxe.inf
-  INF Binaries/tb520fu/DisplayDxe/DisplayDxe.inf
+  INF SiliciumPkg/Drivers/SimpleFbDxe/SimpleFbDxe.inf
   INF Binaries/tb520fu/QRKSDxe/QRKSDxe.inf
   INF Binaries/tb520fu/ButtonsDxe/ButtonsDxe.inf
   INF Binaries/tb520fu/ChargerExDxe/ChargerExDxe.inf

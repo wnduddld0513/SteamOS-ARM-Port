@@ -55,7 +55,7 @@ verified on hardware. The existing SteamOS USB image was not rebuilt.
 From Windows CMD with the tablet in bootloader mode:
 
 ```cmd
-fastboot boot "%USERPROFILE%\Documents\TB520FU\install-tb520fu\tb520fu-uefi-clockfix-debug-v4.img"
+fastboot boot "%USERPROFILE%\Documents\TB520FU\install-tb520fu\tb520fu-uefi-handoff-debug-v5.img"
 ```
 
 This command boots the image temporarily. Do not flash it to a boot partition.
@@ -125,3 +125,22 @@ This candidate aims to preserve inherited scanout so later errors remain
 visible. It does not establish that ClockDxe was the only cause of blackout.
 Stock DisplayDxe remains included. Earlier sections describe earlier images;
 ClockDxe is changed only starting with v4.
+
+## Fifth candidate: inherit the panel scanout
+
+V4 displayed early debug text, changed to solid gray, then entered Qualcomm
+CrashDump. The supplied photograph contains ramdump startup messages, UFS
+information and `tianma panel`, but no fatal reason or exception address.
+`PM: Driver Init # SPMI Transn: 880` is not established as an error code.
+
+V5 changes only the display service relative to v4: source SimpleFbDxe replaces
+stock DisplayDxe at its APRIORI position. The clock-dependency and PMIC patches
+are retained. SimpleFb publishes the inherited framebuffer without panel or
+clock programming. This tests whether the second panel initialization
+contributes to the gray screen; it does not prove the CrashDump cause.
+The old initial SimpleFb build did not contain either of the later clock/PMIC
+workarounds, so its black screen does not settle this combined path.
+
+The current inventory count is 69 stock module/raw entries and 43 regions.
+Earlier sections and counts describe earlier candidates. V5 is not yet
+verified on hardware. Forced shutdown/recovery may erase RAM diagnostics.

@@ -30,7 +30,8 @@ def need(ok, message):
 
 def patch_stock_pe(name, pe):
     """Apply hash-locked workarounds to locally extracted TB520FU modules."""
-    manifests = {"PmicDxe": "pmic-warm-boot.json", "ClockDxe": "clock-display-handoff.json"}
+    manifests = {"PmicDxe": "pmic-warm-boot.json", "ClockDxe": "clock-display-handoff.json",
+                 "UFSDxe": "ufs-device-wakeup.json"}
     if name not in manifests:
         return pe, None
     manifest = json.loads((PORT / "patches" / manifests[name]).read_text())

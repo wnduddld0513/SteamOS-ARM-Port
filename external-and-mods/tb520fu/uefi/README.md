@@ -84,3 +84,8 @@ a guarded Clock_InitCESTA call bypass. ClockDxe executes normally again in
 DEBUG; the v7 diagnostic skip is removed. The image was compiled and its
 embedded ClockDxe patch verified, but has not been tested on the tablet.
 See the debug build record for its hash and the remaining limitations.
+
+The v9 candidate also changes the device-WLUN UFS readiness check to an
+active-power START STOP UNIT command, following the same-SoC Giulia patch.
+The observed v8 failure was UFSDxe `UFS.c:2168`, with NOT READY sense
+data and initialization command required. Storage boot remains unverified.

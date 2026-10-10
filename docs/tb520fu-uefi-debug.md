@@ -220,3 +220,28 @@ ClockDxe, with 0x7D3C bypassed and the original inner DCD call restored.
 The DxeCore skip marker is absent; ClockDxe executes normally. SimpleFb and
 the existing PMIC workaround remain. DEBUG pacing remains at 250 ms.
 This is an experimental image; hardware boot is not yet verified.
+
+## Ninth candidate: device-WLUN wakeup
+
+v8 reached UFSDxe (`0D35CD8E-97EA-4F9A-96AF-0F0D89F76567`) and asserted
+at `UFS.c:2168` with `EFI_DEVICE_ERROR`. The photo contains fixed-format
+sense data `70 00 02 ... 04 02`: NOT READY, initialization command required.
+The stock PE maps this ASSERT to a NULL handle after `ufs_open(0, 0xD0)`
+at RVA `0x3E38`, before protocol installation. This is progress past the
+previous ClockDxe entry marker, not evidence of working storage.
+
+The device-WLUN open path tests readiness at RVA `0xA468`. Replace its
+TEST UNIT READY call and failure branch with `mov w1, #1; bl 0xBAA8`,
+issuing START STOP UNIT with active power condition. The following
+initialization calls and error checks are preserved; the ASSERT is not
+suppressed and UFSDxe is not skipped. The complete open routine matches
+the same-SoC Giulia reference byte for byte, and the eight-byte change
+matches its published patch. Only locally extracted TB520FU bytes are used.
+
+Reference: [Giulia UFS patch](https://github.com/Project-Silicium/Device-Binaries/blob/a1501e0c2e642d6ac0d8f52c85af2a67b75a7799/giulia/README.md).
+
+This targets the observed not-ready condition. Hardware verification of
+UFS and later boot stages remains pending. Previous PMIC, CESTA and
+framebuffer workarounds are retained so this test changes one mechanism.
+
+The v9 DEBUG image was compiled and checked against BootShim/FD and all three patched PE hashes. Local artifact: `tb520fu-uefi-ufswakeup-debug-v9.img` (1269760 bytes), SHA-256 `3afb09ef1b37d4a3de61367cae20f96f4b28fb1bfe1e973f2b02038d7a4889b5`. Actual device boot is pending.

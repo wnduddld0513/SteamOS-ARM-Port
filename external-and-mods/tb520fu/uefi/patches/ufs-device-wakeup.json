@@ -1,0 +1,14 @@
+{
+  "module": "UFSDxe",
+  "input_sha256": "452fb89e6767f1f9327539887f41214849dc50df8ba3139bbb0278582d2d9b6d",
+  "output_sha256": "3a7db7acbf3f646f2e5bb53bc267f8bc6f1d01b7b8caeb391194e5f4a496b373",
+  "rva": "0xA468",
+  "before": "4505009480fdff35",
+  "after": "210080528f050094",
+  "meaning": "For device WLUN 0xD0, replace TEST UNIT READY + failure branch with mov w1, #1; bl 0xBAA8 (START STOP UNIT, active power condition). Keep subsequent initialization and error handling intact.",
+  "evidence": "v8 reaches UFSDxe GUID 0D35CD8E-97EA-4F9A-96AF-0F0D89F76567 then UFS.c line 2168 ASSERT after ufs_open(0, 0xD0) returns NULL. Sense bytes show NOT READY, ASC/ASCQ 04/02 (initialization command required). The TB520FU ufs_open routine at 0xA3E0..0xA52F is byte-identical to the same-SoC Giulia reference routine.",
+  "reference_commit": "a1501e0c2e642d6ac0d8f52c85af2a67b75a7799",
+  "reference": "https://github.com/Project-Silicium/Device-Binaries/blob/a1501e0c2e642d6ac0d8f52c85af2a67b75a7799/giulia/README.md",
+  "reference_scope": "Port the reviewed eight-byte instruction change to TB520FU stock PE; do not include another device executable.",
+  "boot_tested": false
+}

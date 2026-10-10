@@ -4,9 +4,9 @@
   </a>
 </p>
 
-<h1 align="center">SteamOS ARM Port</h1>
+<h1 align="center">SteamOS ARM Port for TB520FU</h1>
 
-<p align="center"><strong>Unofficial SteamOS for Snapdragon handhelds</strong></p>
+<p align="center">Unofficial SteamOS for Snapdragon handhelds</p>
 
 <p align="center">
   Valve's SteamOS for ARM, the one made for the Steam Frame, set up for handhelds:
@@ -21,7 +21,7 @@
 </p>
 
 <p align="center">
-  <a href="https://steamos-arm-port.github.io/getting-started/install/"><strong>Install it</strong></a>
+  <a href="https://steamos-arm-port.github.io/getting-started/install/">Install it</a>
   ·
   <a href="https://steamos-arm-port.github.io/devices/">Supported devices</a>
   ·
@@ -32,10 +32,15 @@
 
 > [!WARNING]
 > This is a community project, not affiliated with or endorsed by Valve.
-> Installing it means flashing the ROCKNIX ABL bootloader, and getting that
+> The upstream installation path uses the ROCKNIX ABL bootloader. Getting that
 > wrong can leave your device unable to boot or lose your data. Back up first
 > and follow the [install guide](https://steamos-arm-port.github.io/getting-started/install/)
 > step by step.
+
+
+This repository contains the TB520FU port for the Lenovo Yoga Tab Plus / YOGA Pad Pro AI元启 (Snapdragon 8 Gen 3). Development takes place on `main`. The TB520FU kernel, Tianma and BOE device trees, UEFI boot image, ARM64 runtime and USB image have been built locally. Boot and hardware operation on the tablet remain untested.
+
+Start with the [TB520FU guide](docs/tb520fu.md). TB520FU uses a separate experimental UEFI and USB boot path; the upstream ABL flashing and internal installation instructions below do not apply to this device. Other device recipes are retained from the upstream project.
 
 ## About
 
@@ -84,16 +89,16 @@ nobody has run them on a real tablet yet. If you have one and want to help,
 ask on [Discord](https://discord.gg/EP53nZYvg) and see the
 [Lenovo page](https://steamos-arm-port.github.io/devices/lenovo/).
 
-### TB520FU fork branch
+### TB520FU development
 
-This fork's `tb520fu` branch adds an opt-in, separate image recipe using
-[our TB520FU kernel port](https://github.com/wnduddld0513/linux-tb520fu/tree/tb520fu).
+The `main` branch adds an opt-in, separate TB520FU image recipe using
+[our TB520FU kernel port](https://github.com/wnduddld0513/linux_kernel_lenovo_tb520fu/tree/main).
 It includes Tianma and BOE panel configurations (2944×1840, currently 120 Hz).
 Existing device builders and overlays are unchanged. The Linux 7.2.6 kernel,
 modules, both panel DTBs and dedicated [TB520FU UEFI boot image](external-and-mods/tb520fu/uefi/README.md)
 have been compiled and inspected. The ARM64 sensor/input/audio runtime and USB
-image have also been built and checked. [Download the experimental TB520FU files](https://github.com/wnduddld0513/SteamOS-ARM-Port/releases/tag/tb520fu-experimental-20261010).
-**Linux boot and hardware operation on the tablet remain untested.**
+image have also been built and checked. The completed image and UEFI boot image are local build artifacts and have not been published to GitHub Releases.
+Linux boot and hardware operation on the tablet remain untested.
 See [docs/tb520fu.md](docs/tb520fu.md) for the dedicated paths and limitations.
 
 ## Documentation

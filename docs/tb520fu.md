@@ -29,7 +29,7 @@ USB 이미지 SHA256: `a463eb599beb0853872dcfe58c6899f36195d6edc5c36a7817d943c9b
 
 ## 커널·화면·입력
 
-커널 소스는 [linux-tb520fu](https://github.com/wnduddld0513/linux-tb520fu/tree/tb520fu)의
+커널 소스는 [linux-tb520fu](https://github.com/wnduddld0513/linux_kernel_lenovo_tb520fu/tree/main)의
 `54ed573a816532658f411e0cabf93072740976e2`으로 고정했습니다. 해당 소스의 전체 패치 series,
 DT, 설정을 사용하고 SteamOS용 설정과 외부 USB 루트 UUID를 처리하는 initramfs를 더합니다.
 내장 DRM의 초기 probing에 필요한 Adreno 마이크로코드와 두 터치 펌웨어도 initramfs에 담습니다.
@@ -50,7 +50,7 @@ pogo 키보드·트랙패드, PM8550B 진동, SSC 센서, NFC·Goodix 제어는 
 G9 컨트롤러는 Steam Deck UHID 대상으로 설정하고, TB520FU IMU 허용 및 Legion 버튼 chord 패치를 포함합니다.
 
 카메라 촬영, 지문 인증, SAR/덮개 정책, 펜 충전 제어 등 미완료 항목은 OS를 바꿔도 완성되지 않습니다.
-전체 범위와 남은 작업은 [커널 하드웨어 대조표](https://github.com/wnduddld0513/linux-tb520fu/blob/tb520fu/tb520fu/HARDWARE.md)를 따릅니다.
+전체 범위와 남은 작업은 [커널 하드웨어 대조표](https://github.com/wnduddld0513/linux_kernel_lenovo_tb520fu/blob/main/tb520fu/HARDWARE.md)를 따릅니다.
 
 ## 로컬 펌웨어·사용자 공간
 

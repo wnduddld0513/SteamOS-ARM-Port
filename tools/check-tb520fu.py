@@ -125,11 +125,11 @@ def main():
         print('Prepared UEFI source: 69 module/raw hashes, DEPEX, 41 memory regions and all platform source files match')
     # Exercise push restrictions without contacting or mutating any Git remote.
     hook=ROOT/'.githooks/pre-push'
-    refs='refs/heads/tb520fu '+('1'*40)+' refs/heads/tb520fu '+('0'*40)+'\n'
+    refs='refs/heads/main '+('1'*40)+' refs/heads/main '+('0'*40)+'\n'
     for remote, data, accepted in (
         ('https://github.com/wnduddld0513/SteamOS-ARM-Port.git',refs,True),
         ('https://github.com/hashtagbasit/SteamOS-ARM-Port.git',refs,False),
-        ('https://github.com/wnduddld0513/SteamOS-ARM-Port.git',refs.replace('refs/heads/tb520fu','refs/heads/main'),False)):
+        ('https://github.com/wnduddld0513/SteamOS-ARM-Port.git',refs.replace('refs/heads/main','refs/heads/tb520fu'),False)):
         result=subprocess.run(['sh',str(hook),'origin',remote],input=data,text=True,capture_output=True)
         assert (result.returncode == 0) == accepted
     print(f'Shell syntax: {len(scripts)} scripts; Python/TOML/JSON parsed; installer isolation/idempotence passed')

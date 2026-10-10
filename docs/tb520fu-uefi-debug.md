@@ -55,7 +55,7 @@ verified on hardware. The existing SteamOS USB image was not rebuilt.
 From Windows CMD with the tablet in bootloader mode:
 
 ```cmd
-fastboot boot "%USERPROFILE%\Documents\TB520FU\install-tb520fu\tb520fu-uefi-displayfix-debug.img"
+fastboot boot "%USERPROFILE%\Documents\TB520FU\install-tb520fu\tb520fu-uefi-pmicfix-debug-v3.img"
 ```
 
 This command boots the image temporarily. Do not flash it to a boot partition.
@@ -82,3 +82,25 @@ that invariant before reusing a buffer and publishes size before start. The
 regression test covers the observed values. This fixes a diagnostic defect;
 it does not establish the cause of the display failure or guarantee RAM
 retention across recovery boot.
+
+## Third candidate: observed PMIC/SPMI abort
+
+The v2 readback retained 122943 bytes. Text has bit corruption, so numeric
+register values must be treated cautiously. The tail contains a PmicDxe
+entry followed by a synchronous exception, an SPMI stack and an ASSERT.
+The stock SPMI RVA 0x37F0 is `ldr w9, [x3, x4]`. The PMIC return RVA
+0x11D30 follows a call in the init routine at RVA 0x11D14. That routine
+starts by writing SID 7 register 0x287F and then performs more PMIC setup.
+
+V3 replaces the first two instructions of that one PMIC init routine with
+`mov w0, wzr; ret`. Input SHA-256, original bytes, RVA and resulting SHA-256
+are checked before applying it. Stock driver registration, SPMI, ClockDxe
+and DisplayDxe remain present. This is a cold-init bypass candidate for an
+Android-loader warm handoff, not a general PMIC implementation. Other PMIC
+users may still hit protected registers. It has not been boot-tested.
+
+The same-SoC upstream [giulia notes](https://github.com/Project-Silicium/Device-Binaries/blob/main/giulia/README.md)
+document PMIC/SPMI crash workarounds, but no foreign-device binary or address
+is used here. The current candidate deliberately changes only the locally
+identified PMIC init routine; it does not yet implement the paired SPMI
+workaround or claim the screen blackout is resolved.

@@ -1,0 +1,11 @@
+{
+  "module": "PmicDxe",
+  "input_sha256": "b42833333e78bd5bab193577dd0b181a8ba5cfa043f33650214b4ab4c28b84fb",
+  "output_sha256": "accfba137defff7a6928c3922a21d5dafb800c99347303d1074f584ce5993107",
+  "rva": "0x11D14",
+  "before": "fd7bbea9f30b00f9",
+  "after": "e0031f2ac0035fd6",
+  "meaning": "Return zero before the stock PMIC init sequence beginning with SID 7 register 0x287F write; keep driver registration and other functions intact",
+  "evidence": "v2 recovery log reaches PmicDxe and contains an SPMI exception; SPMI RVA 0x37F0 is a register load and PMIC return RVA 0x11D30 identifies this init sequence",
+  "boot_tested": false
+}

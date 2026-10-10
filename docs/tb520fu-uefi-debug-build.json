@@ -4,7 +4,7 @@
   "compiled": true,
   "boot_tested": false,
   "size": 1363968,
-  "sha256": "298cff151e391e0291943ecec33e605b8ee95c25a2f52a6cac018c83a206ed21",
+  "sha256": "22a93e9d227e2d242f02260fac8cbbfac207c4b4300147cb7218b12bb262a35d",
   "mu_commit": "8d73b66ab554f9ab6134b58839bb1e46ebd47688",
   "source_patch_sha256": "53107ccc4fb094f3a75f85565e81d23f258399c15361bcc402cdf7c8401c4e20",
   "display": "stock DisplayDxe restored; inherited framebuffer retained for early text",
@@ -39,7 +39,19 @@
     "external-and-mods/tb520fu/uefi/Platforms/Lenovo/tb520fuPkg/tb520fu.dec": "cefa6405e42d9573a5824002be82b7d2cf65d39a43813c6003e80f581789e393",
     "external-and-mods/tb520fu/uefi/Platforms/Lenovo/tb520fuPkg/tb520fu.dsc": "512c0b439dcdc9db1064a67497f294c323fd78a06a260d5ea9799afc40ff1bb4",
     "external-and-mods/tb520fu/uefi/Platforms/Lenovo/tb520fuPkg/tb520fu.fdf": "a6e898d7af83e61436669657393f9537c627a671c3a2e8aa4b7e076b0c6b2a92",
-    "external-and-mods/tb520fu/uefi/patches/dxe-dispatch-trace.patch": "53107ccc4fb094f3a75f85565e81d23f258399c15361bcc402cdf7c8401c4e20"
+    "external-and-mods/tb520fu/uefi/patches/dxe-dispatch-trace.patch": "53107ccc4fb094f3a75f85565e81d23f258399c15361bcc402cdf7c8401c4e20",
+    "external-and-mods/tb520fu/uefi/patches/pmic-warm-boot.json": "d9704a611dfc8d55a14043fe26799bacacc549976d8ee34e9f296ab1f1227a4f"
   },
-  "artifact": "tb520fu-uefi-displayfix-debug-v2.img"
+  "artifact": "tb520fu-uefi-pmicfix-debug-v3.img",
+  "pmic_patch": {
+    "module": "PmicDxe",
+    "input_sha256": "b42833333e78bd5bab193577dd0b181a8ba5cfa043f33650214b4ab4c28b84fb",
+    "output_sha256": "accfba137defff7a6928c3922a21d5dafb800c99347303d1074f584ce5993107",
+    "rva": "0x11D14",
+    "before": "fd7bbea9f30b00f9",
+    "after": "e0031f2ac0035fd6",
+    "meaning": "Return zero before the stock PMIC init sequence beginning with SID 7 register 0x287F write; keep driver registration and other functions intact",
+    "evidence": "v2 recovery log reaches PmicDxe and contains an SPMI exception; SPMI RVA 0x37F0 is a register load and PMIC return RVA 0x11D30 identifies this init sequence",
+    "boot_tested": false
+  }
 }

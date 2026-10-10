@@ -28,6 +28,32 @@ def need(ok, message):
         raise ValueError(message)
 
 
+def patch_stock_pe(name, pe):
+    """Apply only the reviewed TB520FU PMIC warm-boot workaround."""
+    if name != "PmicDxe":
+        return pe, None
+    manifest = json.loads((PORT / "patches/pmic-warm-boot.json").read_text())
+    need(hashlib.sha256(pe).hexdigest() == manifest["input_sha256"],
+         "PmicDxe patch input does not match the reviewed stock build")
+    hdr = struct.unpack_from("<I", pe, 0x3c)[0]
+    count = struct.unpack_from("<H", pe, hdr + 6)[0]
+    table = hdr + 24 + struct.unpack_from("<H", pe, hdr + 20)[0]
+    rva = int(manifest["rva"], 0)
+    before, after = bytes.fromhex(manifest["before"]), bytes.fromhex(manifest["after"])
+    matches = []
+    for i in range(count):
+        _, va, size, offset = struct.unpack_from("<IIII", pe, table + 40 * i + 8)
+        if va <= rva and rva + len(before) <= va + size:
+            matches.append(offset + rva - va)
+    need(len(matches) == 1, "PMIC patch RVA is not uniquely file-backed")
+    offset = matches[0]
+    need(pe[offset:offset + len(before)] == before, "PMIC patch instruction mismatch")
+    result = pe[:offset] + after + pe[offset + len(before):]
+    need(hashlib.sha256(result).hexdigest() == manifest["output_sha256"],
+         "PMIC patch output hash mismatch")
+    return result, manifest
+
+
 def guid(data):
     return str(uuid.UUID(bytes_le=data))
 
@@ -264,6 +290,7 @@ def prepare(mu, stock, require_pin=True):
                      "stock module is not AARCH64: " + name)
                 path = f"Binaries/tb520fu/{name}/{name}.inf"
                 dest = binaries / name; dest.mkdir(exist_ok=True)
+                pe, binary_patch = patch_stock_pe(name, pe)
                 (dest / (name + ".efi")).write_bytes(pe)
                 depex = next((p for t, p in sect if t == 0x13), None)
                 inf = f"[Defines]\n  INF_VERSION = 0x00010005\n  BASE_NAME = {name}\n  FILE_GUID = {ident}\n  MODULE_TYPE = DXE_DRIVER\n  VERSION_STRING = 1.0\n[Packages]\n  MdePkg/MdePkg.dec\n[Binaries.AARCH64]\n  PE32|{name}.efi|*\n"
@@ -273,6 +300,8 @@ def prepare(mu, stock, require_pin=True):
                 (dest / (name + ".inf")).write_text(inf)
                 records.append({"name": name, "guid": ident, "pe_sha256": hashlib.sha256(pe).hexdigest(),
                                 "depex_sha256": hashlib.sha256(depex).hexdigest() if depex else None})
+                if binary_patch:
+                    records[-1]["binary_patch"] = binary_patch
             mapping[ident] = path; order.append(path)
         elif name in RAW:
             content = next(p for t, p in sect if t == 0x19)

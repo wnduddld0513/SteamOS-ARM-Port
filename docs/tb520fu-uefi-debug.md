@@ -55,7 +55,7 @@ verified on hardware. The existing SteamOS USB image was not rebuilt.
 From Windows CMD with the tablet in bootloader mode:
 
 ```cmd
-fastboot boot "%USERPROFILE%\Documents\TB520FU\install-tb520fu\tb520fu-uefi-handoff-debug-v5.img"
+fastboot boot "%USERPROFILE%\Documents\TB520FU\install-tb520fu\tb520fu-uefi-paced-debug-v6.img"
 ```
 
 This command boots the image temporarily. Do not flash it to a boot partition.
@@ -144,3 +144,19 @@ workarounds, so its black screen does not settle this combined path.
 The current inventory count is 69 stock module/raw entries and 43 regions.
 Earlier sections and counts describe earlier candidates. V5 is not yet
 verified on hardware. Forced shutdown/recovery may erase RAM diagnostics.
+
+## Sixth candidate: paced diagnostic video
+
+V5 still changed from scrolling debug text to gray. There is no new retained
+exception log that establishes which driver caused that transition. V6 keeps
+the v5 display, clock and PMIC paths, and adds only a DEBUG-build 250 ms
+CoreStall after each DXE ENTER marker, before entering that driver. CoreStall
+returns immediately until the metronome architectural protocol is available.
+RELEASE builds have no added delay. This is a diagnostic timing change, not
+a hardware fix; it can change watchdog or race timing.
+
+Record the tablet from before fastboot boot until the screen changes. The
+last readable Loading driver name and DXE ENTER GUID before gray identify
+the execution boundary for the next investigation. A final solid-color
+photograph alone cannot recover that information. Normal boot of v6 has not
+been verified. A blank pstore after forced recovery is inconclusive.

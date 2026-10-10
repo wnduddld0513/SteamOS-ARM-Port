@@ -1,11 +1,14 @@
 --- a/Mu_Basecore/MdeModulePkg/Core/Dxe/Dispatcher/Dispatcher.c
 +++ b/Mu_Basecore/MdeModulePkg/Core/Dxe/Dispatcher/Dispatcher.c
-@@ -517,7 +517,9 @@
+@@ -517,7 +517,12 @@
            );
          ASSERT (DriverEntry->ImageHandle != NULL);
 -
 +
 +        DEBUG ((DEBUG_WARN, "TB520FU DXE ENTER %g\n", &DriverEntry->FileName));
++#ifndef MDEPKG_NDEBUG
++        CoreStall (250000);
++#endif
          Status = CoreStartImage (DriverEntry->ImageHandle, NULL, NULL);
 +        DEBUG ((DEBUG_WARN, "TB520FU DXE EXIT %g Status=%r\n", &DriverEntry->FileName, Status));
 -

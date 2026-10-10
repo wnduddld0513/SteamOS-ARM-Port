@@ -4,9 +4,9 @@
   "compiled": true,
   "boot_tested": false,
   "size": 1269760,
-  "sha256": "b0138afd0424f2c39d7621686d6c620d52eca13917e93fdcd7c51a34fa2f54ba",
+  "sha256": "e9caef949a9768ca0bd7cf8d4788518d2f3b15670ea75526ca95c6b9cc792952",
   "mu_commit": "8d73b66ab554f9ab6134b58839bb1e46ebd47688",
-  "source_patch_sha256": "53107ccc4fb094f3a75f85565e81d23f258399c15361bcc402cdf7c8401c4e20",
+  "source_patch_sha256": "66bcedeebfb4000f6d6ad4c92c02678d329e06c4d52bd07389e417464ec3cd14",
   "display": "SimpleFbDxe inherits ABL framebuffer; stock DisplayDxe excluded in v5",
   "ramoops": {
     "address": "0xA2000000",
@@ -40,10 +40,10 @@
     "external-and-mods/tb520fu/uefi/Platforms/Lenovo/tb520fuPkg/tb520fu.dsc": "124c9b441673b1c76d21d3bd8925768963ebca6a449bc74d7e8be0334a31b7e5",
     "external-and-mods/tb520fu/uefi/Platforms/Lenovo/tb520fuPkg/tb520fu.fdf": "a6e898d7af83e61436669657393f9537c627a671c3a2e8aa4b7e076b0c6b2a92",
     "external-and-mods/tb520fu/uefi/patches/clock-display-handoff.json": "13faa7be3b55b994396a3aea26c78f008c6994bc312f3aefe9270b16613d251b",
-    "external-and-mods/tb520fu/uefi/patches/dxe-dispatch-trace.patch": "53107ccc4fb094f3a75f85565e81d23f258399c15361bcc402cdf7c8401c4e20",
+    "external-and-mods/tb520fu/uefi/patches/dxe-dispatch-trace.patch": "66bcedeebfb4000f6d6ad4c92c02678d329e06c4d52bd07389e417464ec3cd14",
     "external-and-mods/tb520fu/uefi/patches/pmic-warm-boot.json": "d9704a611dfc8d55a14043fe26799bacacc549976d8ee34e9f296ab1f1227a4f"
   },
-  "artifact": "tb520fu-uefi-handoff-debug-v5.img",
+  "artifact": "tb520fu-uefi-paced-debug-v6.img",
   "pmic_patch": {
     "module": "PmicDxe",
     "input_sha256": "b42833333e78bd5bab193577dd0b181a8ba5cfa043f33650214b4ab4c28b84fb",
@@ -67,5 +67,6 @@
     "reference": "https://github.com/Project-Silicium/Device-Binaries/blob/a1501e0c2e642d6ac0d8f52c85af2a67b75a7799/giulia/README.md",
     "evidence": "TB520FU stock RVA 0xA668..0xA843 is byte-identical to the same-SoC giulia unpatched routine and caller; reference patched module differs only at the four-byte call site",
     "boot_tested": false
-  }
+  },
+  "debug_dispatch_delay_us": 250000
 }

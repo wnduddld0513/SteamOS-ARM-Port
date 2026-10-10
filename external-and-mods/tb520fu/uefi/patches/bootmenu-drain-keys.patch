@@ -1,0 +1,25 @@
+diff --git a/Mu_Basecore/MdeModulePkg/Application/BootManagerMenuApp/BootManagerMenu.c b/Mu_Basecore/MdeModulePkg/Application/BootManagerMenuApp/BootManagerMenu.c
+index 5bba6ea816..b375b6ca6a 100644
+--- a/Mu_Basecore/MdeModulePkg/Application/BootManagerMenuApp/BootManagerMenu.c
++++ b/Mu_Basecore/MdeModulePkg/Application/BootManagerMenuApp/BootManagerMenu.c
+@@ -1109,6 +1109,20 @@ BootManagerMenuEntry (
+   //
+   // check user input to determine want to re-draw or boot from user selected item
+   //
++  //
++  // TB520FU: discard keystrokes that were queued before the menu became active.
++  // The PMIC PON power button can be latched as pressed while the previous stage
++  // runs, and that single stale key event would confirm the highlighted entry
++  // before the user can react.
++  //
++  {
++    EFI_INPUT_KEY QueuedKey;
++
++    while (!EFI_ERROR (gST->ConIn->ReadKeyStroke (gST->ConIn, &QueuedKey))) {
++      ;
++    }
++  }
++
+   ExitApplication = FALSE;
+   while (!ExitApplication) {
+     gBS->WaitForEvent (1, &gST->ConIn->WaitForKey, &Index);

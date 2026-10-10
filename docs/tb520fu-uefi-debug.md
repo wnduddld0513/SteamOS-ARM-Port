@@ -460,3 +460,34 @@ explain silent USB media failure, lies outside the captured region. That line is
 the first thing to look for on the next boot, together with a TWRP pstore pull,
 because the ramoops console retains the full dispatcher trace.
 
+## v15: drop keystrokes queued before the boot menu is ready
+
+v14 delivered the power button as Enter, but the tablet showed the exception
+screen instead of the menu. The delivered Enter was consumed the moment
+BootManagerMenuApp started reading input, and the app clears the screen and boots
+the highlighted entry (the first registered option, "Internal Storage"), which
+faulted. What the screen showed was the cleared console plus the ArmCpuDxe
+assert, not a menu that failed to draw.
+
+ButtonsDxe emits at most one key event per press-release cycle. The latch at
+0x8000+0x4E0 is set when the key builder runs (RVA 0x3C08) and cleared only when
+the pressed count returns to zero (0x3CC8 and 0x3CD4), while 0x3B20 skips the
+builder while the latch is set. A power button that the stubbed PMIC reports as
+pressed once therefore produces exactly one stale Enter, and a later real press
+produces no event until the release is observed.
+
+v15 adds a keystroke drain to
+Mu_Basecore/MdeModulePkg/Application/BootManagerMenuApp/BootManagerMenu.c after
+the menu is drawn and before the wait loop. It is recorded as
+patches/bootmenu-drain-keys.patch and applied by the prepare script, so any key
+queued before that point is discarded and a latched press cannot confirm the
+highlighted entry. The power button then has to be pressed after the menu is up.
+
+The v15 DEBUG build and static checks pass, and the module was rebuilt in this
+run. Artifact: tb520fu-uefi-drainkeys-debug-v15.img, 1277952 bytes, SHA-256
+572ddfe7ddd2ba0b62c82a187d54fbcdf54cecc5f9459a94cd1ffe68fc41e4ea.
+The Windows install copy and drainkeys-debug-v15.json match. Tablet v15 boot is
+untested. If the menu appears and the power button still does nothing, the PMIC
+PON status path is not reporting the press, and restoring that path is the next
+step rather than another key-code patch.
+

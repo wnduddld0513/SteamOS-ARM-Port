@@ -29,12 +29,13 @@ def need(ok, message):
 
 
 def patch_stock_pe(name, pe):
-    """Apply only the reviewed TB520FU PMIC warm-boot workaround."""
-    if name != "PmicDxe":
+    """Apply hash-locked workarounds to locally extracted TB520FU modules."""
+    manifests = {"PmicDxe": "pmic-warm-boot.json", "ClockDxe": "clock-display-handoff.json"}
+    if name not in manifests:
         return pe, None
-    manifest = json.loads((PORT / "patches/pmic-warm-boot.json").read_text())
+    manifest = json.loads((PORT / "patches" / manifests[name]).read_text())
     need(hashlib.sha256(pe).hexdigest() == manifest["input_sha256"],
-         "PmicDxe patch input does not match the reviewed stock build")
+         "stock PE patch input does not match the reviewed build")
     hdr = struct.unpack_from("<I", pe, 0x3c)[0]
     count = struct.unpack_from("<H", pe, hdr + 6)[0]
     table = hdr + 24 + struct.unpack_from("<H", pe, hdr + 20)[0]
@@ -45,12 +46,12 @@ def patch_stock_pe(name, pe):
         _, va, size, offset = struct.unpack_from("<IIII", pe, table + 40 * i + 8)
         if va <= rva and rva + len(before) <= va + size:
             matches.append(offset + rva - va)
-    need(len(matches) == 1, "PMIC patch RVA is not uniquely file-backed")
+    need(len(matches) == 1, "stock PE patch RVA is not uniquely file-backed")
     offset = matches[0]
-    need(pe[offset:offset + len(before)] == before, "PMIC patch instruction mismatch")
+    need(pe[offset:offset + len(before)] == before, "stock PE patch instruction mismatch")
     result = pe[:offset] + after + pe[offset + len(before):]
     need(hashlib.sha256(result).hexdigest() == manifest["output_sha256"],
-         "PMIC patch output hash mismatch")
+         "stock PE patch output hash mismatch")
     return result, manifest
 
 

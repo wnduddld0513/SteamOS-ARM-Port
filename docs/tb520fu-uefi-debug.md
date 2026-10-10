@@ -55,7 +55,7 @@ verified on hardware. The existing SteamOS USB image was not rebuilt.
 From Windows CMD with the tablet in bootloader mode:
 
 ```cmd
-fastboot boot "%USERPROFILE%\Documents\TB520FU\install-tb520fu\tb520fu-uefi-pmicfix-debug-v3.img"
+fastboot boot "%USERPROFILE%\Documents\TB520FU\install-tb520fu\tb520fu-uefi-clockfix-debug-v4.img"
 ```
 
 This command boots the image temporarily. Do not flash it to a boot partition.
@@ -104,3 +104,24 @@ document PMIC/SPMI crash workarounds, but no foreign-device binary or address
 is used here. The current candidate deliberately changes only the locally
 identified PMIC init routine; it does not yet implement the paired SPMI
 workaround or claim the screen blackout is resolved.
+
+## Fourth candidate: preserve display clock dependencies
+
+The v3 recovery attempt had an empty pstore. On this tablet recovery requires
+a forced shutdown followed by fastboot and recovery, so RAM retention cannot
+be relied on and an empty pstore does not identify the stop location. The
+earlier advice to reach recovery without shutdown was not applicable. V3's
+PMIC workaround is still unverified on hardware.
+
+V4 retains the v3 PMIC workaround and adds one four-byte ClockDxe patch:
+RVA 0xA810 changes `bl 0xA668` to `mov w0, wzr`. This is the
+DCDDisableDependencies call removed in the same-SoC giulia port to keep clocks
+on. The unpatched TB520FU routine and its caller at 0xA668..0xA843 are
+byte-identical to that reference, whose patched module changes only the call.
+No giulia executable is included in the TB520FU image. The patch validates
+the full local stock input hash, instruction bytes and output hash.
+
+This candidate aims to preserve inherited scanout so later errors remain
+visible. It does not establish that ClockDxe was the only cause of blackout.
+Stock DisplayDxe remains included. Earlier sections describe earlier images;
+ClockDxe is changed only starting with v4.

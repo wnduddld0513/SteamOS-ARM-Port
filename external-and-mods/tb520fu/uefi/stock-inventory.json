@@ -159,8 +159,21 @@
     {
       "name": "ClockDxe",
       "guid": "4db5dea6-5302-4d1a-8a82-677a683b0d29",
-      "pe_sha256": "ce93cbee7189ba0609dc215a2891649a2e65094073876d654cc00f957d30a6fe",
-      "depex_sha256": "c8001e9cea134cf8205ad4167fd0ff3b8dab6ecf325c723158cc6916e4a9b1cf"
+      "pe_sha256": "6fbcb26e60a8717038c12b25ed0660fe59dea93cbf3b82185c50f442fae8afb4",
+      "depex_sha256": "c8001e9cea134cf8205ad4167fd0ff3b8dab6ecf325c723158cc6916e4a9b1cf",
+      "binary_patch": {
+        "module": "ClockDxe",
+        "input_sha256": "ce93cbee7189ba0609dc215a2891649a2e65094073876d654cc00f957d30a6fe",
+        "output_sha256": "6fbcb26e60a8717038c12b25ed0660fe59dea93cbf3b82185c50f442fae8afb4",
+        "rva": "0xA810",
+        "before": "96ffff97",
+        "after": "e0031f2a",
+        "meaning": "Replace bl 0xA668 (DCDDisableDependencies) with mov w0, wzr to preserve inherited clock dependencies",
+        "reference_commit": "a1501e0c2e642d6ac0d8f52c85af2a67b75a7799",
+        "reference": "https://github.com/Project-Silicium/Device-Binaries/blob/a1501e0c2e642d6ac0d8f52c85af2a67b75a7799/giulia/README.md",
+        "evidence": "TB520FU stock RVA 0xA668..0xA843 is byte-identical to the same-SoC giulia unpatched routine and caller; reference patched module differs only at the four-byte call site",
+        "boot_tested": false
+      }
     },
     {
       "name": "SPMI",

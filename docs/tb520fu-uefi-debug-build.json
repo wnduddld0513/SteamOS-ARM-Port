@@ -4,7 +4,7 @@
   "compiled": true,
   "boot_tested": false,
   "size": 1363968,
-  "sha256": "22a93e9d227e2d242f02260fac8cbbfac207c4b4300147cb7218b12bb262a35d",
+  "sha256": "409e687b7c5d5e89dc704b70866be4424da1bdb8e6f9f234a3639179b74e5343",
   "mu_commit": "8d73b66ab554f9ab6134b58839bb1e46ebd47688",
   "source_patch_sha256": "53107ccc4fb094f3a75f85565e81d23f258399c15361bcc402cdf7c8401c4e20",
   "display": "stock DisplayDxe restored; inherited framebuffer retained for early text",
@@ -20,7 +20,8 @@
     "DXE ENTER/EXIT strings present",
     "stock DisplayDxe GUID present; SimpleFbDxe GUID absent",
     "ring writer host test passed",
-    "4205 original files preserved"
+    "4205 original files preserved",
+    "Guarded clock patch changes only the verified four-byte DCD call"
   ],
   "source_overrides_sha256": {
     "external-and-mods/tb520fu/uefi/Platforms/Lenovo/tb520fuPkg/DeviceBuild.py": "72bac059ed89016566cd9c7de9f731276394cfa45e027b0ffd499f8d34e4d391",
@@ -39,10 +40,11 @@
     "external-and-mods/tb520fu/uefi/Platforms/Lenovo/tb520fuPkg/tb520fu.dec": "cefa6405e42d9573a5824002be82b7d2cf65d39a43813c6003e80f581789e393",
     "external-and-mods/tb520fu/uefi/Platforms/Lenovo/tb520fuPkg/tb520fu.dsc": "512c0b439dcdc9db1064a67497f294c323fd78a06a260d5ea9799afc40ff1bb4",
     "external-and-mods/tb520fu/uefi/Platforms/Lenovo/tb520fuPkg/tb520fu.fdf": "a6e898d7af83e61436669657393f9537c627a671c3a2e8aa4b7e076b0c6b2a92",
+    "external-and-mods/tb520fu/uefi/patches/clock-display-handoff.json": "13faa7be3b55b994396a3aea26c78f008c6994bc312f3aefe9270b16613d251b",
     "external-and-mods/tb520fu/uefi/patches/dxe-dispatch-trace.patch": "53107ccc4fb094f3a75f85565e81d23f258399c15361bcc402cdf7c8401c4e20",
     "external-and-mods/tb520fu/uefi/patches/pmic-warm-boot.json": "d9704a611dfc8d55a14043fe26799bacacc549976d8ee34e9f296ab1f1227a4f"
   },
-  "artifact": "tb520fu-uefi-pmicfix-debug-v3.img",
+  "artifact": "tb520fu-uefi-clockfix-debug-v4.img",
   "pmic_patch": {
     "module": "PmicDxe",
     "input_sha256": "b42833333e78bd5bab193577dd0b181a8ba5cfa043f33650214b4ab4c28b84fb",
@@ -52,6 +54,19 @@
     "after": "e0031f2ac0035fd6",
     "meaning": "Return zero before the stock PMIC init sequence beginning with SID 7 register 0x287F write; keep driver registration and other functions intact",
     "evidence": "v2 recovery log reaches PmicDxe and contains an SPMI exception; SPMI RVA 0x37F0 is a register load and PMIC return RVA 0x11D30 identifies this init sequence",
+    "boot_tested": false
+  },
+  "clock_patch": {
+    "module": "ClockDxe",
+    "input_sha256": "ce93cbee7189ba0609dc215a2891649a2e65094073876d654cc00f957d30a6fe",
+    "output_sha256": "6fbcb26e60a8717038c12b25ed0660fe59dea93cbf3b82185c50f442fae8afb4",
+    "rva": "0xA810",
+    "before": "96ffff97",
+    "after": "e0031f2a",
+    "meaning": "Replace bl 0xA668 (DCDDisableDependencies) with mov w0, wzr to preserve inherited clock dependencies",
+    "reference_commit": "a1501e0c2e642d6ac0d8f52c85af2a67b75a7799",
+    "reference": "https://github.com/Project-Silicium/Device-Binaries/blob/a1501e0c2e642d6ac0d8f52c85af2a67b75a7799/giulia/README.md",
+    "evidence": "TB520FU stock RVA 0xA668..0xA843 is byte-identical to the same-SoC giulia unpatched routine and caller; reference patched module differs only at the four-byte call site",
     "boot_tested": false
   }
 }

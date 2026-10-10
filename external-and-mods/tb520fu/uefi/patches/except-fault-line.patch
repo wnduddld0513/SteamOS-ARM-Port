@@ -1,0 +1,26 @@
+diff --git a/Mu_Basecore/UefiCpuPkg/Library/CpuExceptionHandlerLib/AArch64/CpuExceptionHandlerLib.c b/Mu_Basecore/UefiCpuPkg/Library/CpuExceptionHandlerLib/AArch64/CpuExceptionHandlerLib.c
+index 9116ba9d96..a2678ba5e3 100644
+--- a/Mu_Basecore/UefiCpuPkg/Library/CpuExceptionHandlerLib/AArch64/CpuExceptionHandlerLib.c
++++ b/Mu_Basecore/UefiCpuPkg/Library/CpuExceptionHandlerLib/AArch64/CpuExceptionHandlerLib.c
+@@ -433,6 +433,21 @@ DumpCpuContext (
+   // Attempt to print that we had a synchronous exception to ConOut.  We do
+   // this after the serial logging as ConOut's logging is more complex and we
+   // aren't guaranteed to succeed.
++  //
++  // TB520FU: repeat the fault registers after the dump. The earlier copies of
++  // these values scroll off the panel, and this platform cannot recover a
++  // ramoops log, so the last visible line has to carry ESR, FAR and ELR.
++  //
++  DEBUG ((
++    DEBUG_ERROR,
++    "\nTB520FU ESR 0x%08lx EC 0x%02x FAR 0x%016lx ELR 0x%016lx SP 0x%016lx\n",
++    SystemContext.SystemContextAArch64->ESR,
++    (SystemContext.SystemContextAArch64->ESR & 0xFC000000) >> 26,
++    SystemContext.SystemContextAArch64->FAR,
++    SystemContext.SystemContextAArch64->ELR,
++    SystemContext.SystemContextAArch64->SP
++    ));
++
+   LogToConsole (UnicodeBuffer);
+ 
+   ASSERT (FALSE);

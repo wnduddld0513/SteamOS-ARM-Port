@@ -491,3 +491,17 @@ untested. If the menu appears and the power button still does nothing, the PMIC
 PON status path is not reporting the press, and restoring that path is the next
 step rather than another key-code patch.
 
+## v16: keep the fault registers on screen
+
+The v14 and v15 crash screens show only the tail of the exception dump. The
+handler in Mu_Basecore/UefiCpuPkg/Library/CpuExceptionHandlerLib/AArch64/CpuExceptionHandlerLib.c
+already prints SP, ELR, SPSR, ESR and FAR, but it does so before the 128 byte
+stack dump, so those lines have scrolled off the panel by the time the tablet
+stops, and this device cannot hand back a ramoops log because a forced reboot
+always goes through fastboot and recovery.
+
+v16 repeats the ESR, EC, FAR, ELR and SP line after the stack dump and before
+LogToConsole, recorded as patches/except-fault-line.patch and applied by the
+prepare script. The last line of the next crash screen therefore carries the
+faulting address even in a single photograph.
+

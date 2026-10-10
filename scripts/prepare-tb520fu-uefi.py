@@ -260,7 +260,8 @@ def prepare(mu, stock, require_pin=True):
     entries = volumes_from_elf(data["uefi.elf"])
     # Apply only in this dedicated, pinned TB520FU build checkout.
     for patch_name in ("dxe-dispatch-trace.patch", "gic-unhandled-irq.patch",
-                      "bootmenu-drain-keys.patch"):
+                      "bootmenu-drain-keys.patch",
+                      "except-fault-line.patch"):
         patch = PORT / "patches" / patch_name
         if subprocess.run(["git", "-C", str(mu), "apply", "--ignore-whitespace", "--reverse", "--check", str(patch)],
                           stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode:

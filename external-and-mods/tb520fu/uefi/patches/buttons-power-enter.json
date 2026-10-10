@@ -1,0 +1,14 @@
+{
+  "module": "ButtonsDxe",
+  "input_sha256": "f83a07d53a509cd586de51c325ab54185ad4b99ad63d1a2d13b34f30dee169ed",
+  "output_sha256": "ace24a88b469361a44277bfa767f8a2f3fddc36232f76ef495cd8540f66c441d",
+  "rva": "0x3cc0",
+  "before": "48208052d6ffff17",
+  "after": "edffff171f2003d5",
+  "meaning": "Make the PMIC PON power button work as the boot-menu confirm key. The stock key-map builder stores SCAN_SUSPEND (0x102) in the ScanCode field of EFI_INPUT_KEY for the power button, and the Mu BootManagerMenuApp that this platform boots only accepts CHAR_CARRIAGE_RETURN (0x0D) in the UnicodeChar field, so the button did nothing in the menu. This patch redirects the power-button branch (mov w8,#0x102) into the driver's own ENTER epilogue at RVA 0x3C74 (mov w8,#0xD ; strh w8,[x29,#26] ; b 0x3C90), so the button now reports a real Enter key to every UEFI consumer.",
+  "evidence": "TB520FU ButtonsDxe.efi disassembly: the whole 0x7000-byte .text contains exactly one #0x102 immediate (mov w8,#0x102 at RVA 0x3CC0, followed by b 0x3C1C which stores it as the ScanCode at 0x3C1C), and with the stock XBL device tree (/soc/buttons/platform-key-maps key-maps = <1 2 3 0 0>) it is the only branch that can fire. Mu_Basecore/MdeModulePkg/Application/BootManagerMenuApp/BootManagerMenu.c:1136-1182 handles a key stroke with switch (Key.UnicodeChar): SCAN_UP/SCAN_DOWN/SCAN_ESC are honoured inside case CHAR_NULL, and selection/boot happens only in case CHAR_CARRIAGE_RETURN, so ScanCode 0x0D (what the project-silicium giulia patch writes) would be dropped into default: break. RVA 0x3C74-0x3C7C uses only w8 and x29, so entering it directly from 0x3CC0 is safe and the driver then notifies the event through its normal path at 0x3C90. The ScanCode patch published for giulia/onyx/nx729j is therefore ineffective on this platform.",
+  "reference": "https://github.com/Project-Silicium/Device-Binaries/blob/a1501e0c2e642d6ac0d8f52c85af2a67b75a7799/giulia/README.md",
+  "reference_commit": "a1501e0c2e642d6ac0d8f52c85af2a67b75a7799",
+  "limitations": "The key is still sampled through the PMIC PON real-time IRQ status, so the button only reaches the menu if that path reports the press at all; if the PMIC PON path is dead the power button still produces no event. Volume and other GPIO buttons keep their stock key codes. Only the seven-byte branch at 0x3CC0 is redirected; the rest of the driver is untouched.",
+  "boot_tested": false
+}

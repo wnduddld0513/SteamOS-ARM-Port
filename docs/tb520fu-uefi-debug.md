@@ -399,3 +399,64 @@ no 250000-us stall. Artifact: tb520fu-uefi-secondstage-debug-v13.img,
 1277952 bytes, SHA-256
 33253684871e403938db54b14861f728c97eb269978c1e63499f5e4e460bc655.
 The Windows install copy matches. Tablet v13 boot remains untested.
+
+## v14: power button as the boot manager confirm key
+
+The v12 and v13 photos show the boot manager menu with the volume buttons
+working and the power button doing nothing: volume moves the highlight, and no
+key confirms a selection. ButtonsDxe reports the PMIC PON power button as
+SCAN_SUSPEND (0x0102) in the ScanCode field of EFI_INPUT_KEY. The Mu-built
+MdeModulePkg/Application/BootManagerMenuApp that this platform launches
+(`BootManagerMenu.c:1136-1182`) switches on Key.UnicodeChar first: SCAN_UP,
+SCAN_DOWN and SCAN_ESC are handled inside `case CHAR_NULL`, and selection and
+boot happen only in `case CHAR_CARRIAGE_RETURN`. ScanCode 0x0102 therefore falls
+into `default: break`. The binary patch published for giulia, onyx and nx729j
+rewrites the same immediate to ScanCode 0x000D, which the same switch also
+discards, so it cannot work on this platform.
+
+v14 instead redirects the power-button branch into the driver's own Enter
+epilogue. ButtonsDxe key handling was re-derived before patching: the routine at
+0x1B30 is the only caller of the key builder at 0x3AE8 (call site 0x1BF8); the
+state-diff routine at 0x19C8 turns button state changes into a pressed array
+(0x8000+0x2A4, count 0x8000+0x278) and a released array (0x8000+0x2C0, count
+0x8000+0x27C) that hold key-map indices; the builder maps those entries to key
+codes and both the volume buttons and the power button flow through it. The
+branch at RVA 0x3CC0 is the only instruction in the whole 0x7000-byte .text that
+can produce 0x0102, and it is taken when the first pressed entry is key-map
+index 1, which is the power button. The patch replaces the 8 bytes at RVA
+0x3CC0 (`mov w8,#0x102` and its unconditional branch) with `b 0x3C74` and a
+NOP, so the branch enters `mov w8,#0xD` and `strh w8,[x29,#26]` and then
+notifies the event through the driver's normal path at 0x3C90. UnicodeChar
+becomes 0x0D while ScanCode stays at the zero it was initialized to, which is
+exactly the keystroke the menu accepts and the key code every other UEFI
+consumer sees.
+
+A power press only reaches this code if the PMIC PON status path reports it,
+because the button is sampled through PmicPONProtocol. The PmicDxe and SPMI
+workarounds may leave that status unreadable. If the button still does nothing
+in v14, the next step is restoring that path rather than changing another key
+code.
+
+The v14 DEBUG build and static checks pass. All eight patched modules on disk
+match the hash in their patch record. The uncompressed
+Build/tb520fuPkg/DEBUG_CLANGPDB/FV/FVMAIN.Fv contains the patched bytes exactly
+once and the stock bytes zero times, and the final image's gzip payload is
+byte-identical to the built BootShim/FD payload. Artifact:
+tb520fu-uefi-powerkey-debug-v14.img, 1277952 bytes, SHA-256
+d695e1a109fb6e1ebf5caee4c81acf6a8219ca55f11ded588ac64f49ed9a756e.
+The Windows install copy and powerkey-debug-v14.json match. Tablet v14 boot and
+the power button are untested.
+
+```cmd
+fastboot boot "%USERPROFILE%\Documents\TB520FU\install-tb520fu\tb520fu-uefi-powerkey-debug-v14.img"
+```
+
+The same photos contribute one USB observation. The v13 console shows
+`Failed to enable GPIO status : 0x7` for the codec-shared
+usb_shared_wcd_usb_switch_reset while `ssusb_phy_init_success lane: 0x0` reports
+PHY success, and the captured console tail ends at BootManagerMenuApp. Whether
+XhciPciEmulation reported `Unable to configure USB in host mode`, which would
+explain silent USB media failure, lies outside the captured region. That line is
+the first thing to look for on the next boot, together with a TWRP pstore pull,
+because the ramoops console retains the full dispatcher trace.
+

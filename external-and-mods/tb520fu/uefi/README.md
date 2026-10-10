@@ -65,7 +65,11 @@ may lose these logs; blank recovery pstore is inconclusive.
 v12 tablet photos reach the boot manager menu with RSC deferred. Linux boot
 and USB media operation remain unverified. v13 removes the per-driver debug
 delay while retaining traces, and includes the Mass Storage application that
-the existing Qualcomm boot-options library registers.
+the existing Qualcomm boot-options library registers. v14 makes the power
+button report Enter to UEFI consumers instead of SCAN_SUSPEND, so the boot
+manager menu can be confirmed without an external keyboard, although the button
+still depends on the PMIC PON status path that the earlier PMIC and SPMI
+workarounds may have left unreadable.
 
 These are experimental second-stage boot workarounds. Runtime charging,
 secure apps, remaining SPMI paths, USB and ExitBootServices need hardware tests.

@@ -33,7 +33,7 @@ def patch_stock_pe(name, pe):
     manifests = {"PmicDxe": "pmic-warm-boot.json", "ClockDxe": "clock-display-handoff.json",
                  "UFSDxe": "ufs-device-wakeup.json", "SPMI": "spmi-second-stage.json",
                  "TzDxeLA": "tz-second-stage.json", "FeatureEnablerDxe": "feature-second-stage.json",
-                 "RscDxe": "rsc-second-stage.json"}
+                 "RscDxe": "rsc-second-stage.json", "ButtonsDxe": "buttons-power-enter.json"}
     if name not in manifests:
         return pe, None
     manifest = json.loads((PORT / "patches" / manifests[name]).read_text())

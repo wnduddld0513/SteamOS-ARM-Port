@@ -89,3 +89,8 @@ The v9 candidate also changes the device-WLUN UFS readiness check to an
 active-power START STOP UNIT command, following the same-SoC Giulia patch.
 The observed v8 failure was UFSDxe `UFS.c:2168`, with NOT READY sense
 data and initialization command required. Storage boot remains unverified.
+
+The v10 candidate additionally masks an unowned GICv3 interrupt and issues
+EOI before logging it. v9 showed a repeating IRQ 0x105 and nested exception
+frames exhausting the stack. Registered interrupt handlers keep their
+existing behavior. Hardware confirmation remains pending.

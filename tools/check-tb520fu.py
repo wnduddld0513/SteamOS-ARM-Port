@@ -111,6 +111,10 @@ def main():
         mu=a.uefi_prepared.resolve()
         lock=json.loads((ROOT/'external-and-mods/tb520fu/uefi/source-lock.json').read_text())
         assert subprocess.check_output(['git','-C',str(mu),'rev-parse','HEAD'],text=True).strip() == lock['mu_commit']
+        for patch_name in ('dxe-dispatch-trace.patch', 'gic-unhandled-irq.patch'):
+            subprocess.run(['git', '-C', str(mu), 'apply', '--ignore-whitespace',
+                            '--reverse', '--check',
+                            str(ROOT/'external-and-mods/tb520fu/uefi/patches'/patch_name)], check=True)
         actual=json.loads((mu/'TB520FU-PREPARED.json').read_text())
         assert actual == uefi
         for entry in actual['stock_modules']:

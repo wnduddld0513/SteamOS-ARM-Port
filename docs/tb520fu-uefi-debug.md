@@ -245,3 +245,32 @@ UFS and later boot stages remains pending. Previous PMIC, CESTA and
 framebuffer workarounds are retained so this test changes one mechanism.
 
 The v9 DEBUG image was compiled and checked against BootShim/FD and all three patched PE hashes. Local artifact: `tb520fu-uefi-ufswakeup-debug-v9.img` (1269760 bytes), SHA-256 `3afb09ef1b37d4a3de61367cae20f96f4b28fb1bfe1e973f2b02038d7a4889b5`. Actual device boot is pending.
+
+## Tenth candidate: quiesce unowned level interrupts before logging
+
+The v9 photos show repeated `Spurious GIC interrupt: 0x105`, a GLinkDxe
+call in the older stock firmware, then dozens of ArmCpuDxe exception-return
+frames at RVA `0x1D6C`. SP is `0xA7600F40`, below the configured
+`0xA760D000..0xA764D000` stack. The final write fault at `0xA7600F50`
+falls in the preserved CPU vector page. ArmGicDxe RVA `0x252C` is the
+DebugPrint stack store. These observations support recursive IRQ handling
+and stack exhaustion; relaxing vector-page permissions would hide the
+consequence without fixing that path. Exact hardware retrigger timing
+remains unverified.
+
+The pinned GICv3 handler logs an unowned interrupt before EOI and never
+masks its source. The TB520FU preparation patch now disables that source,
+then issues EOI, then logs once. Registered handlers, including timer
+handlers, retain their original dispatch and EOI ownership. A later
+RegisterInterruptSource call can enable a newly owned source normally.
+No global IRQ disable, IRQ 0x105 hardcoded filter, stack enlargement or
+memory protection relaxation is applied. The GLink transport itself is
+not claimed fixed by this containment change.
+
+`tools/test-tb520fu-gic-handler.py --uefi-prepared <mu>` compiles the actual
+handler with mocked IRQ registers/logger. The original handler fails the
+mask/EOI-before-log assertion; the patched handler passes it and preserves
+registered, special and invalid source behavior. The patch is applied only
+in the dedicated TB520FU checkout by its preparation script.
+
+The v10 DEBUG image was compiled and verified against BootShim/FD, the compiled GIC driver and all three stock PE patches. Local artifact: `tb520fu-uefi-gicfix-debug-v10.img` (1269760 bytes), SHA-256 `818f49159bd4338808d4011db0ded3d19dfc58f11f011b13785b6a1c6527f8cd`. Actual device boot is pending.

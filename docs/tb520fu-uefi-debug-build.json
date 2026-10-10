@@ -4,7 +4,7 @@
   "compiled": true,
   "boot_tested": false,
   "size": 1269760,
-  "sha256": "3afb09ef1b37d4a3de61367cae20f96f4b28fb1bfe1e973f2b02038d7a4889b5",
+  "sha256": "818f49159bd4338808d4011db0ded3d19dfc58f11f011b13785b6a1c6527f8cd",
   "mu_commit": "8d73b66ab554f9ab6134b58839bb1e46ebd47688",
   "source_patch_sha256": "66bcedeebfb4000f6d6ad4c92c02678d329e06c4d52bd07389e417464ec3cd14",
   "display": "SimpleFbDxe inherits ABL framebuffer; stock DisplayDxe excluded in v5",
@@ -23,7 +23,9 @@
     "Final FV ClockDxe hash matches CESTA candidate; RVA 0x7D3C bypass present; original inner DCD call retained",
     "Final DxeCore contains ENTER/EXIT markers and no ClockDxe skip marker",
     "UFS patch regression: exact eight-byte scope, mismatched input and double-application rejection",
-    "Final compressed FV UFSDxe, ClockDxe and PmicDxe hashes match prepared TB520FU modules"
+    "Final compressed FV UFSDxe, ClockDxe and PmicDxe hashes match prepared TB520FU modules",
+    "Actual GICv3 handler host test: original fails ordering assertion; patched passes unowned/owned/special/invalid cases",
+    "Final compressed FV ArmGicDxe matches compiled PE and contains new unowned-IRQ marker"
   ],
   "source_overrides_sha256": {
     "external-and-mods/tb520fu/uefi/Platforms/Lenovo/tb520fuPkg/DeviceBuild.py": "72bac059ed89016566cd9c7de9f731276394cfa45e027b0ffd499f8d34e4d391",
@@ -46,9 +48,11 @@
     "external-and-mods/tb520fu/uefi/patches/dxe-dispatch-trace.patch": "66bcedeebfb4000f6d6ad4c92c02678d329e06c4d52bd07389e417464ec3cd14",
     "external-and-mods/tb520fu/uefi/patches/pmic-warm-boot.json": "d9704a611dfc8d55a14043fe26799bacacc549976d8ee34e9f296ab1f1227a4f",
     "external-and-mods/tb520fu/uefi/patches/ufs-device-wakeup.json": "d5ce93bfcdf631cd8d46752aaceefa04ac6857a7b866f2ec799a89bdc9733656",
-    "scripts/prepare-tb520fu-uefi.py": "0ec55addb34534f93ccdda9b1a8898ebf0a46cfad4caa062a79270a513ee1dd8"
+    "scripts/prepare-tb520fu-uefi.py": "e4060509ebe6b75b08af96b98ba6a52f180246959f100e04a7127fa17dd4bd60",
+    "external-and-mods/tb520fu/uefi/patches/gic-unhandled-irq.patch": "cafe41d33c59d29f3f157018fedd5ffb749a8bdcf2b9e676e005a8732ac06052",
+    "tools/test-tb520fu-gic-handler.py": "6470913ef710f5a4f77f6f609ed333ca6074f95dccadeda29a850ce187ad8fae"
   },
-  "artifact": "tb520fu-uefi-ufswakeup-debug-v9.img",
+  "artifact": "tb520fu-uefi-gicfix-debug-v10.img",
   "pmic_patch": {
     "module": "PmicDxe",
     "input_sha256": "b42833333e78bd5bab193577dd0b181a8ba5cfa043f33650214b4ab4c28b84fb",
@@ -90,5 +94,12 @@
     "reference": "https://github.com/Project-Silicium/Device-Binaries/blob/a1501e0c2e642d6ac0d8f52c85af2a67b75a7799/giulia/README.md",
     "reference_scope": "Port the reviewed eight-byte instruction change to TB520FU stock PE; do not include another device executable.",
     "boot_tested": false
+  },
+  "gic_fix": {
+    "patch": "gic-unhandled-irq.patch",
+    "behavior": "Disable unowned GICv3 source, then EOI, then log; registered handler dispatch unchanged",
+    "compiled_pe_sha256": "23e19e5e3cb98bdcd8544f4b3da71327bee52eb672797be0a7bb99a1a6270a65",
+    "previous_observation": "v9 unhandled IRQ 0x105 repeats, nested exception frames exhaust configured stack",
+    "hardware_confirmed": false
   }
 }

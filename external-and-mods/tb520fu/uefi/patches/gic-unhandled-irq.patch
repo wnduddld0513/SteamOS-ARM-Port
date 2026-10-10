@@ -1,0 +1,13 @@
+--- a/Mu_Basecore/ArmPkg/Drivers/ArmGicDxe/GicV3/ArmGicV3Dxe.c
++++ b/Mu_Basecore/ArmPkg/Drivers/ArmGicDxe/GicV3/ArmGicV3Dxe.c
+@@ -505,6 +505,9 @@
+     (*InterruptHandlerPtr)(GicInterrupt, SystemContext);
+   } else {
+-    DEBUG ((DEBUG_ERROR, "Spurious GIC interrupt: 0x%x\n", (UINT32)GicInterrupt));
++    // An inherited level interrupt has no owner in this DXE instance.
++    // Quiesce it before logging, which can change TPL and enable interrupts.
++    GicV3DisableInterruptSource (&gHardwareInterruptV3Protocol, GicInterrupt);
+     GicV3EndOfInterrupt (&gHardwareInterruptV3Protocol, GicInterrupt);
++    DEBUG ((DEBUG_ERROR, "TB520FU masked unhandled GIC interrupt: 0x%x\n", (UINT32)GicInterrupt));
+   }
+ }

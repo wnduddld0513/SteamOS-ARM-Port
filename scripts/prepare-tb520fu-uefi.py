@@ -257,11 +257,12 @@ def prepare(mu, stock, require_pin=True):
     memory = memory_map(data["xbl_config.elf"])
     entries = volumes_from_elf(data["uefi.elf"])
     # Apply only in this dedicated, pinned TB520FU build checkout.
-    patch = PORT / "patches/dxe-dispatch-trace.patch"
-    if subprocess.run(["git", "-C", str(mu), "apply", "--ignore-whitespace", "--reverse", "--check", str(patch)],
-                      stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode:
-        subprocess.run(["git", "-C", str(mu), "apply", "--ignore-whitespace", "--check", str(patch)], check=True)
-        subprocess.run(["git", "-C", str(mu), "apply", "--ignore-whitespace", str(patch)], check=True)
+    for patch_name in ("dxe-dispatch-trace.patch", "gic-unhandled-irq.patch"):
+        patch = PORT / "patches" / patch_name
+        if subprocess.run(["git", "-C", str(mu), "apply", "--ignore-whitespace", "--reverse", "--check", str(patch)],
+                          stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode:
+            subprocess.run(["git", "-C", str(mu), "apply", "--ignore-whitespace", "--check", str(patch)], check=True)
+            subprocess.run(["git", "-C", str(mu), "apply", "--ignore-whitespace", str(patch)], check=True)
     platform = mu / "Platforms/Lenovo/tb520fuPkg"
     platform.parent.mkdir(parents=True, exist_ok=True)
     shutil.copytree(PORT / "Platforms/Lenovo/tb520fuPkg", platform, dirs_exist_ok=not require_pin)

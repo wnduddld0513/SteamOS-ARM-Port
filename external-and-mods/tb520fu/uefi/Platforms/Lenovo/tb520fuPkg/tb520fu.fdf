@@ -92,7 +92,7 @@ READ_LOCK_STATUS   = TRUE
 
   # Linux DTB comes from the external media and is selected in GRUB.
   # Retain upstream BDS and setup UI; never import another tablet's ACPI.
-  !include SiliciumPkg/Extra.fdf.inc
+  !include QcomPkg/Extra.fdf.inc
 
 [FV.FVMAIN_COMPACT]
 FvAlignment        = 8

@@ -374,3 +374,28 @@ module/raw and DEPEX hashes, and compiled ArmGicDxe/DxeCore/SimpleFbDxe PEs.
 Artifact: tb520fu-uefi-secondstage-debug-v12.img, 1273856 bytes, SHA-256
 2487a692316be7d0c195d46c8db8a55adf87418f08369f89a49ee155c26e6c03.
 The Windows install copy matches. Tablet boot has not yet been verified.
+
+## v13: remove tracing delays and include the registered boot application
+
+The v12 tablet photos reach the Project Silicium logo and BootManagerMenuApp
+menu, beyond the previous RSC entry. This confirms progress with RSC deferred,
+not functional camera/PCIe initialization. USB GPIO enable returns status 7
+while the SuperSpeed PHY reports initialization success. Actual USB media
+enumeration, input and Linux boot are still unverified.
+
+Remove the DEBUG-only 250000-us dispatcher stall at the user's request; retain
+ENTER/EXIT logs. Include QcomPkg/Extra.fdf.inc in the TB520FU FV instead of
+only SiliciumPkg/Extra.fdf.inc. Qcom's include adds MassStorage.inf and then
+includes the same Silicium apps/resources. The Qcom boot-options library
+registers the hidden Mass Storage option, but that application's FV entry
+was previously missing. Its existing DSC component remains unchanged.
+This fixes that packaging omission without altering another device's files
+or automatically launching the storage application.
+
+The v13 DEBUG build and static checks pass. The unpacked final FV matches
+all 71 stock entries/DEPEX and compiled core/display PEs, and contains the
+MassStorage application at its registered GUID. The dispatcher source has
+no 250000-us stall. Artifact: tb520fu-uefi-secondstage-debug-v13.img,
+1277952 bytes, SHA-256
+33253684871e403938db54b14861f728c97eb269978c1e63499f5e4e460bc655.
+The Windows install copy matches. Tablet v13 boot remains untested.

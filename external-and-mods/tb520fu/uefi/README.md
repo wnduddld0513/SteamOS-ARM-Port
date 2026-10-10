@@ -62,6 +62,11 @@ may lose these logs; blank recovery pstore is inconclusive.
   or functional camera/PCIe RSC support. It is unrelated to RscRtDxe, the
   report-status-code router, which remains enabled.
 
+v12 tablet photos reach the boot manager menu with RSC deferred. Linux boot
+and USB media operation remain unverified. v13 removes the per-driver debug
+delay while retaining traces, and includes the Mass Storage application that
+the existing Qualcomm boot-options library registers.
+
 These are experimental second-stage boot workarounds. Runtime charging,
 secure apps, remaining SPMI paths, USB and ExitBootServices need hardware tests.
 No ABL/XBL/TZ partition is modified. The output is unsigned and does not unlock

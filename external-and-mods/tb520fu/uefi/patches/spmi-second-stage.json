@@ -1,14 +1,11 @@
 {
   "module": "SPMI",
   "input_sha256": "fd6b11d13950ff62a45bb23fc8120c95115611d8460956902f6308c0cb77e65f",
-  "output_sha256": "6eddedc79cb543b0c83e9efa313bcf2c440a3d0d261cfbc1f83801f0f0859acb",
-  "rva": "0x154c",
-  "before": "400500b4fd7bbaa9",
+  "output_sha256": "e6e55534d629203cd0fb0c929d36796d3a640a32f2d2482e5d13d5ac9e7a4ae6",
+  "rva": "0x1000",
+  "before": "1f0000f1c0050054",
   "after": "e0031f2ac0035fd6",
-  "meaning": "Pair the existing PMIC minimal-init workaround with the same-SoC SPMI transaction-wrapper bypass. Preserve driver registration. This is a bring-up workaround, not working PMIC writes.",
-  "evidence": "v10 QcomChargerDxeLA -> PmicDxe -> SPMI return RVA 0x15C0, faulting at RVA 0x37F0 with FAR=0x0C77A008. TB520FU wrapper 0x154C..0x15FB is byte-identical to the unpatched Giulia wrapper; its published patch changes these same eight bytes.",
-  "reference_commit": "a1501e0c2e642d6ac0d8f52c85af2a67b75a7799",
-  "reference": "https://github.com/Project-Silicium/Device-Binaries/blob/a1501e0c2e642d6ac0d8f52c85af2a67b75a7799/giulia/README.md",
-  "limitations": "The wrapper returns zero without hardware I/O. Do not interpret this as valid battery or charging status. Other SPMI wrappers remain unchanged.",
+  "meaning": "SPMI DXE entry point returns success without initialising the driver",
+  "evidence": "FAR 0xC777008 (SPMI chnls 0xC500000 + channel 0x277 << 12), ESR 0x96000010 EC 0x25: the arbiter rejects that channel window. The old 0x154C stub covered only one internal wrapper.",
   "boot_tested": false
 }

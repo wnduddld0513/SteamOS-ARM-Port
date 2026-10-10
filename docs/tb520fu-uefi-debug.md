@@ -505,3 +505,19 @@ LogToConsole, recorded as patches/except-fault-line.patch and applied by the
 prepare script. The last line of the next crash screen therefore carries the
 faulting address even in a single photograph.
 
+## v17: stub the SPMI entry point
+
+The v16 line reads ESR 0x96000010 (EC 0x25 data abort at the same exception level,
+DFSC 0x10 synchronous external abort), FAR 0x000000000C777008 and ELR
+0x00000000D1F317F0. FAR is the SPMI channel window 0x0C500000 plus 0x277 << 12 plus
+8, and ELR is the SPMI.efi instruction at RVA 0x37F0 that builds that address; the
+v10 family fault was the same instruction with channel 0x27A and FAR 0x0C77A008.
+The arbiter implements no such channel, so the read is rejected.
+
+The previous spmi-second-stage site only neutered one internal wrapper. v17 moves
+the site to the SPMI DXE entry point (RVA 0x1000, before 1f0000f1c0050054, after
+e0031f2ac0035fd6) so the driver never initialises and can never compute a channel
+address; PmicDxe already returns before its own init sequence. Expected result: the
+boot manager menu appears and the volume keys navigate it. The power button and USB
+VBUS stay inert until the PMIC/SPMI path is restored on purpose.
+

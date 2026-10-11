@@ -679,3 +679,86 @@ what the Device-Binaries dual role patches (UsbConfigDxe.patched.efi,
 UsbMsdDxe.patched.efi, UsbPwrCtrlDxe.patched.efi, PR #68) do by hand. Any fix on
 this platform therefore has to be a byte patch to those blobs, applied through the
 same sites array as every other module patch, not a change to the DXE lists.
+
+## v20: keep SPMI inert, open the boot menu, and put USB core 0 in host mode
+
+v19 filtered the channels the arbiter "does not implement" and faulted again, at FAR `0x0C54C008`
+(channel 0x4c) instead of `0x0C777008` (channel 0x277). A low access number faults exactly like a high
+one, so no channel filter can work. Investigating why produced a correction to the v19 reasoning.
+
+### Correction: the vendor module is a version 7 driver, and the chnls window is what refuses
+
+The stock SPMIDxe instruction stream reproduces SM8650's version 7 arbiter map exactly:
+
+| function | vendor code | v7 register |
+| --- | --- | --- |
+| RW channel poll (RVA 0x37F0, the faulting read) | `base + 0x100000 + 0x1000*n + 0x8` | CHNLS(0x0C500000) + 0x1000*apid + STATUS(0x08) |
+| observer block | `base + 0x40000 + 0x8000*ee + 0x20*apid + {0x8,0x18,0x1c}` | OBS(0x0C440000) + 0x8000*ee + 0x20*apid |
+| PPID to APID map | `CORE + 0x2000 + 4*idx` | core + 0x2000 + 4*n |
+| APID owner | `CNFG + 0x2D000 + 0x5000*EE + 4*idx` | cnfg owner table, low bits = owner EE |
+| command word | `(opc<<27) | ((addr&0xff)<<4) | (bc&7)` | `pmic_arb_fmt_cmd_v2` |
+
+`arch/arm64/boot/dts/qcom/sm8650.dtsi` declares `spmi@c400000` with reg `core 0x0C400000+0x3000`,
+`chnls 0x0C500000+0x400000`, `obsrvr 0x0C440000+0x80000`, `intr 0x0C4C0000+0x20000`,
+`cnfg 0x0C42D000+0x4000`, `qcom,ee = <0>`, `qcom,channel = <0>`; Linux selects `pmic_arb_v7_ops` after
+reading `PMIC_ARB_VERSION` (`core + 0x0`), and the X1E80100 binding is explicitly labeled "PMIC Arbiter
+v7" with the same region shape. So both faulting addresses are *structurally valid* v7 registers: with
+base 0x0C400000 they land at 0x0C500000 + 0x1000*631 + 8 and 0x0C500000 + 0x1000*76 + 8, inside the
+4 MB chnls window. The earlier "v2 layout versus v8 hardware" explanation in the v19 section is wrong
+and is superseded here.
+
+What remains is that the chnls window aborts while core, cnfg and obsrvr respond (the transfer does a
+`base + 0x2F000 + 0x5000*EE` read inside cnfg a few instructions before the fault, and the APID/owner
+table reads must already have succeeded). The arbiter's channel window is therefore refusing
+application-processor accesses, which an UEFI-side rewrite cannot change. Three register reads would
+settle it - `PMIC_ARB_VERSION` at core+0x0, the per-bus APID count at core+0x4, and APID 0 STATUS at
+`chnls+0x8` - and they are recorded as the next diagnostic step in the SPMI patch manifest.
+
+### The three v20 changes
+
+1. **SPMI stays inert, but the protocol stays installed.** Stock module with the transaction wrapper at
+   RVA 0x154C (`400500b4fd7bbaa9` to `e0031f2ac0035fd6`) and the arbiter access routine at RVA 0x3668
+   (`ff8303d1fd7b08a9` to `e0031f2ac0035fd6`) both turned into `mov w0, wzr; ret`. The 0x154C stub is
+   exactly the eight bytes by which Project-Silicium publishes `giulia/QcomPkg/Drivers/SPMIDxe/SPMIDxe.patched.efi`,
+   whose stated purpose is "To make UEFI not Crash during UEFI Boot"; the 0x3668 stub additionally covers
+   the paths v14 and later exercised through the patched ButtonsDxe. Because the DXE entry point is
+   restored, `LocateProtocol` succeeds and the `pm_comm_spmi_lite.c +66` assert that v17 produced cannot
+   fire. Patch manifest output sha256 `c5335e57e404a918c4e339575633dc6d1e6a89caaaa40af71d383e55629dd944`.
+
+2. **The boot manager menu becomes reachable.** This port builds neither `KeypadDeviceDxe` nor the
+   KeypadDxe STI driver - only the Samsung and Xiaomi platforms list them - so
+   `SetupKeypad()` in `Silicon/Silicium/SiliciumPkg/Library/BootManagerLib/KeyCallback.c` fails with
+   "Failed to Locate STI Device Path!", `RegisterKeyCallback()` returns early, `mEnterBootManager` never
+   becomes TRUE, and `PlatformBootManagerPriorityBoot()` (BootManager.c:146) - the only key-driven way
+   into the menu - returns immediately. Every failed boot then lands in
+   `PlatformBootManagerUnableToBoot()` (BootManager.c:202), which draws the no-boot logo, stalls ten
+   seconds and resets the tablet off. The new source patch `bootmenu-unable-to-boot.patch` inserts the
+   same `MsBootOptionsLibGetBootManagerMenu` plus `EfiBootManagerBoot` sequence that the Volume Up key
+   would have selected, immediately after `DeviceBootManagerUnableToBoot()`, so the menu appears even
+   though the keypad stack is absent. `BdsDxe` in the built FV contains the new diagnostic string, which
+   is the evidence that the change is compiled in.
+
+3. **USB core 0 is switched from device to host mode.** Our `UsbConfigDxe.efi` (90,112 B, sha256
+   `c56a7783d544d0b1446c5add31c94dd8d8baa9db75b8201b57fb45dc04a3c253`) is layout-identical to giulia's
+   stock blob and its whole mode switch at RVA 0x4480-0x4680 is byte-identical to it. The per-core mode
+   byte at RVA 0x143F4 is 3 (device); mode 1 stores 8 into `*(void**)(usbc+0x18)`, and the host start path
+   at RVA 0x477C only falls through when that value is 8 (`subs w8,w8,#0x8 ; b.ne 0x4830`), reaching
+   `UsbCoreIfc->StartController` at 0x47AC. Stock mode 3 stores 0x20 and skips that whole path, which is
+   why host mode was dead. The patch writes the community's two edits onto our offsets: the mode array
+   window at 0x143F0 (`00000000 03000000` to `00000000 01010000`) and the argument at 0x47A4
+   (`... e1031f2a 00013fd6 ...` to `... 21008052 00013fd6 ...`, `mov w1, wzr` to `mov w1, #1`, the edit
+   bitra's host-mode blob makes at both of its copies). The IOMMU attach gate at 0x561C is deliberately
+   left stock: the flag byte 0x148B9 is zero in our build, so that branch is already taken. Patch manifest
+   output sha256 `42e94fcb5ee6f6f3361bb9898535558ca89d6f61c73735e89722763a59ffc991`.
+
+### Verification and artifact
+
+Both modules appear verbatim in `Build/tb520fuPkg/DEBUG_CLANGPDB/FV/FVMAIN.Fv` (SPMI at 0x2D9094,
+UsbConfigDxe at 0x50A1BC) and in their own FFS sections, with the bytes above confirmed at RVA 0x1000
+(stock entry), 0x154C, 0x3668, 0x143F4, 0x47A8. The DEBUG image is 1,277,952 bytes, sha256
+`4b77fb01f878735cf1c4c97209e04eaba7e1b851e9711ec373615dbaea513e50`, packaged as
+`install-tb520fu/tb520fu-uefi-usbhost-debug-v20.img` with `usbhost-debug-v20.json`.
+
+Known gaps at this revision: SPMI transfers are successful no-ops, so PMIC clients read zero data and USB
+VBUS may remain off even with host mode selected; and mode 1 proves the host start path is chosen, not
+that the SM8650 DWC3 controller enumerates a device.

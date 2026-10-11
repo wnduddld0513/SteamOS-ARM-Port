@@ -33,7 +33,8 @@ def patch_stock_pe(name, pe):
     manifests = {"PmicDxe": "pmic-warm-boot.json", "ClockDxe": "clock-display-handoff.json",
                  "UFSDxe": "ufs-device-wakeup.json", "SPMI": "spmi-second-stage.json",
                  "TzDxeLA": "tz-second-stage.json", "FeatureEnablerDxe": "feature-second-stage.json",
-                 "RscDxe": "rsc-second-stage.json", "ButtonsDxe": "buttons-power-enter.json"}
+                 "RscDxe": "rsc-second-stage.json", "ButtonsDxe": "buttons-power-enter.json",
+                 "UsbConfigDxe": "usb-host-mode.json"}
     if name not in manifests:
         return pe, None
     manifest = json.loads((PORT / "patches" / manifests[name]).read_text())
@@ -263,7 +264,8 @@ def prepare(mu, stock, require_pin=True):
     # Apply only in this dedicated, pinned TB520FU build checkout.
     for patch_name in ("dxe-dispatch-trace.patch", "gic-unhandled-irq.patch",
                       "bootmenu-drain-keys.patch",
-                      "except-fault-line.patch"):
+                      "except-fault-line.patch",
+                      "bootmenu-unable-to-boot.patch"):
         patch = PORT / "patches" / patch_name
         if subprocess.run(["git", "-C", str(mu), "apply", "--ignore-whitespace", "--reverse", "--check", str(patch)],
                           stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode:

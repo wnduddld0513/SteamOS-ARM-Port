@@ -1,18 +1,18 @@
 {
   "module": "SPMI",
   "input_sha256": "fd6b11d13950ff62a45bb23fc8120c95115611d8460956902f6308c0cb77e65f",
-  "output_sha256": "ce798bc46eba8e05aa4747e9a25103dffecdc6b8da475b992ca2be5a06d4c96f",
+  "output_sha256": "b9cb297bcbf31b12e27607c74477b3e769091132b2cea7f7047b805c77979de1",
   "sites": [
     {
-      "rva": "0x3668",
-      "before": "ff8303d1fd7b08a9",
-      "after": "e0031f2ac0035fd6",
-      "meaning": "SPMI channel execute routine returns success without touching the arbiter",
-      "evidence": "Reached from the single caller at RVA 0x2940; its ldr w9, [x3, x4] at RVA 0x37F0 is the faulting ELR"
+      "rva": "0x3598",
+      "before": "eb030b2a4c696c38",
+      "after": "2b0248374c696c38",
+      "meaning": "Reject PPID->channel table values with bit 9 set (channel >= 0x200) before the arbiter is touched. The vendor check at 0x3584 only rejects bit 10 (>= 0x400); the two tests together reject every value >= 0x200. The reject path returns 0x1c (unsupported) at 0x35dc, so the caller aborts the transaction at 0x294c without reading the arbiter.",
+      "evidence": "FAR 0x000000000C777008 in v16 (and 0x0C77A008 in v10) = arbiter base 0x0C500008 + channel 0x277/0x27A << 12, read by 0x37F0. The channel comes from the runtime PPID->channel lookup at 0x3578, which never range-checks the table value (0x3668 loads ctx[68], 0x372c adds the looked-up value, 0x3734 masks to 0xffff, 0x373c shifts by 12). The vendor rejects bit 10 but not bit 9, so 0x277 is accepted and the unimplemented channel aborts."
     }
   ],
-  "meaning": "SPMI still initialises and installs its protocols; the channel execute routine that builds the arbiter address read by the ldr at RVA 0x37F0 now returns success without touching the bus",
-  "evidence": "v16 line: ESR 0x96000010 (EC 0x25, DFSC 0x10 synchronous external abort), FAR 0x000000000C777008 = arbiter 0x0C500000 + channel 0x277 << 12 + 8, ELR 0x00000000D1F317F0 = SPMI.efi base 0x000D1F2E000 + RVA 0x37F0",
+  "meaning": "Restore the stock SPMI driver completely (entry point and channel execute routine are stock again) and reject arbiter channels >= 0x200 at the PPID->channel lookup, so the PMIC/SPMI path works for the provisioned channels while an unprogrammed table entry returns EFI_UNSUPPORTED instead of an external abort.",
+  "evidence": "v17 stubbed the DXE entry (no SPMI protocol, PmicDxe Locate protocol failed, ASSERT pm_comm_spmi_lite.c +66). v18 stubbed the whole channel execute routine at RVA 0x3668 (no abort, but every transfer a silent no-op, and the PMIC PON path the volume/power keys need stayed dead). v19 keeps both stock and only adds the range check.",
   "boot_tested": false,
-  "limitations": "Every SPMI transfer routed through this routine now reports success without touching the arbiter: PMIC register reads hand back whatever the caller's buffer already held and writes are dropped, so the PMIC minimal-init sequence completes without real hardware I/O and battery/charger status must not be trusted. Driver registration and every other SPMI entry point stay stock. Flip this site to a small error status (e.g. mov w0, #3) if a later build needs the transfer to fail loudly instead."
+  "limitations": "Any SPMI channel index of 0x200 or above is rejected by the protocol lookup: an unsupported or unprogrammed PPID now returns EFI_UNSUPPORTED (28) instead of issuing the arbiter read that aborted the AP. Every provisioned PMIC channel is below 0x100, so those transfers keep their stock behaviour and the PMIC/PON path stays alive. If a future slave legitimately needs a channel above 0x1FF the guard must be replaced by a range check against the per-EE channel count in the context record at ctx+48."
 }

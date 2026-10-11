@@ -571,3 +571,68 @@ commit 8d73b66ab554f9ab6134b58839bb1e46ebd47688. Tablet v18 boot is untested. If
 the next screen shows neither an ESR line nor the "Locate protocol failed" /
 pm_comm_spmi_lite assert, the SPMI abort path is closed and the PMIC work can
 resume on top of it.
+## v19: reject the channels the arbiter does not implement
+
+The v18 tablet boot answered the v18 question and raised a worse one. No ESR
+line and no pm_comm_spmi_lite assert appeared, so the abort path was closed, but
+the console also shows "SetupKeypad: Failed to Locate STI Device Path! Status =
+Not Found", no boot manager menu at all, "No handles survived filtering!" for the
+USB attempt and "[Bds] Unable to boot!" afterwards. That is exactly what this
+file warned about in v14: the buttons are sampled through the PMIC PON status
+path, so while the SPMI workaround keeps that path dead there are no key events
+and therefore no menu. The v15 and v16 photographs still showed the menu with
+working volume keys, i.e. input worked as long as SPMI still executed.
+
+v19 therefore restores the driver completely - stock DXE entry at RVA 0x1000 and
+the stock prologue of the channel routine at RVA 0x3668 - and moves the guard to
+the protocol lookup that produces the channel index the faulting load uses.
+
+The chain is: the single caller at RVA 0x27e4 calls the lookup at RVA 0x3578 with
+the PPID index and the transaction class; a successful lookup stores a 16 bit
+channel value through the caller's x4 pointer and returns 0, a failed lookup
+returns 0x1c (28) and the caller branches to its error path at 0x294c without
+ever touching the arbiter. Only on success does it reload that channel from the
+stack (ldurh w4, [x29, #-8]) and call the routine at 0x3668, where the address
+becomes 0x0C500008 + (context[68] + channel) << 12 - 0x0C777008 for channel 0x277,
+the FAR the v16 line recorded. The stock lookup rejects only bit 10
+(RVA 0x3584, tbnz w11, #10, 0x35dc -> return 28), so a channel value of 0x277 or
+0x27A is accepted even though the arbiter implements no such window.
+
+The per-EE context behind context[68] lives at .data 0x7160 (EE 0) and 0x71a8
+(EE 1), 72 bytes each: [0] arbiter base 0x0C400000, [16] EE index, [24] the
+PPID to channel table, [32] the node table, [48] a record whose first halfword is
+the entry count (0x380 = 896 for EE 0, 0x80 = 128 for EE 1) and [68] the EE
+channel base (0 for EE 0, 0x380 for EE 1). Both channel tables are all zero in
+the file and are built at runtime from the arbiter, which is why the bad entry
+exists only after initialisation. Because context[68] is added before the shift,
+masking the computed offset to 0x1ff would mis-address every EE 1 access, so the
+guard has to sit in the lookup, not at the point of use.
+
+The v19 site is RVA 0x3598 (before eb030b2a4c696c38, mov w11, w11 / ldrb w12,
+[x10, x12]; after 2b0248374c696c38, tbnz w11, #9, 0x35dc / ldrb w12, [x10, x12]).
+The replaced mov w11, w11 is redundant: w11 is already zero extended by the ldrh
+at 0x3580 and by the and w11, w10, #0x7ff at 0x35d0, and only its low half is
+stored at 0x35b0. Together with the stock bit-10 test this rejects every channel
+value of 0x200 or above, so the lookup returns 28 (EFI_UNSUPPORTED) and the caller
+takes its error path without ever computing or reading an arbiter address. The
+node-chain walk jumps back to 0x3590, so a value found deeper in a chain is
+tested by the same instruction. Every provisioned PMIC channel is below 0x100, so
+real transfers keep their stock behaviour and the PMIC PON path should come back
+with them.
+
+Verification for this build: the manifest re-derives the stock blob from the
+built module and asserts fd6b11d1...65f before patching; the patched module is
+b9cb297b...de1; and the built FV's SPMI section
+(Build/tb520fuPkg/DEBUG_CLANGPDB/FV/Ffs/2a7b4bef-80cd-49e1-b473-374ba4d673fcSPMI/
+2a7b4bef-80cd-49e1-b473-374ba4d673fcSEC2.1.pe32, whose raw offsets run four bytes
+ahead of the module RVAs) carries 1f0000f1c0050054 at the DXE entry,
+2b0248374c696c38 at RVA 0x3598, the stock prologue ff8303d1fd7b08a9 at RVA 0x3668
+and the faulting 696864b8 still present but unreachable at RVA 0x37F0.
+
+Artifact: tb520fu-uefi-spmi-guard-debug-v19.img, 1277952 bytes, SHA-256
+65e92bb5451d30624993806fd58ca32c17e6dec9c6c69aa28b20ab201a358dd3, DEBUG, Mu
+commit 8d73b66ab554f9ab6134b58839bb1e46ebd47688. Tablet v19 boot is untested.
+Expected on the next boot: the boot manager menu returns with working volume
+keys, the power button confirms through the v14 redirection, USB VBUS comes back,
+and a transfer to an unimplemented channel returns EFI_UNSUPPORTED instead of
+aborting.

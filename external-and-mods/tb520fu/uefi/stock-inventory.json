@@ -220,9 +220,40 @@
     {
       "name": "SPMI",
       "guid": "2a7b4bef-80cd-49e1-b473-374ba4d673fc",
-      "pe_sha256": "c5335e57e404a918c4e339575633dc6d1e6a89caaaa40af71d383e55629dd944",
+      "pe_sha256": "b6e4b9a1453ded65b2e14cb9c81f62aac8be116a10d851ac6c267a22183d93c7",
       "depex_sha256": "557c754d26e2667287367a856ea5fcd584f35ab796d24a6a875d1648a4637d23",
-      "binary_patch": "spmi-second-stage.json"
+      "binary_patch": {
+        "module": "SPMI",
+        "input_sha256": "fd6b11d13950ff62a45bb23fc8120c95115611d8460956902f6308c0cb77e65f",
+        "sites": [
+          {
+            "rva": "0x3668",
+            "before": "ff8303d1fd7b08a9",
+            "after": "260e00141f2003d5",
+            "meaning": "Branch to an ownership guard; retain the original transfer implementation and all read/RMW wrappers."
+          },
+          {
+            "rva": "0x6f00",
+            "before": "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+            "after": "600300b4091840f9290300b42a0140799f000a6bc20200543f040071a0010054610000343f440071e1010054091040f9e90100b4ca0080d289240a9b29054039291100126a1c00123f010a6b81000054ff8303d1fd7b08a9c6f1ff1780038052040000146000805202000014e0018052e90340f9490000b43f0100b9c0035fd6",
+            "meaning": "Executable padding holds spmi-owner-guard.S. Bound the relative APID, permit observer reads, reject writes when the cached node owner differs from the caller EE, then execute the original prologue. Errors report zero transferred bytes."
+          },
+          {
+            "rva": "0x37f0",
+            "before": "696864b8",
+            "after": "29008052",
+            "meaning": "Start the transaction without a pre-command STATUS read, following Linux ordering. Original WDATA/CMD writes and bounded post-command STATUS polling remain intact."
+          }
+        ],
+        "evidence": {
+          "reference": "Working supplied Y703 image has all 24576 SPMI .text bytes identical to TB520FU stock; it does not stub transfer functions.",
+          "live_TWRP": "Arbiter version 0x70010000, features0 0x80060380, features1 0x80; bus0=896, bus1=128. APID 0x4c PPID 0x183 owner=4, APID 0x277 PPID 0x021 owner=0, AP EE=0.",
+          "fault": "Earlier fault at SPMI+0x37f0 on write STATUS 0x0c54c008 matches the unowned 0x4c channel. The earlier 0x277 fault was on an owned channel; command-first ordering is a hypothesis requiring a tablet boot test, not a proven firewall fix."
+        },
+        "limitations": "Hardware untested. Ownership is necessary but may not be sufficient for MMIO access after ABL. An owned-channel fault can still occur. Reads, writes, data buffers and failure status now remain real; no successful no-op transfers. PMIC cold-init remains deferred.",
+        "boot_tested": false,
+        "output_sha256": "b6e4b9a1453ded65b2e14cb9c81f62aac8be116a10d851ac6c267a22183d93c7"
+      }
     },
     {
       "name": "ICBDxe",
@@ -438,9 +469,33 @@
     {
       "name": "UsbConfigDxe",
       "guid": "cd823a4d-7dec-4531-ae5d-4134fa4127b8",
-      "pe_sha256": "42e94fcb5ee6f6f3361bb9898535558ca89d6f61c73735e89722763a59ffc991",
+      "pe_sha256": "4d1672431e7f7e0a74670008ba31809fa3364667754470589e29dcfba66a1675",
       "depex_sha256": "ee32169774c787d62e03f2d39f9f266977871fec5c433e46b4c03e29b8abd17e",
-      "binary_patch": "usb-host-mode.json"
+      "binary_patch": {
+        "module": "UsbConfigDxe",
+        "input_sha256": "c56a7783d544d0b1446c5add31c94dd8d8baa9db75b8201b57fb45dc04a3c253",
+        "output_sha256": "4d1672431e7f7e0a74670008ba31809fa3364667754470589e29dcfba66a1675",
+        "sites": [
+          {
+            "rva": "0x143f0",
+            "before": "0000000003000000",
+            "after": "0000000001000000",
+            "meaning": "Select host mode (1) only for physical USB core 0. Leave the absent second core disabled (0), as in TB520FU stock; the live DT has one DWC3 controller at 0x0a600000.",
+            "evidence": "Our mode array is `03 00 00 00` immediately before the ASCII \"usbc\" struct base at 0x143F8 (stride 0x130), the same placement as bitra/9707f (`03 03` before \"usbc\" at 0x15360). bitra UsbConfigDxe.hostmode.efi and 9707f UsbConfigDxe.patched.efi change exactly those bytes 03 -> 01, and our whole mode-switch block 0x4480-0x4680 is byte-identical to giulia's stock build.",
+            "reference": "https://github.com/Project-Silicium/Device-Binaries/blob/main/bitra/QcomPkg/Drivers/UsbConfigDxe/UsbConfigDxe.hostmode.efi"
+          },
+          {
+            "rva": "0x47a4",
+            "before": "a0035e38e1031f2a00013fd6a0831ff8",
+            "after": "a0035e382100805200013fd6a0831ff8",
+            "meaning": "Pass mode argument 1 instead of 0 to the USB core start entry (`mov w1,wzr ; blr x8` becomes `mov w1,#1 ; blr x8`) on the host start path the mode byte selects.",
+            "evidence": "Same edit exists in bitra UsbConfigDxe.hostmode.efi (both copies of the call, at 0x4638 and 0x472C); our build has this one copy at 0x47A8. The driver's own fallback start path at 0x47D8 already passes w1 = 1 to the local UsbStartController, so 1 is the value this code treats as \"start\".",
+            "reference": "https://github.com/Project-Silicium/Device-Binaries/blob/main/bitra/QcomPkg/Drivers/UsbConfigDxe/UsbConfigDxe.hostmode.efi"
+          }
+        ],
+        "limitations": "Host selection alone does not establish USB enumeration or VBUS. PMIC transfers have been restored with ownership checks, but need tablet verification. No Y703 or bitra GPIO/power data is imported.",
+        "boot_tested": false
+      }
     },
     {
       "name": "UsbInitDxe",

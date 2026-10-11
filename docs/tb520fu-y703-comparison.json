@@ -1,0 +1,680 @@
+{
+  "reference": {
+    "sha256": "45f923bc3980a8ba6e12ce606c30b4b08c2de48047626648a3d1861c95d2a58f",
+    "size": 100663296,
+    "header_version": 3,
+    "kernel_size": 2413234,
+    "shim_size": 112,
+    "fd_size": 4194304
+  },
+  "built": {
+    "sha256": "f99bf4c85845872083bc26d79e7a11fc18e89916671d9943772bde8966752d3d",
+    "size": 1277952,
+    "header_version": 4,
+    "kernel_size": 1263721,
+    "shim_size": 112,
+    "fd_size": 3145728
+  },
+  "reference_ffs_entries": 201,
+  "built_ffs_entries": 118,
+  "reference_pe_count": 141,
+  "built_pe_count": 107,
+  "reference_only_pe_names": [
+    "AcpiPlatform",
+    "AcpiRgrt",
+    "AcpiTableDxe",
+    "AdvancedFileLogger",
+    "BaseCryptoDriverDxeAARCH64",
+    "BootManagerPolicyDxe",
+    "BootMenu",
+    "DfciManager",
+    "DfciMenu",
+    "DisplayEngine",
+    "DriverHealthManagerDxe",
+    "DtPlatformDxe",
+    "EdkShell",
+    "EsrtFmpDxe",
+    "FirmwarePerformanceDxe",
+    "FrontPage",
+    "FvDxe",
+    "FvSimpleFileSystem",
+    "GopOverrideDxe",
+    "HidKeyboardDxe",
+    "HidMouseAbsolutePointerDxe",
+    "HwErrorBert",
+    "HwhMenu",
+    "IdentityAndAuthManagerDxe",
+    "LinuxLoader",
+    "LoadOptionVariablePolicyDxe",
+    "MsEarlyGraphicsDxe",
+    "MsUiThemeProtocol",
+    "MsWheaReportDxe",
+    "MuCryptoDxe",
+    "MuVarPolicyFoundationDxe",
+    "NullMemoryTestDxe",
+    "NvmExpressDxe",
+    "OnScreenKeyboardDxe",
+    "PciBusDxe",
+    "RamPartitionDxe",
+    "RegularExpressionDxe",
+    "RenderingEngineDxe",
+    "ResetRuntimeDxe",
+    "ScsiBus",
+    "ScsiDisk",
+    "SecureBootProvisioningDxe",
+    "SettingsManagerDxe",
+    "SimpleWindowManagerDxe",
+    "TerminalDxe",
+    "UsbKbHidDxe",
+    "UsbMouseHidDxe",
+    "VirtualKeyboardDxe"
+  ],
+  "built_only_pe_names": [
+    "BootManagerMenuApp",
+    "ChargerExDxe",
+    "GlinkDxe",
+    "I2CHapticDxe",
+    "IortDtDxe",
+    "MassStorage",
+    "QcomChargerDxeLA",
+    "QcomWDogDxe",
+    "RamManagerDxe",
+    "ResetSystemRuntimeDxe",
+    "RscDxe",
+    "SSRDxe",
+    "UFPLoader",
+    "UsbKbDxe"
+  ],
+  "reference_vs_tb_stock_text": {
+    "ASN1X509Dxe": {
+      "reference_text_sha256": "aaa9e8763bcd57517486016d17ade2a7302f334e69827a5e8a02ce039682533e",
+      "stock_text_sha256": "aaa9e8763bcd57517486016d17ade2a7302f334e69827a5e8a02ce039682533e",
+      "reference_text_size": 28672,
+      "stock_text_size": 28672,
+      "different_bytes": 0
+    },
+    "ArmCpuDxe": {
+      "reference_text_sha256": "910cf2e259dff0de6562d8dde08479ad5263d45eb581d4ad6aa4011ce50f2f96",
+      "stock_text_sha256": "a47314e1a074f2a3839d58848ae02ace3e66882e745f123909ec3058a7edb61f",
+      "reference_text_size": 18944,
+      "stock_text_size": 40960,
+      "different_bytes": 39483
+    },
+    "ArmGicDxe": {
+      "reference_text_sha256": "e2ad00afbe9cff3af363dd95e83fefdf0b7f3b71f06856603790866d79ff209f",
+      "stock_text_sha256": "2e69f7cb09bd8a75ca2c731eab53987a3c7033e0420ab70d8a85aa437d6b4fdc",
+      "reference_text_size": 7168,
+      "stock_text_size": 24576,
+      "different_bytes": 23957
+    },
+    "ArmTimerDxe": {
+      "reference_text_sha256": "bf7c963848e9154acdf224c91b1cea2e58ed58520bc50c11e3723a8850ab6ffc",
+      "stock_text_sha256": "78a38093800a547bf4a71b345839095cf9717875f62b3574fa35f019a94e6aaf",
+      "reference_text_size": 4608,
+      "stock_text_size": 16384,
+      "different_bytes": 15932
+    },
+    "ButtonsDxe": {
+      "reference_text_sha256": "f369f09d9cd823b9c013154e7a3b6a09da6a66407c7aec91bde80e74c5e8ac4a",
+      "stock_text_sha256": "f369f09d9cd823b9c013154e7a3b6a09da6a66407c7aec91bde80e74c5e8ac4a",
+      "reference_text_size": 28672,
+      "stock_text_size": 28672,
+      "different_bytes": 0
+    },
+    "CPRDxe": {
+      "reference_text_sha256": "9a78454751639ec1a021c36217ff398c393bf435611178faafa453d4252a5212",
+      "stock_text_sha256": "366ed89e51590c6da5ab842d36f0f6914e6f75d6429f21bfefc479bf27a404aa",
+      "reference_text_size": 57344,
+      "stock_text_size": 61440,
+      "different_bytes": 56163
+    },
+    "CapsuleRuntimeDxe": {
+      "reference_text_sha256": "6072efe61bce640244b50d422d8b44b9b084d185a5b56092a8c1fefbc9ee05e0",
+      "stock_text_sha256": "d5d8b55877fbd2389d02684000a988dbee9e7524ed085c0838a889c325006d22",
+      "reference_text_size": 4096,
+      "stock_text_size": 20480,
+      "different_bytes": 20176
+    },
+    "ChipInfo": {
+      "reference_text_sha256": "6613f93b20edca1c9a16cd31471265dc93a5ee62c3d4a13fba807679185efe71",
+      "stock_text_sha256": "878370b4ac6ff78dfe77c58319e2bfa12687f6cd70b7f9c96064fc44cacbdd81",
+      "reference_text_size": 36864,
+      "stock_text_size": 36864,
+      "different_bytes": 13938
+    },
+    "ClockDxe": {
+      "reference_text_sha256": "ab40cbe01b206ba7c6b982748154454c0459bd91aabc8375e60d4cfbfcbccd31",
+      "stock_text_sha256": "38af1a99ca7f736fe04a9b9cc9902d038cc1ea27e9a14abc39ce05dcb1c61489",
+      "reference_text_size": 126976,
+      "stock_text_size": 126976,
+      "different_bytes": 37178
+    },
+    "CmdDbDxe": {
+      "reference_text_sha256": "7407495c8231b61883174850edbd3cee337ff3001c0b24fb09f12d7df2d31615",
+      "stock_text_sha256": "7407495c8231b61883174850edbd3cee337ff3001c0b24fb09f12d7df2d31615",
+      "reference_text_size": 20480,
+      "stock_text_size": 20480,
+      "different_bytes": 0
+    },
+    "ConPlatformDxe": {
+      "reference_text_sha256": "908a3440e23d086801e62d02508c610063b7632ba0d88e7391bb105a85f1749b",
+      "stock_text_sha256": "2d8820cf64a6c61bd4a87a3f9fbed780c29fdcd87de67f36b873f82ab0051e98",
+      "reference_text_size": 9728,
+      "stock_text_size": 24576,
+      "different_bytes": 23758
+    },
+    "ConSplitterDxe": {
+      "reference_text_sha256": "57dba97950acfbd141c87b5b010e3a45bcc20a0facdbc397d7b85362f7bc5805",
+      "stock_text_sha256": "5f63dc6f47afbc2710ce00f01e4e4cf1c3925d5efe97876d337a1d217c01f6d5",
+      "reference_text_size": 19456,
+      "stock_text_size": 40960,
+      "different_bytes": 39520
+    },
+    "DALSys": {
+      "reference_text_sha256": "7a32b50a1cea54a562b9d3d2735387661c322ff8e31c918f77d87b7ae08a6eeb",
+      "stock_text_sha256": "7a32b50a1cea54a562b9d3d2735387661c322ff8e31c918f77d87b7ae08a6eeb",
+      "reference_text_size": 163840,
+      "stock_text_size": 163840,
+      "different_bytes": 0
+    },
+    "DALTLMM": {
+      "reference_text_sha256": "313326f755559694d4340b1ce830400d2fdd75d829ad041ef9be1526dbef6c13",
+      "stock_text_sha256": "1a0dcbd4313c77cd62003fb78c8a5452247a651635c7d33383f7d85013dbc48e",
+      "reference_text_size": 36864,
+      "stock_text_size": 36864,
+      "different_bytes": 94
+    },
+    "DDRInfoDxe": {
+      "reference_text_sha256": "1ebee275ba3e326f18593ade1c3be86579e75622a55aacf693611df9be862cbb",
+      "stock_text_sha256": "336a65e1506fab5684a9ea984082ea00c33655eef18ce2cfc153e48ecd7fd0d6",
+      "reference_text_size": 32768,
+      "stock_text_size": 32768,
+      "different_bytes": 30
+    },
+    "DevicePathDxe": {
+      "reference_text_sha256": "d7ff67d51a475d048846e1642ceb8026dcc77c4e5d7c4275f63c9e8ae7faecf5",
+      "stock_text_sha256": "f2c4a069e08984892f8df900814009ea1dd52b8241f5afd1a6880635ab43146f",
+      "reference_text_size": 31744,
+      "stock_text_size": 61440,
+      "different_bytes": 58830
+    },
+    "DiskIoDxe": {
+      "reference_text_sha256": "17b39cc120d688a80ab2167e362b2c6e2c41834bb9b66cafcb15d652729604c8",
+      "stock_text_sha256": "17b39cc120d688a80ab2167e362b2c6e2c41834bb9b66cafcb15d652729604c8",
+      "reference_text_size": 28672,
+      "stock_text_size": 28672,
+      "different_bytes": 0
+    },
+    "DxeCore": {
+      "reference_text_sha256": "49e2d2f4b9a09817236152c87ec8588697957997f15df5be9a098ebc785b5843",
+      "stock_text_sha256": "877f4b0c5ef0c9092c674098ccee20199724eb5ed73270cd5bbbb07ca962e831",
+      "reference_text_size": 94720,
+      "stock_text_size": 167936,
+      "different_bytes": 161369
+    },
+    "EmbeddedMonotonicCounter": {
+      "reference_text_sha256": "47b97e4ceec128417a316d02c6dbb0af771755fbe2db34a60b54911a8a622fa4",
+      "stock_text_sha256": "47b97e4ceec128417a316d02c6dbb0af771755fbe2db34a60b54911a8a622fa4",
+      "reference_text_size": 20480,
+      "stock_text_size": 20480,
+      "different_bytes": 0
+    },
+    "EnglishDxe": {
+      "reference_text_sha256": "ae60c610e0004b45bf3a00ca7156a2b51879b814b12706800e67444f8979373e",
+      "stock_text_sha256": "c476e6d8ed4dd717ba080d45230d44ade7ef165ce64c0200318aa401d5ea9f10",
+      "reference_text_size": 4096,
+      "stock_text_size": 16384,
+      "different_bytes": 16028
+    },
+    "EnvDxeEnhanced": {
+      "reference_text_sha256": "af9754d460eb0e27f7d7843d58f2e20ee9af8d4817b1484bb0849d6cdd3beab7",
+      "stock_text_sha256": "ad089a1f6cd154345574d96a97f71e0755c3b9ed0a3add983ed4df303f53b29c",
+      "reference_text_size": 57344,
+      "stock_text_size": 57344,
+      "different_bytes": 9729
+    },
+    "Fat": {
+      "reference_text_sha256": "eb2ff3f411a0eb6c5e6f9e9c607edb20d9ee58ce4f80bf2678a8291f96636dba",
+      "stock_text_sha256": "67c4af0e46ad09a6c1a4b77f740a56087b379d8a8f7cae7520e0b559c5f321a9",
+      "reference_text_size": 25600,
+      "stock_text_size": 49152,
+      "different_bytes": 47311
+    },
+    "FeatureEnablerDxe": {
+      "reference_text_sha256": "611e00455748e6ab22999947d5ac7185778688b1447ce23dda54f537deecd84c",
+      "stock_text_sha256": "a8553d8af4503469f838e934f82ed85bd10436583e29d32a8716bf06d780132e",
+      "reference_text_size": 20480,
+      "stock_text_size": 20480,
+      "different_bytes": 4857
+    },
+    "FontDxe": {
+      "reference_text_sha256": "66a7188c95da1fb0b9e728f93910a0c19d0f861ec11e97be04217351115b47c4",
+      "stock_text_sha256": "66a7188c95da1fb0b9e728f93910a0c19d0f861ec11e97be04217351115b47c4",
+      "reference_text_size": 24576,
+      "stock_text_size": 24576,
+      "different_bytes": 0
+    },
+    "FvDxe": {
+      "reference_text_sha256": "059314950162d474699b5dc6c33674ec768e988fdb73c4b70cc6dd6c2ea4b2d1",
+      "stock_text_sha256": "126f63f59d8fd03189f1275a9e64587d64b2c8d019b51bd81300fd77a8e1ebbc",
+      "reference_text_size": 57344,
+      "stock_text_size": 61440,
+      "different_bytes": 53867
+    },
+    "FvSimpleFileSystem": {
+      "reference_text_sha256": "0870aac1a8dd2ac4ee52123c5db58db0ec3f14bc3ed5ed68fa5bc0ecadb6af9f",
+      "stock_text_sha256": "d42118d5184788a89b9fd8f8c5d5cf0e9a6cb893225fccaa9471d85d4d4e0384",
+      "reference_text_size": 13824,
+      "stock_text_size": 32768,
+      "different_bytes": 31703
+    },
+    "GpiDxe": {
+      "reference_text_sha256": "6a0b1004b0382efdd0d8fab9f7a3a0a37ccfdb4b6ff97c4523ece3c6cfde1e1e",
+      "stock_text_sha256": "057f01b98ed997066aae3e2e9069256f3f910b4e5d4165e3d95cff6bbd1a4c74",
+      "reference_text_size": 45056,
+      "stock_text_size": 45056,
+      "different_bytes": 13181
+    },
+    "GraphicsConsoleDxe": {
+      "reference_text_sha256": "e058e06a45a3b55762bbab7dd0b71d12058a20984a4e8d59c696044617d77614",
+      "stock_text_sha256": "09e8a5bd72762683bde16db9b16e7c984386d760a74094ab54d7ca2ed4f59fee",
+      "reference_text_size": 11264,
+      "stock_text_size": 28672,
+      "different_bytes": 27791
+    },
+    "HALIOMMU": {
+      "reference_text_sha256": "59f05e04615cef864d8917f5add53e4b24217048b33d47554cd8185d9487fefd",
+      "stock_text_sha256": "125ff40c8ef6fabf6eb0257eaba5f97154c59b36318af6a16249ffce27f0be59",
+      "reference_text_size": 40960,
+      "stock_text_size": 40960,
+      "different_bytes": 7263
+    },
+    "HSUART": {
+      "reference_text_sha256": "37df5a6d9e76e7cbe504e4d446ce1508b81901f9de22aa3f9dcb65cf0aac4592",
+      "stock_text_sha256": "37df5a6d9e76e7cbe504e4d446ce1508b81901f9de22aa3f9dcb65cf0aac4592",
+      "reference_text_size": 16384,
+      "stock_text_size": 16384,
+      "different_bytes": 0
+    },
+    "HWIODxeDriver": {
+      "reference_text_sha256": "00f370b3381fa4f00e43ed40c663a56be1ff8a78c3ff95b625a95736247c1e4b",
+      "stock_text_sha256": "00f370b3381fa4f00e43ed40c663a56be1ff8a78c3ff95b625a95736247c1e4b",
+      "reference_text_size": 20480,
+      "stock_text_size": 20480,
+      "different_bytes": 0
+    },
+    "HiiDatabase": {
+      "reference_text_sha256": "dc62c376edd891a02e6ad1b610cfaa12600d128f0e04b3df9776f76c79b37220",
+      "stock_text_sha256": "862f3a6770a8e7bd71a6e259fcd01edcabdbfbd3a8281c9eb3d0a0d962303a96",
+      "reference_text_size": 81408,
+      "stock_text_size": 126976,
+      "different_bytes": 121225
+    },
+    "I2C": {
+      "reference_text_sha256": "2de2ba43b9a30d2286f791f1f21f159bb6a54729497921ff25f061c25233b5c8",
+      "stock_text_sha256": "7777aec381a185a7a0e5c5f4cb674bd6b73e0f1c13f6487127f2b308d2814504",
+      "reference_text_size": 32768,
+      "stock_text_size": 32768,
+      "different_bytes": 23107
+    },
+    "ICBDxe": {
+      "reference_text_sha256": "c4a3e73ae9a0206ed061dd57ba491d5b2bbe2018e9db86889d0b6a8f53e0c11a",
+      "stock_text_sha256": "c4a3e73ae9a0206ed061dd57ba491d5b2bbe2018e9db86889d0b6a8f53e0c11a",
+      "reference_text_size": 40960,
+      "stock_text_size": 40960,
+      "different_bytes": 0
+    },
+    "IPCCDxe": {
+      "reference_text_sha256": "ed087b113796777307540df135fc012d471416c90f0f3f6a5cc38c67a73a1a40",
+      "stock_text_sha256": "fcfd2906acfca80001f93f4ae46e8c7be0097adc2389c8b687e348e0ba24f1da",
+      "reference_text_size": 24576,
+      "stock_text_size": 24576,
+      "different_bytes": 16
+    },
+    "LimitsDxe": {
+      "reference_text_sha256": "a00d0241d78eadc732557bd6da65af303de13e0d232ee6e837beaf58f8b4ebbc",
+      "stock_text_sha256": "eefb89b37d1ad808122a615fad2d9f77e821d141870bfa08c2f873c88c560b5d",
+      "reference_text_size": 57344,
+      "stock_text_size": 57344,
+      "different_bytes": 43
+    },
+    "MetronomeDxe": {
+      "reference_text_sha256": "34578636ea24a0829baecab6d2ae03c612d4ef3b77af610c2f684857a7fd9b01",
+      "stock_text_sha256": "53cc4754da37fddfe5039a6095cca5d6084d8ea18b1f35edc29bc0de35f313b7",
+      "reference_text_size": 4096,
+      "stock_text_size": 16384,
+      "different_bytes": 15916
+    },
+    "NpaDxe": {
+      "reference_text_sha256": "7acfb3772e5ee77ad02ee18e2053a3714f42d7d20fe2d55449d7ff70327e9d38",
+      "stock_text_sha256": "7acfb3772e5ee77ad02ee18e2053a3714f42d7d20fe2d55449d7ff70327e9d38",
+      "reference_text_size": 65536,
+      "stock_text_size": 65536,
+      "different_bytes": 0
+    },
+    "PILDxe": {
+      "reference_text_sha256": "b7704d8cf2346477c86ad240d2ef6d05251242b202fcbfa226490f93db990c4c",
+      "stock_text_sha256": "2bfde586c95dd3d89d17e91b2c416b7d4a8312c8ccff8bf836b6d7da4eb6a216",
+      "reference_text_size": 94208,
+      "stock_text_size": 94208,
+      "different_bytes": 64791
+    },
+    "PILProxyDxe": {
+      "reference_text_sha256": "79b3b06b134dd3fc5e71c4322cfc4163b596e10ba396c0a0e503abff8f15fe5e",
+      "stock_text_sha256": "e34181753671d7956d518dc8994ec879ae340de6f29dcb19e7f1d45981e83e38",
+      "reference_text_size": 28672,
+      "stock_text_size": 28672,
+      "different_bytes": 16
+    },
+    "ParserDxe": {
+      "reference_text_sha256": "289c5ac3bd353f05e779e4069d0d31a36d3f424d58066673c1a44c42a54bec59",
+      "stock_text_sha256": "289c5ac3bd353f05e779e4069d0d31a36d3f424d58066673c1a44c42a54bec59",
+      "reference_text_size": 20480,
+      "stock_text_size": 20480,
+      "different_bytes": 0
+    },
+    "PartitionDxe": {
+      "reference_text_sha256": "a3b46f1ab9b3ac31d0146a3671cddf3066d586d5c856f945364b617227958d13",
+      "stock_text_sha256": "a3b46f1ab9b3ac31d0146a3671cddf3066d586d5c856f945364b617227958d13",
+      "reference_text_size": 40960,
+      "stock_text_size": 40960,
+      "different_bytes": 0
+    },
+    "PlatformInfoDxeDriver": {
+      "reference_text_sha256": "8a080d6bcd4ed8ca65d8ce084769b748bd4113fe0a6dcb80f29f9b3e4991df5f",
+      "stock_text_sha256": "8a080d6bcd4ed8ca65d8ce084769b748bd4113fe0a6dcb80f29f9b3e4991df5f",
+      "reference_text_size": 20480,
+      "stock_text_size": 20480,
+      "different_bytes": 0
+    },
+    "PmicDxe": {
+      "reference_text_sha256": "5bce578d7d8f766aa0ecef4ea5d2c58477f9c0d5c05a3764038ef3a4ac745c0d",
+      "stock_text_sha256": "ee2cac1da75f63913309b77ad98de8412e4625a6292258f7d58f244b7c09f49f",
+      "reference_text_size": 180224,
+      "stock_text_size": 184320,
+      "different_bytes": 168440
+    },
+    "PmicGlinkDxe": {
+      "reference_text_sha256": "cc85d4712f19f1c6fb5658bdc9e2033aa39b390470314a79f954deb899965295",
+      "stock_text_sha256": "e824e43ce941df7a41c921315cdbc2acffa8b398562d78ddff7fc6899b2305ee",
+      "reference_text_size": 36864,
+      "stock_text_size": 36864,
+      "different_bytes": 16
+    },
+    "PrintDxe": {
+      "reference_text_sha256": "fd1e80897515e003122bad078959c103757c40323388734ad75acb8463b33b98",
+      "stock_text_sha256": "9ba987654ed7bbaa3deb286fdf7efd0cd7aab747f4f2c28f2e271d5ab4cd3f24",
+      "reference_text_size": 8192,
+      "stock_text_size": 20480,
+      "different_bytes": 19909
+    },
+    "PsStateDxe": {
+      "reference_text_sha256": "711dd5988e931f8a9ad844e11b79aebf18848309ba5e51060ea39ac8b801518d",
+      "stock_text_sha256": "711dd5988e931f8a9ad844e11b79aebf18848309ba5e51060ea39ac8b801518d",
+      "reference_text_size": 16384,
+      "stock_text_size": 16384,
+      "different_bytes": 0
+    },
+    "PwrUtilsDxe": {
+      "reference_text_sha256": "e20ab50c1eb5590d94d85b476f3627c28c4cd83e77298db99308043a4bf89c44",
+      "stock_text_sha256": "e20ab50c1eb5590d94d85b476f3627c28c4cd83e77298db99308043a4bf89c44",
+      "reference_text_size": 20480,
+      "stock_text_size": 20480,
+      "different_bytes": 0
+    },
+    "QRKSDxe": {
+      "reference_text_sha256": "eab255ea0dbf98dcfd4cd0b12a1f3004d489b07349eaa9f0f933abd80da101d3",
+      "stock_text_sha256": "eab255ea0dbf98dcfd4cd0b12a1f3004d489b07349eaa9f0f933abd80da101d3",
+      "reference_text_size": 20480,
+      "stock_text_size": 20480,
+      "different_bytes": 0
+    },
+    "RealTimeClock": {
+      "reference_text_sha256": "56192ca3f859994024026e5282547d93e87a78a4bf28c88990684906729cdfa2",
+      "stock_text_sha256": "6e4bcef17ddf4546bd2ed2d5a514cb12e5f932b5459eee276331051c8f9aeb26",
+      "reference_text_size": 5120,
+      "stock_text_size": 20480,
+      "different_bytes": 20000
+    },
+    "ResetRuntimeDxe": {
+      "reference_text_sha256": "f23f5daf84a5145972dff93ba3bfe0f3e973b3756f5312756a8919c38b821677",
+      "stock_text_sha256": "f23f5daf84a5145972dff93ba3bfe0f3e973b3756f5312756a8919c38b821677",
+      "reference_text_size": 24576,
+      "stock_text_size": 24576,
+      "different_bytes": 0
+    },
+    "RmVmDxe": {
+      "reference_text_sha256": "acce71b230ac158f447933d0a83ef6f55534821a4b69cc1d02755ecccb588380",
+      "stock_text_sha256": "acce71b230ac158f447933d0a83ef6f55534821a4b69cc1d02755ecccb588380",
+      "reference_text_size": 45056,
+      "stock_text_size": 45056,
+      "different_bytes": 0
+    },
+    "RngDxe": {
+      "reference_text_sha256": "45329db170a3b1774a9cb5d46070f307cb0213d4d77b4139d20e2f66dd855245",
+      "stock_text_sha256": "45329db170a3b1774a9cb5d46070f307cb0213d4d77b4139d20e2f66dd855245",
+      "reference_text_size": 28672,
+      "stock_text_size": 28672,
+      "different_bytes": 0
+    },
+    "RpmhDxe": {
+      "reference_text_sha256": "f92b55608ab7fe756bd28a27b74f338b4108c2b53c9ff254bf073b7dc330d573",
+      "stock_text_sha256": "f92b55608ab7fe756bd28a27b74f338b4108c2b53c9ff254bf073b7dc330d573",
+      "reference_text_size": 53248,
+      "stock_text_size": 53248,
+      "different_bytes": 0
+    },
+    "RuntimeDxe": {
+      "reference_text_sha256": "4de8086d479d23bbf4c4c8d3d24ffefcd46f33ff18e4e4cb7399b7b0b77321a1",
+      "stock_text_sha256": "b5283c151e01d1132af4ee2b7e36dff0081f6b3a6d227f53dc988f43a4395bad",
+      "reference_text_size": 5120,
+      "stock_text_size": 20480,
+      "different_bytes": 20050
+    },
+    "SPI": {
+      "reference_text_sha256": "8aa29e3c97c638ce0f05b8d54ae0013da7458108f52ce5e84844b2717d9bbb5f",
+      "stock_text_sha256": "8aa29e3c97c638ce0f05b8d54ae0013da7458108f52ce5e84844b2717d9bbb5f",
+      "reference_text_size": 16384,
+      "stock_text_size": 16384,
+      "different_bytes": 0
+    },
+    "SPMI": {
+      "reference_text_sha256": "5aff3030cd472b7abb70ead9795919a5bdfbc10c06b6ac23e34ed200f2e1aa34",
+      "stock_text_sha256": "5aff3030cd472b7abb70ead9795919a5bdfbc10c06b6ac23e34ed200f2e1aa34",
+      "reference_text_size": 24576,
+      "stock_text_size": 24576,
+      "different_bytes": 0
+    },
+    "SPSSDxe": {
+      "reference_text_sha256": "e4823f613d6d0da2d9de8807c1af0adc40df2e9ac4f82a4cacc82957e6a370a3",
+      "stock_text_sha256": "f88cc0d80272f1affcef696de5192532193837ebfc6b313dcc11c700b5a29f52",
+      "reference_text_size": 32768,
+      "stock_text_size": 32768,
+      "different_bytes": 398
+    },
+    "ScmDxeCompat": {
+      "reference_text_sha256": "527f1ac6554cd5728c385f30f49430fffb445ce4959350cbebc0d48470768020",
+      "stock_text_sha256": "527f1ac6554cd5728c385f30f49430fffb445ce4959350cbebc0d48470768020",
+      "reference_text_size": 40960,
+      "stock_text_size": 40960,
+      "different_bytes": 0
+    },
+    "SdccDxe": {
+      "reference_text_sha256": "864208c330d77eb1201a0a9719a19203fe51e2ff7ef5caada8f625119597cfe2",
+      "stock_text_sha256": "26b2e020b01506d416631a3e7d2ab50342f6020c0056f5bd12f298acc4ce1778",
+      "reference_text_size": 98304,
+      "stock_text_size": 98304,
+      "different_bytes": 1686
+    },
+    "SecRSADxe": {
+      "reference_text_sha256": "c60098cf96de060bd25ece1851f2b430b1378f7c6a598207cc5853cb226e19dc",
+      "stock_text_sha256": "c60098cf96de060bd25ece1851f2b430b1378f7c6a598207cc5853cb226e19dc",
+      "reference_text_size": 28672,
+      "stock_text_size": 28672,
+      "different_bytes": 0
+    },
+    "SecurityStubDxe": {
+      "reference_text_sha256": "6fbf6d6608ff58aee2f192e3b71d5b946806f19c87fc4df59097ccb3351d0fd6",
+      "stock_text_sha256": "59c1e6a050e131b3c9242c06679572739644af879e039abc9a388b83aafe8395",
+      "reference_text_size": 26112,
+      "stock_text_size": 40960,
+      "different_bytes": 39192
+    },
+    "SerialPortDxe": {
+      "reference_text_sha256": "fce34e19d76c4a82c4537a23c59cbaf2d0976854ed120b3b8a3d947c5e4491b5",
+      "stock_text_sha256": "fce34e19d76c4a82c4537a23c59cbaf2d0976854ed120b3b8a3d947c5e4491b5",
+      "reference_text_size": 16384,
+      "stock_text_size": 16384,
+      "different_bytes": 0
+    },
+    "ShmBridgeDxeLA": {
+      "reference_text_sha256": "2da4aaaed5e9763bae77e4c991fbcafea31ce4574ae317a078f86ed2b1197b31",
+      "stock_text_sha256": "2da4aaaed5e9763bae77e4c991fbcafea31ce4574ae317a078f86ed2b1197b31",
+      "reference_text_size": 24576,
+      "stock_text_size": 24576,
+      "different_bytes": 0
+    },
+    "SimpleTextInOutSerial": {
+      "reference_text_sha256": "ce4ba99bacd9c75ac4b156e285e02f4e4496e27e2f3ac98bed25055ea3ef3aca",
+      "stock_text_sha256": "ce4ba99bacd9c75ac4b156e285e02f4e4496e27e2f3ac98bed25055ea3ef3aca",
+      "reference_text_size": 20480,
+      "stock_text_size": 20480,
+      "different_bytes": 0
+    },
+    "SmemDxe": {
+      "reference_text_sha256": "b04259e28fdd7774e006371f09553909580a5e79731288dbbf2dd21c6f74bc45",
+      "stock_text_sha256": "87717d8a5ee036440d616aea4dbf6825d9c687fe4585fd30abe5b94206ab747b",
+      "reference_text_size": 28672,
+      "stock_text_size": 28672,
+      "different_bytes": 48
+    },
+    "Smp2pDxe": {
+      "reference_text_sha256": "55d1855bfe58765bf65fa254b70d6ac6471b6c1630dbb9c7fc7e10498b07fa38",
+      "stock_text_sha256": "739d3c44e1aed3bed5d7b8ea977f7f4e19322b57ee93a8d8f484cd2f99ca7730",
+      "reference_text_size": 28672,
+      "stock_text_size": 28672,
+      "different_bytes": 173
+    },
+    "TsensDxe": {
+      "reference_text_sha256": "e7b20594249248222265e53a1067e5cecf3d9c9c24a9289a0a736508f9908f27",
+      "stock_text_sha256": "e7b20594249248222265e53a1067e5cecf3d9c9c24a9289a0a736508f9908f27",
+      "reference_text_size": 28672,
+      "stock_text_size": 28672,
+      "different_bytes": 0
+    },
+    "TzDxeLA": {
+      "reference_text_sha256": "741dc55dfa7b1d420395feabfd27a587a31886defa02609ac4f25d0dc1bdb624",
+      "stock_text_sha256": "a559f39f2cc275ddeddad9a5929a8fbca954c40e89e2f43a6b9337d62e9ff720",
+      "reference_text_size": 53248,
+      "stock_text_size": 53248,
+      "different_bytes": 38140
+    },
+    "UCDxe": {
+      "reference_text_sha256": "cc767d52db3b045c988c646f330a1ca5685808415d8758d266b7eb70fbcbda48",
+      "stock_text_sha256": "fde733578f7bc018c0fe68a1b97948f6932e10211a0863635f3950ddc59d9596",
+      "reference_text_size": 180224,
+      "stock_text_size": 180224,
+      "different_bytes": 18943
+    },
+    "UFSDxe": {
+      "reference_text_sha256": "bdb55da22eb6abb3571a9fb5b58a4f2e1ce78ffa41bf4d37f324608f3364f5b9",
+      "stock_text_sha256": "d1fcb0e9e0c90ebd049f12a0eaa69df2775e5759ccb355690aed1418e8d6cd43",
+      "reference_text_size": 118784,
+      "stock_text_size": 118784,
+      "different_bytes": 100037
+    },
+    "ULogDxe": {
+      "reference_text_sha256": "bf8a301e81c44473d1591432409044e9c5e2a01af9d3d8654ab590ae80f7d5d3",
+      "stock_text_sha256": "7c02523d5908a1684b9eee748a6e275c66911904b0c6ce7f2184db2627f546e6",
+      "reference_text_size": 65536,
+      "stock_text_size": 65536,
+      "different_bytes": 15
+    },
+    "UsbBusDxe": {
+      "reference_text_sha256": "cc2da507dd49c39014623ef697bba0a6d2ae01b461111addf565e515c094fd40",
+      "stock_text_sha256": "0c1825725a02b7189c83e48ad01f6d76b6a0fb1d6e709dbd287f1147f52a4c2b",
+      "reference_text_size": 69632,
+      "stock_text_size": 69632,
+      "different_bytes": 16156
+    },
+    "UsbConfigDxe": {
+      "reference_text_sha256": "1e518c78ddb096b444f6e2727a938008dda5e05d38663a7d1454c7de2028707d",
+      "stock_text_sha256": "804baac6f114e12595b5a5a034314ab691d973d26c992e5a24a5c2b1a96d93d0",
+      "reference_text_size": 77824,
+      "stock_text_size": 77824,
+      "different_bytes": 14244
+    },
+    "UsbDeviceDxe": {
+      "reference_text_sha256": "3e4036dc2dfd0a4f55e23153578939c53314f935e7619ef3c8c40f531c87bebb",
+      "stock_text_sha256": "0468d6a15e3746a74a753bb9cf350c758e8564517598aed4068c56bd96c7ef82",
+      "reference_text_size": 40960,
+      "stock_text_size": 40960,
+      "different_bytes": 28074
+    },
+    "UsbInitDxe": {
+      "reference_text_sha256": "640acbae51cda1397d67952dd981b1e205575c8619f6e42caab0dabf4d92456f",
+      "stock_text_sha256": "640acbae51cda1397d67952dd981b1e205575c8619f6e42caab0dabf4d92456f",
+      "reference_text_size": 20480,
+      "stock_text_size": 20480,
+      "different_bytes": 0
+    },
+    "UsbMassStorageDxe": {
+      "reference_text_sha256": "9c26bc746a2560595b971746fffc611a67cd76aeeb319a661ef36ba9caf80a5a",
+      "stock_text_sha256": "7a86f86a0892f14ec051189c259ea67a059cefc41c860af3b5d8d2a1d268bd10",
+      "reference_text_size": 36864,
+      "stock_text_size": 36864,
+      "different_bytes": 6933
+    },
+    "UsbMsdDxe": {
+      "reference_text_sha256": "6db7e1702aed3df31fdff768df18bc5f126ea17014c2d74959ee5df96cfa02f8",
+      "stock_text_sha256": "4b61137e340a4889bda337538ddd2ad98dddebfb7a9d7f4e453378d4525f06de",
+      "reference_text_size": 45056,
+      "stock_text_size": 45056,
+      "different_bytes": 8082
+    },
+    "UsbPwrCtrlDxe": {
+      "reference_text_sha256": "5611b74ca868f863df3663ed0924724d4ab4e573360399175bb285fa7d5bef92",
+      "stock_text_sha256": "9eb040feb2498ef690fea23fbceeaaaaf9c65c74f0d457d59a3b71128621ba25",
+      "reference_text_size": 28672,
+      "stock_text_size": 28672,
+      "different_bytes": 15
+    },
+    "UsbfnDwc3Dxe": {
+      "reference_text_sha256": "a173f297711e51e089375300a5843362f355e23f64a941b16149647cc61f51f0",
+      "stock_text_sha256": "31537298484e3adaf49807290e66b07bbe8f89e537dd23d6e0dbec6180e67470",
+      "reference_text_size": 86016,
+      "stock_text_size": 86016,
+      "different_bytes": 19134
+    },
+    "VcsDxe": {
+      "reference_text_sha256": "0001e6e9244ee0df9971bdfc8f1f1801ff55faaa542ff6f777515a8afc776bb5",
+      "stock_text_sha256": "becac3525138c0465340b8f9e8235e4d8ac5fd17b5471cbc982e94de15a3f018",
+      "reference_text_size": 32768,
+      "stock_text_size": 32768,
+      "different_bytes": 19
+    },
+    "WatchdogTimer": {
+      "reference_text_sha256": "5c23f29edb8c06df706eeae2303fd15ddac5957dde0035b85f15497449a7bd5f",
+      "stock_text_sha256": "875c4d656e2599a5cf65d7a4daff2f54ee47014b23f9986cc9a722e078cb9ecd",
+      "reference_text_size": 3584,
+      "stock_text_size": 16384,
+      "different_bytes": 16034
+    },
+    "XhciDxe": {
+      "reference_text_sha256": "963450ce1bd6127eaafe50f97572d00dcc1acdb7f63a20383fa8b0a8b557acab",
+      "stock_text_sha256": "f457a5407f573987b5e656b1f2648be3ee37c0759801358d2f8eca2ae6884587",
+      "reference_text_size": 77824,
+      "stock_text_size": 77824,
+      "different_bytes": 15141
+    },
+    "XhciPciEmulation": {
+      "reference_text_sha256": "d02a81166d7f2dbd45d2d122fa336576082a6ae76318c9d29f91cf0ffda6c90c",
+      "stock_text_sha256": "8ca9d79e25453fe54ef7b24fcb2935ea750eca3f74cc1ab3d02026383b845363",
+      "reference_text_size": 28672,
+      "stock_text_size": 28672,
+      "different_bytes": 6445
+    }
+  },
+  "verified_built_stock_entries": 71,
+  "hardware_boot_tested": false
+}

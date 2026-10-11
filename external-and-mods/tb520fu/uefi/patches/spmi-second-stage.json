@@ -1,31 +1,32 @@
 {
   "module": "SPMI",
   "input_sha256": "fd6b11d13950ff62a45bb23fc8120c95115611d8460956902f6308c0cb77e65f",
-  "output_sha256": "c5335e57e404a918c4e339575633dc6d1e6a89caaaa40af71d383e55629dd944",
   "sites": [
-    {
-      "rva": "0x154c",
-      "before": "400500b4fd7bbaa9",
-      "after": "e0031f2ac0035fd6",
-      "meaning": "Return EFI_SUCCESS from the SPMI transaction wrapper at RVA 0x154C without executing the protected transaction. This is the eight-byte edit Project-Silicium publishes for giulia (SM8650): stock `cbz x0,0x15f4 ; stp x29,x30,[sp,#-96]!` becomes `mov w0,wzr ; ret`. It keeps the SPMI protocols installed, so PmicDxe's LocateProtocol succeeds and the pm_comm_spmi_lite assert seen with the whole entry point stubbed cannot fire.",
-      "evidence": "giulia SPMIDxe.patched.efi differs from its stock in exactly these eight bytes at file offset 0x154c, and our SPMI.efi .text is byte-identical to giulia's stock there (file offset == RVA across .text).",
-      "reference": "https://github.com/Project-Silicium/Device-Binaries/blob/main/giulia/QcomPkg/Drivers/SPMIDxe/SPMIDxe.patched.efi"
-    },
     {
       "rva": "0x3668",
       "before": "ff8303d1fd7b08a9",
-      "after": "e0031f2ac0035fd6",
-      "meaning": "Return EFI_SUCCESS from the arbiter access routine that faults, without touching the arbiter at all.",
-      "evidence": "The v16 and v19 crash lines (ELR SPMI.efi+0x37F0) are inside the routine that starts at RVA 0x3668 (`sub sp,sp,#0xa0`), whose only caller is the `bl 0x3668` inside the raw transfer implementation at RVA 0x27e0. Stubbing that entry removed the exception (v18 reached BDS with no fault line), while v19 proved channel-number filtering cannot: the same instruction faulted again at FAR 0x0C54C008, channel 0x4c.",
-      "reference": "docs/tb520fu-uefi-debug.md"
+      "after": "260e00141f2003d5",
+      "meaning": "Branch to an ownership guard; retain the original transfer implementation and all read/RMW wrappers."
+    },
+    {
+      "rva": "0x6f00",
+      "before": "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+      "after": "600300b4091840f9290300b42a0140799f000a6bc20200543f040071a0010054610000343f440071e1010054091040f9e90100b4ca0080d289240a9b29054039291100126a1c00123f010a6b81000054ff8303d1fd7b08a9c6f1ff1780038052040000146000805202000014e0018052e90340f9490000b43f0100b9c0035fd6",
+      "meaning": "Executable padding holds spmi-owner-guard.S. Bound the relative APID, permit observer reads, reject writes when the cached node owner differs from the caller EE, then execute the original prologue. Errors report zero transferred bytes."
+    },
+    {
+      "rva": "0x37f0",
+      "before": "696864b8",
+      "after": "29008052",
+      "meaning": "Start the transaction without a pre-command STATUS read, following Linux ordering. Original WDATA/CMD writes and bounded post-command STATUS polling remain intact."
     }
   ],
-  "limitations": "Every SPMI transfer is reported as a successful no-op: the protocol is installed and PmicDxe runs, but no PMIC register is really read or written, so the power button (PMIC PON) and USB VBUS control stay inert. The vendor module is NOT a legacy (v2) layout driver - its instruction stream reproduces the SM8650 version 7 arbiter map exactly: the RW channel STATUS read that faults is CHNLS(0x0C500000) + 0x1000*apid + 0x08 (RVA 0x37F0, `ldr w9,[x3,x4]`), the observer accesses are base + 0x40000 + 0x8000*ee + 0x20*apid + {0x8,0x18,0x1c}, the PPID-to-APID map is read at CORE(0x0C400000) + 0x2000 + 4*apid, the owner table at CNFG(0x0C42D000) + 0x2D000 + 0x5000*EE + 4*idx, and the command word is the v7 form (opc<<27)|((addr&0xff)<<4)|(bc&7). Both faulting access numbers, 0x277 (631) and 0x4c (76), are inside the 4 MB chnls window 0x0C500000..0x0C900000, so the external abort means the chnls window rejects application-processor accesses (XPU/firewall policy, clock or power state) while core, cnfg and obsrvr still respond - the register algebra is not the problem and a UEFI-side rewrite cannot repair it. This is also why v19's channel filter had to fail: a low APID faults exactly like a high one. The patch follows the same-SoC Project-Silicium recipe for giulia, whose published rationale is \"To make UEFI not Crash during UEFI Boot\", combined with a PmicDxe patch that makes failing SPMI calls return EFI_SUCCESS.",
+  "evidence": {
+    "reference": "Working supplied Y703 image has all 24576 SPMI .text bytes identical to TB520FU stock; it does not stub transfer functions.",
+    "live_TWRP": "Arbiter version 0x70010000, features0 0x80060380, features1 0x80; bus0=896, bus1=128. APID 0x4c PPID 0x183 owner=4, APID 0x277 PPID 0x021 owner=0, AP EE=0.",
+    "fault": "Earlier fault at SPMI+0x37f0 on write STATUS 0x0c54c008 matches the unowned 0x4c channel. The earlier 0x277 fault was on an owned channel; command-first ordering is a hypothesis requiring a tablet boot test, not a proven firewall fix."
+  },
+  "limitations": "Hardware untested. Ownership is necessary but may not be sufficient for MMIO access after ABL. An owned-channel fault can still occur. Reads, writes, data buffers and failure status now remain real; no successful no-op transfers. PMIC cold-init remains deferred.",
   "boot_tested": false,
-  "diagnostic_next_step": "Settle layout versus access policy with three register reads from an early DXE driver: readl(0x0C400000 + 0x0) = PMIC_ARB_VERSION (expect 0x70000000..0x7FFFFFFF for v7), readl(0x0C400000 + 0x4) & 0x7FF = APID count on bus 0, and readl(0x0C500000 + 0x8) = APID 0 STATUS. If the first two answer and the third faults, the chnls window itself is inaccessible from the AP and the shared-XPU/ownership or power configuration must be found in the tablet's XBL/ACPI path.",
-  "arbiter_reference": {
-    "dts": "arch/arm64/boot/dts/qcom/sm8650.dtsi spmi@c400000: reg core 0x0C400000+0x3000, chnls 0x0C500000+0x400000, obsrvr 0x0C440000+0x80000, intr 0x0C4C0000+0x20000, cnfg 0x0C42D000+0x4000, qcom,ee=0, qcom,channel=0",
-    "version_ops": "drivers/spmi/spmi-pmic-arb.c reads PMIC_ARB_VERSION at core+0x0 and selects pmic_arb_v7_ops for 0x70000000 <= hw_ver < 0x80000000; the X1E80100 binding is explicitly labeled arbiter v7 and shares the SM8650 region shape",
-    "v7_formulas": "apid_map = core+0x2000+4*n; owner = cnfg+4*(n-base_apid); rw = wr_base+0x1000*apid; observer = rd_base+0x8000*ee+0x20*apid; acc_enable/irq_status/irq_clear = wr_base+0x100/0x104/0x108+0x1000*apid; PIC owner_acc_status = intr+0x1000*ee+4*group"
-  }
+  "output_sha256": "b6e4b9a1453ded65b2e14cb9c81f62aac8be116a10d851ac6c267a22183d93c7"
 }

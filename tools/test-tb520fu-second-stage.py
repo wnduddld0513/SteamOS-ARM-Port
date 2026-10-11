@@ -15,6 +15,7 @@ from unicorn import Uc, UC_ARCH_ARM64, UC_MODE_ARM
 from unicorn.arm64_const import (
     UC_ARM64_REG_PC, UC_ARM64_REG_SP, UC_ARM64_REG_LR,
     UC_ARM64_REG_X0, UC_ARM64_REG_X22, UC_ARM64_REG_X29,
+    UC_ARM64_REG_X1,
 )
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -53,7 +54,7 @@ def machine(pe):
 
 patched = {}
 for name, expected_rva, expected_size in (
-    ("SPMI", 0x154C, 8), ("TzDxeLA", 0xE5A8, 1),
+    ("TzDxeLA", 0xE5A8, 1),
     ("FeatureEnablerDxe", 0x2370, 8),
     ("RscDxe", 0x14E4, 8),
 ):
@@ -86,16 +87,7 @@ for name, pe in modules.items():
     if name not in prepare.SKIP and name not in prepare.REPLACE and name != "RscDxe":
         assert rsc_protocol not in pe, "review RSC dependency: " + name
 
-# Execute the real wrapper: it must return without touching unconfigured MMIO
-# or changing caller buffers. This proves containment, not functional PMIC I/O.
-uc = machine(patched["SPMI"])
-uc.reg_write(UC_ARM64_REG_X0, 1)
-canary = b"caller data stays unchanged"
-uc.mem_write(0x100100, canary)
-uc.emu_start(0x154C, 0x18000, count=10)
-assert uc.reg_read(UC_ARM64_REG_PC) == 0x18000
-assert uc.reg_read(UC_ARM64_REG_X0) == 0
-assert bytes(uc.mem_read(0x100100, len(canary))) == canary
+# Functional SPMI transfer/ownership tests live in test-tb520fu-spmi.py.
 
 # Run both the helper and its original caller's error path: unavailable secure
 # features must be marked unavailable and never invoke gated feature callbacks.
@@ -123,6 +115,27 @@ for guid in ("fe2555be-d716-4686-b9d0-79db5921b70d", "6848de61-eb61-4def-9a8e-38
 for name in ("DiskIoDxe", "PartitionDxe"):
     assert name not in prepare.REPLACE
     assert modules[name] == (args.uefi_prepared / "Binaries/tb520fu" / name / (name + ".efi")).read_bytes()
-print("Second-stage checks passed: ARM64 SPMI containment, feature error path,")
+
+# Stock ButtonsDxe already publishes the exact vendor path the source BDS
+# expects. Missing STI is not proof that another device's keypad is required.
+buttons, _ = prepare.patch_stock_pe("ButtonsDxe", modules["ButtonsDxe"])
+assert uuid.UUID("d7f58a0e-bed2-4b5a-bb43-8ab23dd0e2b0").bytes_le in buttons
+uc = machine(buttons)
+uc.mem_write(0x108080 + 24, b"\0" * 4)
+uc.emu_start(0x3cc0, 0x3c90, count=8)
+assert bytes(uc.mem_read(0x108080 + 24, 4)) == b"\0\0\r\0"
+
+# Exercise the vendor mode switch and the actual StartController argument.
+usb, _ = prepare.patch_stock_pe("UsbConfigDxe", modules["UsbConfigDxe"])
+assert usb[0x143f4:0x143f8] == b"\x01\0\0\0"  # no fictitious second host
+uc = machine(usb)
+uc.mem_write(0x108080 - 32, struct.pack("<Q", 0))
+uc.mem_write(0x143f8 + 24, struct.pack("<Q", 0x100200))
+uc.emu_start(0x44b4, 0x466c, count=64)
+assert struct.unpack("<I", uc.mem_read(0x100200, 4))[0] == 8
+uc.emu_start(0x47a8, 0x47ac, count=1)
+assert uc.reg_read(UC_ARM64_REG_X1) == 1
+print("Second-stage checks passed: ARM64 feature error path,")
 print("TZ loader guard, RSC deferral, exact patch scope/input rejection, stock partition protocols.")
+print("Power-to-Enter, stock keypad path, USB core-0 host switch and start argument passed.")
 print("Hardware PMIC, secure-world and filesystem operation remain unverified.")

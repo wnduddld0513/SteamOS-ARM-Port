@@ -1,13 +1,13 @@
 {
   "module": "UsbConfigDxe",
   "input_sha256": "c56a7783d544d0b1446c5add31c94dd8d8baa9db75b8201b57fb45dc04a3c253",
-  "output_sha256": "42e94fcb5ee6f6f3361bb9898535558ca89d6f61c73735e89722763a59ffc991",
+  "output_sha256": "4d1672431e7f7e0a74670008ba31809fa3364667754470589e29dcfba66a1675",
   "sites": [
     {
       "rva": "0x143f0",
       "before": "0000000003000000",
-      "after": "0000000001010000",
-      "meaning": "Set the per-core USB mode byte to host mode (1). Stock is 3 (device). The driver loads it at RVA 0x44C0 (`adrp x8,0x14000 ; add x8,x8,#0x3f4 ; ldrb w8,[x8,x9]`) and dispatches through the jump table at RVA 0x10360: mode 1 lands at 0x4500 and stores 8 into *(void**)(usbc+0x18); the guard at 0x477C (`subs w8,w8,#0x8 ; b.ne`) only falls through to the host start path - UsbCoreIfc->StartController at 0x47AC, or the local UsbStartController at 0x4A70 - when that value is 8, while stock mode 3 stores 0x20 and never takes it.",
+      "after": "0000000001000000",
+      "meaning": "Select host mode (1) only for physical USB core 0. Leave the absent second core disabled (0), as in TB520FU stock; the live DT has one DWC3 controller at 0x0a600000.",
       "evidence": "Our mode array is `03 00 00 00` immediately before the ASCII \"usbc\" struct base at 0x143F8 (stride 0x130), the same placement as bitra/9707f (`03 03` before \"usbc\" at 0x15360). bitra UsbConfigDxe.hostmode.efi and 9707f UsbConfigDxe.patched.efi change exactly those bytes 03 -> 01, and our whole mode-switch block 0x4480-0x4680 is byte-identical to giulia's stock build.",
       "reference": "https://github.com/Project-Silicium/Device-Binaries/blob/main/bitra/QcomPkg/Drivers/UsbConfigDxe/UsbConfigDxe.hostmode.efi"
     },
@@ -20,6 +20,6 @@
       "reference": "https://github.com/Project-Silicium/Device-Binaries/blob/main/bitra/QcomPkg/Drivers/UsbConfigDxe/UsbConfigDxe.hostmode.efi"
     }
   ],
-  "limitations": "Mode 1 provably selects the in-driver host start path; it does not by itself prove that the SM8650 DWC3 controller enumerates as a host. The driver still decides the role at runtime from the UsbCoreIfc protocol state, and VBUS control goes through the PMIC, which this build leaves inert, so a bus-powered device may still not appear. The IOMMU attach gate at RVA 0x561C is deliberately left stock: in our build the flag byte 0x148B9 is zero in the file, so that branch is already taken and the giulia edit would only skip a failure log.",
+  "limitations": "Host selection alone does not establish USB enumeration or VBUS. PMIC transfers have been restored with ownership checks, but need tablet verification. No Y703 or bitra GPIO/power data is imported.",
   "boot_tested": false
 }

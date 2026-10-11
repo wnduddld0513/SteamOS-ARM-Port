@@ -6,10 +6,11 @@ Preparation and source patches apply only to this device's private build
 checkout. Existing device builders are unchanged.
 
 The tablet has reached the UEFI boot manager. USB enumeration, button operation
-and Linux entry remain unverified. v21 replaces successful no-op SPMI transfers
-with real transfers and an ownership guard, and selects USB host mode only for
-the tablet's single controller. It was compiled from a new Build directory and
-passed host checks; it has not been booted on the tablet.
+and Linux entry remain unverified. v21 failed with an external abort in a real
+SPMI write. v22 retains real transfers and the ownership guard, restores stock
+transaction ordering, and returns a denied result for narrowly identified
+channel-access aborts. It passed a fresh DEBUG build and host checks; its tablet
+boot remains untested. This contains the abort, without repairing access policy.
 
 See the [Y703 comparison](../../../docs/tb520fu-y703-baseline.md),
 [machine-readable comparison](../../../docs/tb520fu-y703-comparison.json) and
@@ -48,11 +49,14 @@ per-driver delay. Forced power-off can lose these logs.
 - GICv3 masks and EOIs an unowned interrupt before logging, retaining registered
   handlers and preventing recursive IRQ 0x105 handling from exhausting the stack.
 - PmicDxe's cold initialization remains deferred; other code and protocols remain.
-- SPMI uses real observer reads and ownership-checked writes. The transfer wrapper
-  and data tables remain stock. The pre-command STATUS read is omitted, matching
-  Linux transaction ordering; command completion/error polling remains. This is
-  a hardware hypothesis, not proof that an owned channel cannot fault after ABL.
-  Unowned writes return a vendor error and zero bytes.
+- SPMI uses real observer reads and ownership-checked writes. The transfer wrapper,
+  data tables and STATUS/CMD ordering remain stock. A private exception fixup
+  accepts only synchronous external aborts at six reviewed write-channel MMIO
+  instructions in the pinned SPMI image, with matching operands and stack frame.
+  It runs the stock epilogue with denied result 7 and zero transferred bytes.
+  The affected channel's writes are then blocked for this boot; observer reads
+  and other channels remain functional. Unrelated exceptions remain fatal.
+  This does not establish usable PMIC control, buttons or USB VBUS.
 - ButtonsDxe maps power to Unicode Enter. Its keypad device path already matches
   the source boot manager. Actual PMIC PON reads need a tablet test.
 - UsbConfigDxe selects host mode for core 0 and leaves absent core 1 disabled.
@@ -87,6 +91,8 @@ python3 tools/test-tb520fu-gic-handler.py --uefi-prepared /path/to/prepared/mu
 # Requires Unicorn 2.1.4; the SPMI test also needs AArch64 GNU binutils.
 python3 tools/test-tb520fu-second-stage.py --stock /path/to/stock/image --uefi-prepared /path/to/prepared/mu
 python3 tools/test-tb520fu-spmi.py --stock /path/to/stock/image --uefi-prepared /path/to/prepared/mu
+# Compiles the actual exception recovery C against positive/negative contexts.
+python3 tools/test-tb520fu-spmi-recovery.py --uefi-prepared /path/to/prepared/mu
 python3 tools/compare-tb520fu-uefi.py --reference /path/to/y703/boot.img --stock /path/to/stock/image --built /path/to/Mu-tb520fu.img --uefi-prepared /path/to/prepared/mu --output comparison.json
 ```
 

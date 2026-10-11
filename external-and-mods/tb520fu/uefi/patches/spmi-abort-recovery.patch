@@ -1,0 +1,22 @@
+--- a/Mu_Basecore/UefiCpuPkg/Library/CpuExceptionHandlerLib/AArch64/CpuExceptionHandlerLib.c
++++ b/Mu_Basecore/UefiCpuPkg/Library/CpuExceptionHandlerLib/AArch64/CpuExceptionHandlerLib.c
+@@ -251,6 +251,8 @@
+   @param[in]      ExceptionType  AArch64 exception type or interrupt vector number.
+   @param[in,out]  SystemContext  Saved CPU context at the time of the exception.
+ **/
++#include "Tb520fuSpmiRecovery.h"
++
+ VOID
+ EFIAPI
+ CommonCExceptionHandler (
+@@ -258,6 +260,10 @@
+   IN OUT EFI_SYSTEM_CONTEXT  SystemContext
+   )
+ {
++  if (Tb520fuRecoverSpmiAbort (ExceptionType, SystemContext)) {
++    return;
++  }
++
+   if ((UINTN)ExceptionType <= mMaxExceptionNumber) {
+     if (mExceptionHandlers[ExceptionType] != NULL) {
+       mExceptionHandlers[ExceptionType](ExceptionType, SystemContext);

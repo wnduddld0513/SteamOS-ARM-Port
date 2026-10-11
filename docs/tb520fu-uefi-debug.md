@@ -2,7 +2,7 @@
 
 This is a chronological investigation log. Current findings and corrections to
 the v19/v20 SPMI and keypad explanations are in the
-[v21 Y703 comparison](tb520fu-y703-baseline.md). Earlier hypotheses below are not
+[Y703 comparison and v22 abort recovery](tb520fu-y703-baseline.md). Earlier hypotheses below are not
 current hardware support claims.
 
 The initial RELEASE image produced a black screen with the backlight on. The

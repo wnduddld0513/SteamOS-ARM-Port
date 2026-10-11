@@ -118,12 +118,55 @@ Validation passed:
 
 Local artifact: `install-tb520fu/tb520fu-uefi-y703-baseline-debug-v21.img`.
 SHA-256: `f99bf4c85845872083bc26d79e7a11fc18e89916671d9943772bde8966752d3d`.
-This candidate is not yet hardware-tested. A remaining owned-channel abort, PMIC
-client failure, WCD switch GPIO error or missing USB VBUS requires further
-hardware evidence; no successful Linux boot is claimed.
+The subsequent tablet test failed on a write-channel access, as detailed below.
+No successful Linux boot is claimed.
 
 From either Windows CMD or PowerShell, manually test without flashing:
 
 ```text
 fastboot boot "C:\Users\HJY\Documents\TB520FU\install-tb520fu\tb520fu-uefi-y703-baseline-debug-v21.img"
 ```
+
+## v22: recover the observed write-channel abort
+
+The next tablet photo reports ESR `0x96000010`, FAR `0x0C77A010`, ELR
+`0x01F31844` and SP `0xA764B680`. With SPMI loaded at `0x01F2E000`, ELR
+is RVA `0x3844`: `str w11,[x12,x13]`, the WDATA0 write to APID `0x27a`.
+The command-first hypothesis was insufficient: removing the preflight STATUS
+read merely moved the abort to the next write-channel access.
+
+v22 restores the stock STATUS read. A TB520FU-only AArch64 exception fixup
+recognizes synchronous external Data Aborts at six reviewed SPMI write-channel
+instructions. Image identity, header size, exact instruction, effective address,
+stack/frame bounds and recovery code must all match. Otherwise the ordinary
+fatal exception handler runs. Observer-window faults are not intercepted.
+
+Accepted faults resume at RVA `0x6fd0`, clear transferred bytes and execute the
+stock transfer epilogue with vendor result 7 (denied). A 128-byte bitmap in the
+image's writable padding at `0x9f00` prevents repeated writes to that channel
+until reboot. Reads still use the observer path, and unaffected channels retain
+the actual vendor transaction code. This is error containment; it does not
+change the arbiter's access policy. A client may still reject denied transfers,
+and the USB power/GPIO issue remains unresolved.
+
+The guard and recovery occupy 224 bytes of executable padding at `0x6f00`.
+The stock wrapper, data bytes, bus geometry and relocations remain unchanged.
+Preparation installs the C fixup only in the private TB520FU Mu checkout.
+
+The fresh DEBUG build validated 49 source PE images. Host checks compiled the
+actual recovery C for all six positive contexts and unrelated-fault rejection;
+ARM64 emulation verified the recovery epilogue, quarantine, real transfers,
+ownership, both buses, stock preflight behavior, timeouts and errors. Existing
+button, USB-selection, GIC and UFS checks passed. Packed-image comparison
+verified all 71 stock/raw/DEPEX entries and the exact BootShim/FD payload.
+
+Local artifact: `install-tb520fu/tb520fu-uefi-spmi-recovery-debug-v22.img`.
+SHA-256: `4a0170aa0b89fc36cfb13083206c6073d8162f182bc6b1c0dce460a25243e71e`.
+It has not been tested on the tablet.
+
+The supplied Y703 image retains the stock ButtonsDxe power branch, emitting
+`SCAN_SUSPEND (0x102)` rather than Unicode Enter. Its menu/input stack differs
+from this port; whether its menu treats that scan code as confirmation has not
+been established. The TB520FU power-to-Enter patch remains an independent
+eight-byte change. Neither menu behavior nor working USB power follows from
+binary presence alone.

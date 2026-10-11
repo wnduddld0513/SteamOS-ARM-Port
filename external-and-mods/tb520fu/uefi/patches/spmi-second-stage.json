@@ -6,27 +6,22 @@
       "rva": "0x3668",
       "before": "ff8303d1fd7b08a9",
       "after": "260e00141f2003d5",
-      "meaning": "Branch to an ownership guard; retain the original transfer implementation and all read/RMW wrappers."
+      "meaning": "Branch to an ownership/abort-quarantine guard, retaining all transfer wrappers and original MMIO ordering."
     },
     {
       "rva": "0x6f00",
-      "before": "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
-      "after": "600300b4091840f9290300b42a0140799f000a6bc20200543f040071a0010054610000343f440071e1010054091040f9e90100b4ca0080d289240a9b29054039291100126a1c00123f010a6b81000054ff8303d1fd7b08a9c6f1ff1780038052040000146000805202000014e0018052e90340f9490000b43f0100b9c0035fd6",
-      "meaning": "Executable padding holds spmi-owner-guard.S. Bound the relative APID, permit observer reads, reject writes when the cached node owner differs from the caller EE, then execute the original prologue. Errors report zero transferred bytes."
-    },
-    {
-      "rva": "0x37f0",
-      "before": "696864b8",
-      "after": "29008052",
-      "meaning": "Start the transaction without a pre-command STATUS read, following Linux ordering. Original WDATA/CMD writes and bounded post-command STATUS polling remain intact."
+      "before": "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+      "after": "200500b4091840f9e90400b42a0140799f000a6b820400543f04007120030054610000343f440071a1030054091040f9a90300b4ca0080d289240a9b29054039291100126a1c00123f010a6b010200540a8840794a01040b5f011071420200544b0900124a7d035309000090290d409129013c912a696a384a25cb1aca000037ff8303d1fd7b08a9baf1ff178003805206000014e0008052040000146000805202000014e0018052e90340f9490000b43f0100b9c0035fd6000000000000000000000000000000000000000000000000f01340f91f0200b9e000805297f2ff17",
+      "meaning": "Ownership and per-channel abort-quarantine guard, plus fixed recovery entry at RVA 0x6fd0. Real observer reads and accessible writes remain stock; inaccessible writes return vendor denied with zero bytes. Writable quarantine bitmap uses originally zero padding at RVA 0x9f00..0x9f80."
     }
   ],
   "evidence": {
     "reference": "Working supplied Y703 image has all 24576 SPMI .text bytes identical to TB520FU stock; it does not stub transfer functions.",
     "live_TWRP": "Arbiter version 0x70010000, features0 0x80060380, features1 0x80; bus0=896, bus1=128. APID 0x4c PPID 0x183 owner=4, APID 0x277 PPID 0x021 owner=0, AP EE=0.",
-    "fault": "Earlier fault at SPMI+0x37f0 on write STATUS 0x0c54c008 matches the unowned 0x4c channel. The earlier 0x277 fault was on an owned channel; command-first ordering is a hypothesis requiring a tablet boot test, not a proven firewall fix."
+    "fault": "Earlier fault at SPMI+0x37f0 on write STATUS 0x0c54c008 matches the unowned 0x4c channel. An earlier APID 0x277 fault was on an AP-owned channel. The v21 command-first hypothesis was subsequently insufficient, as the next photo shows a WDATA0 abort.",
+    "v21_tablet": "ESR 0x96000010, FAR 0x0c77a010, ELR 0x1f31844. Relative RVA 0x3844 is the WDATA0 STR for APID 0x27a. Command-first ordering did not resolve channel access; v22 restores the stock preflight STATUS read."
   },
-  "limitations": "Hardware untested. Ownership is necessary but may not be sufficient for MMIO access after ABL. An owned-channel fault can still occur. Reads, writes, data buffers and failure status now remain real; no successful no-op transfers. PMIC cold-init remains deferred.",
+  "limitations": "A narrow CPU exception fixup converts only reviewed synchronous external aborts inside this exact SPMI raw-transfer frame to vendor denied. Faulting write channels are quarantined; observer reads and other write channels stay enabled. This contains inaccessible MMIO, not a repair of the underlying hardware access policy. USB VBUS still depends on accessible power paths. Tablet validation pending.",
   "boot_tested": false,
-  "output_sha256": "b6e4b9a1453ded65b2e14cb9c81f62aac8be116a10d851ac6c267a22183d93c7"
+  "output_sha256": "60bda5221d3d46e8ef5a107b912d94c4d487f0745b0ca56b63ca496b52718cb9"
 }

@@ -265,12 +265,14 @@ def prepare(mu, stock, require_pin=True):
     for patch_name in ("dxe-dispatch-trace.patch", "gic-unhandled-irq.patch",
                       "bootmenu-drain-keys.patch",
                       "except-fault-line.patch",
-                      "bootmenu-unable-to-boot.patch"):
+                      "bootmenu-unable-to-boot.patch", "spmi-abort-recovery.patch"):
         patch = PORT / "patches" / patch_name
         if subprocess.run(["git", "-C", str(mu), "apply", "--ignore-whitespace", "--reverse", "--check", str(patch)],
                           stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode:
             subprocess.run(["git", "-C", str(mu), "apply", "--ignore-whitespace", "--check", str(patch)], check=True)
             subprocess.run(["git", "-C", str(mu), "apply", "--ignore-whitespace", str(patch)], check=True)
+    shutil.copy2(PORT / "patches/spmi-abort-recovery.h",
+                 mu / "Mu_Basecore/UefiCpuPkg/Library/CpuExceptionHandlerLib/AArch64/Tb520fuSpmiRecovery.h")
     platform = mu / "Platforms/Lenovo/tb520fuPkg"
     platform.parent.mkdir(parents=True, exist_ok=True)
     shutil.copytree(PORT / "Platforms/Lenovo/tb520fuPkg", platform, dirs_exist_ok=not require_pin)

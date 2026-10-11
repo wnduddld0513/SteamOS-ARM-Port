@@ -636,3 +636,46 @@ Expected on the next boot: the boot manager menu returns with working volume
 keys, the power button confirms through the v14 redirection, USB VBUS comes back,
 and a transfer to an unimplemented channel returns EFI_UNSUPPORTED instead of
 aborting.
+
+## USB host mode: what this platform already ships
+
+Recorded while tracing the "USB boot desired, but no USB devices found" line, so
+the same ground is not re-covered. The DXE and APRIORI lists of this port already
+carry the full vendor USB set, in the same order as the only other SM8650
+platform in the tree (Platforms/OnePlus/giuliaPkg, OnePlus 13R / Ace 5):
+
+  UsbPwrCtrlDxe, UsbfnDwc3Dxe, XhciPciEmulationDxe, XhciDxe, UsbBusDxe,
+  UsbKbDxe, UsbMassStorageDxe, UsbMsdDxe, UsbDeviceDxe, UsbConfigDxe, UsbInitDxe
+
+in Platforms/Lenovo/tb520fuPkg/Include/DXE.inc lines 73-86 and APRIORI.inc lines
+64-73. Both the host path (XhciPciEmulationDxe plus XhciDxe) and the device path
+(UsbfnDwc3Dxe, UsbDeviceDxe) are present, and no USB related PCD is defined
+anywhere in tb520fuPkg or Silicon/Silicium/SiliciumPkg, so the role is not chosen
+by this port's configuration. giuliaPkg, which lists the same drivers, still
+reports "USB Host Mode" as unsupported in its Status.md, so the difference is not
+a missing driver either.
+
+The role is decided inside the prebuilt vendor blobs. UsbConfigDxe.efi (90112
+bytes, SHA-256 c56a7783d544d0b1446c5add31c94dd8d8baa9db75b8201b57fb45dc04a3c253)
+contains both paths and their own events: "ConfigUsb: Error - failed to perform
+common initialization for USB core %d: %r", "... failed to perform device
+initializaition for USB core %d: %r", "... failed to perform host initializaition
+for USB core %d: %r", plus "Failed to Create ToggleUsbModeEvent" and "Failed to
+Create ConfigUsbEvent". XhciPciEmulation.efi (40960 bytes, SHA-256
+5d13057ccd32e6c475be19536f8c8f43c07f9e4e98aa1fd1178315e92869a941) prints
+"Unable to configure USB in host mode, Status = (0x%x)"; that line is the first
+thing to look for on the next boot, because the v13 capture ended at
+BootManagerMenuApp and never covered it. The other recorded USB lines are
+"Failed to enable GPIO status : 0x7" for usb_shared_wcd_usb_switch_reset while
+"ssusb_phy_init_success lane: 0x0" reports PHY success.
+
+The other two driver hashes are UsbPwrCtrlDxe.efi (40960 bytes, 42d32f9b5be6f1
+56909721de2e401ac47b9401fa12ca2aa4fa1c9a18e07cda9c) and UsbMsdDxe.efi (61440
+bytes, bdf09fed17e3d70d6f10a48110760c0b18d6feae4a3bbcc0327e2f0683443b17); all
+four are stock, because no patch manifest targets them yet. This matches the
+public Mu-Silicium answer on issue #1619: host mode cannot be enabled by
+configuration, only by building a different (dual role) UsbConfigDxe, which is
+what the Device-Binaries dual role patches (UsbConfigDxe.patched.efi,
+UsbMsdDxe.patched.efi, UsbPwrCtrlDxe.patched.efi, PR #68) do by hand. Any fix on
+this platform therefore has to be a byte patch to those blobs, applied through the
+same sites array as every other module patch, not a change to the DXE lists.

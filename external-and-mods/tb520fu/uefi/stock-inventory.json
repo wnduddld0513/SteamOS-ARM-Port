@@ -220,21 +220,25 @@
     {
       "name": "SPMI",
       "guid": "2a7b4bef-80cd-49e1-b473-374ba4d673fc",
-      "pe_sha256": "6eddedc79cb543b0c83e9efa313bcf2c440a3d0d261cfbc1f83801f0f0859acb",
+      "pe_sha256": "ce798bc46eba8e05aa4747e9a25103dffecdc6b8da475b992ca2be5a06d4c96f",
       "depex_sha256": "557c754d26e2667287367a856ea5fcd584f35ab796d24a6a875d1648a4637d23",
       "binary_patch": {
         "module": "SPMI",
         "input_sha256": "fd6b11d13950ff62a45bb23fc8120c95115611d8460956902f6308c0cb77e65f",
-        "output_sha256": "6eddedc79cb543b0c83e9efa313bcf2c440a3d0d261cfbc1f83801f0f0859acb",
-        "rva": "0x154c",
-        "before": "400500b4fd7bbaa9",
-        "after": "e0031f2ac0035fd6",
-        "meaning": "Pair the existing PMIC minimal-init workaround with the same-SoC SPMI transaction-wrapper bypass. Preserve driver registration. This is a bring-up workaround, not working PMIC writes.",
-        "evidence": "v10 QcomChargerDxeLA -> PmicDxe -> SPMI return RVA 0x15C0, faulting at RVA 0x37F0 with FAR=0x0C77A008. TB520FU wrapper 0x154C..0x15FB is byte-identical to the unpatched Giulia wrapper; its published patch changes these same eight bytes.",
-        "reference_commit": "a1501e0c2e642d6ac0d8f52c85af2a67b75a7799",
-        "reference": "https://github.com/Project-Silicium/Device-Binaries/blob/a1501e0c2e642d6ac0d8f52c85af2a67b75a7799/giulia/README.md",
-        "limitations": "The wrapper returns zero without hardware I/O. Do not interpret this as valid battery or charging status. Other SPMI wrappers remain unchanged.",
-        "boot_tested": false
+        "output_sha256": "ce798bc46eba8e05aa4747e9a25103dffecdc6b8da475b992ca2be5a06d4c96f",
+        "sites": [
+          {
+            "rva": "0x3668",
+            "before": "ff8303d1fd7b08a9",
+            "after": "e0031f2ac0035fd6",
+            "meaning": "SPMI channel execute routine returns success without touching the arbiter",
+            "evidence": "Reached from the single caller at RVA 0x2940; its ldr w9, [x3, x4] at RVA 0x37F0 is the faulting ELR"
+          }
+        ],
+        "meaning": "SPMI still initialises and installs its protocols; the channel execute routine that builds the arbiter address read by the ldr at RVA 0x37F0 now returns success without touching the bus",
+        "evidence": "v16 line: ESR 0x96000010 (EC 0x25, DFSC 0x10 synchronous external abort), FAR 0x000000000C777008 = arbiter 0x0C500000 + channel 0x277 << 12 + 8, ELR 0x00000000D1F317F0 = SPMI.efi base 0x000D1F2E000 + RVA 0x37F0",
+        "boot_tested": false,
+        "limitations": "Every SPMI transfer routed through this routine now reports success without touching the arbiter: PMIC register reads hand back whatever the caller's buffer already held and writes are dropped, so the PMIC minimal-init sequence completes without real hardware I/O and battery/charger status must not be trusted. Driver registration and every other SPMI entry point stay stock. Flip this site to a small error status (e.g. mov w0, #3) if a later build needs the transfer to fail loudly instead."
       }
     },
     {
@@ -335,8 +339,22 @@
     {
       "name": "ButtonsDxe",
       "guid": "5bd181db-0487-4f1a-ae73-820e165611b3",
-      "pe_sha256": "f83a07d53a509cd586de51c325ab54185ad4b99ad63d1a2d13b34f30dee169ed",
-      "depex_sha256": "202ad9811555d98efa58563c98a3b90e94d76630feb68f92c8d7a63c46998d9d"
+      "pe_sha256": "ace24a88b469361a44277bfa767f8a2f3fddc36232f76ef495cd8540f66c441d",
+      "depex_sha256": "202ad9811555d98efa58563c98a3b90e94d76630feb68f92c8d7a63c46998d9d",
+      "binary_patch": {
+        "module": "ButtonsDxe",
+        "input_sha256": "f83a07d53a509cd586de51c325ab54185ad4b99ad63d1a2d13b34f30dee169ed",
+        "output_sha256": "ace24a88b469361a44277bfa767f8a2f3fddc36232f76ef495cd8540f66c441d",
+        "rva": "0x3cc0",
+        "before": "48208052d6ffff17",
+        "after": "edffff171f2003d5",
+        "meaning": "Make the PMIC PON power button work as the boot-menu confirm key. The stock key-map builder stores SCAN_SUSPEND (0x102) in the ScanCode field of EFI_INPUT_KEY for the power button, and the Mu BootManagerMenuApp that this platform boots only accepts CHAR_CARRIAGE_RETURN (0x0D) in the UnicodeChar field, so the button did nothing in the menu. This patch redirects the power-button branch (mov w8,#0x102) into the driver's own ENTER epilogue at RVA 0x3C74 (mov w8,#0xD ; strh w8,[x29,#26] ; b 0x3C90), so the button now reports a real Enter key to every UEFI consumer.",
+        "evidence": "TB520FU ButtonsDxe.efi disassembly: the whole 0x7000-byte .text contains exactly one #0x102 immediate (mov w8,#0x102 at RVA 0x3CC0, followed by b 0x3C1C which stores it as the ScanCode at 0x3C1C), and with the stock XBL device tree (/soc/buttons/platform-key-maps key-maps = <1 2 3 0 0>) it is the only branch that can fire. Mu_Basecore/MdeModulePkg/Application/BootManagerMenuApp/BootManagerMenu.c:1136-1182 handles a key stroke with switch (Key.UnicodeChar): SCAN_UP/SCAN_DOWN/SCAN_ESC are honoured inside case CHAR_NULL, and selection/boot happens only in case CHAR_CARRIAGE_RETURN, so ScanCode 0x0D (what the project-silicium giulia patch writes) would be dropped into default: break. RVA 0x3C74-0x3C7C uses only w8 and x29, so entering it directly from 0x3CC0 is safe and the driver then notifies the event through its normal path at 0x3C90. The ScanCode patch published for giulia/onyx/nx729j is therefore ineffective on this platform.",
+        "reference": "https://github.com/Project-Silicium/Device-Binaries/blob/a1501e0c2e642d6ac0d8f52c85af2a67b75a7799/giulia/README.md",
+        "reference_commit": "a1501e0c2e642d6ac0d8f52c85af2a67b75a7799",
+        "limitations": "The key is still sampled through the PMIC PON real-time IRQ status, so the button only reaches the menu if that path reports the press at all; if the PMIC PON path is dead the power button still produces no event. Volume and other GPIO buttons keep their stock key codes. Only the seven-byte branch at 0x3CC0 is redirected; the rest of the driver is untouched.",
+        "boot_tested": false
+      }
     },
     {
       "name": "ChargerExDxe",

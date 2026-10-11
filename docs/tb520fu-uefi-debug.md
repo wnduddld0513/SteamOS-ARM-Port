@@ -523,26 +523,51 @@ VBUS stay inert until the PMIC/SPMI path is restored on purpose.
 
 ## v18: stop the SPMI channel execute path without hiding the SPMI protocol
 
-v17 removed the abort but produced a new failure: with the SPMI entry point
-stubbed the driver installs no protocols, so PmicDxe's SPMI-lite wrapper prints
-"Locate protocol failed", then "ERROR: C90000002:V03000007 IO
-5776232E-082D-4B75-9A0E-FE1D13F7A5D9", then asserts in
-pm_comm_spmi_lite.c +66. The v17 console also confirms the original diagnosis:
-SPMI.efi loads at 0x000D1F2E000 with entry point 0x000D1F2F000, so the faulting
-ELR 0x00000000D1F317F0 is exactly RVA 0x37F0 inside SPMI.efi.
+The v17 entry-point stub removed the abort but produced a new failure: with the
+DXE entry stubbed the driver installs no protocols, so PmicDxe's SPMI-lite
+wrapper prints "Locate protocol failed", then "ERROR: C90000002:V03000007 IO
+5776232E-082D-4B75-9A0E-FE1D13F7A5D9", then asserts in pm_comm_spmi_lite.c +66.
+The v17 console also confirms the original diagnosis: SPMI.efi loads at
+0x000D1F2E000 with entry point 0x000D1F2F000, so the faulting ELR
+0x00000000D1F317F0 is exactly RVA 0x37F0 inside SPMI.efi.
 
-v18 restores the SPMI entry point so the protocols are installed, and stubs the
-channel execute function instead. patches/spmi-second-stage.json now carries a
-sites array: RVA 0x3748 before b44101a9761300f9 after e0031f2ac0035fd6 (the
-function that builds the channel address used by the ldr at RVA 0x37F0), and the
-old wrapper site at RVA 0x154c kept as before. patch_stock_pe in
-scripts/prepare-tb520fu-uefi.py applies a sites array in order while single-site
-manifests keep working. Expected result: the boot manager menu appears and
-PmicDxe initialises without asserting. The power button and USB VBUS stay inert
-until the PMIC/SPMI path is restored on purpose.
+v18 restores the stock DXE entry point (RVA 0x1000) so SPMI installs its
+protocols, and stubs the one routine that builds the channel address read by the
+faulting load. Disassembly of the stock module puts that routine at RVA 0x3668
+(before ff8303d1fd7b08a9, sub sp, sp, #0xe0 / stp x29, x30, [sp, #128]); its
+faulting ldr w9, [x3, x4] is at RVA 0x37F0, and its only caller is the single
+bl 0x3668 at RVA 0x2940 inside the function at 0x27e4, which branches to its
+error path at 0x294c when the call returns non-zero. v18 replaces that routine
+entry with mov w0, wzr ; ret (after e0031f2ac0035fd6), so every transfer reports
+success without touching the arbiter. Success rather than an error status is
+deliberate: PmicDxe's pm_comm_spmi_lite wrapper asserts readily on a failed
+transfer, and a non-zero return would risk replacing the abort with another
+assert. The cost is that transfers through this routine are now silent no-ops
+(reads hand back whatever the caller's buffer already held, writes are dropped),
+so PMIC data must not be trusted yet. The earlier 0x154c wrapper site is dropped,
+so the wrapper and the rest of the driver are stock again.
+
+patches/spmi-second-stage.json now carries a sites array with that single entry,
+and patch_stock_pe in scripts/prepare-tb520fu-uefi.py applies sites in order while
+single-site manifests keep working. The earlier v18 record in this file (site RVA
+0x3748, before b44101a9761300f9, artifact 026d8722..., commit e349b9b) came from
+work that a workspace rollback discarded, and its site does not exist in this
+module at all: b44101a9761300f9 occurs nowhere in the stock PE and RVA 0x3748
+holds 4a15098b6b014491 in the middle of the routine. That address belongs to
+another module variant and must not be reused here.
+
+Verification for this build: the stock blob hashes to fd6b11d1...65f and the
+patched blob to ce798bc4...96f, both asserted by the manifest; running
+patch_stock_pe on a reconstruction of the stock blob reproduces the built module
+byte for byte; and the built FV's SPMI section (Build/tb520fuPkg/DEBUG_CLANGPDB/
+FV/Ffs/2a7b4bef-80cd-49e1-b473-374ba4d673fcSPMI/2a7b4bef-80cd-49e1-b473-374ba4d673fcSEC2.1.pe32)
+carries 1f0000f1c0050054 at module RVA 0x1000 and e0031f2ac0035fd6 at module RVA
+0x3668, while the faulting 696864b8 is still present at RVA 0x37f0 and
+unreachable.
 
 Artifact: tb520fu-uefi-spmi-stub-debug-v18.img, 1277952 bytes, SHA-256
-026d872202bea23bf108824a98fc6b191e799e7114680495f7da243af0e6c7c8. FVMAIN.Fv
-byte checks: 0 unstubbed prologue copies, 3 stub copies (two SPMI sites and the
-PmicDxe site), 0 old wrapper prologue copies.
-
+57066f2502b61ad5585d178d75a8fb4d701ed60ea5feac97686aad8939cc5c40, DEBUG, Mu
+commit 8d73b66ab554f9ab6134b58839bb1e46ebd47688. Tablet v18 boot is untested. If
+the next screen shows neither an ESR line nor the "Locate protocol failed" /
+pm_comm_spmi_lite assert, the SPMI abort path is closed and the PMIC work can
+resume on top of it.

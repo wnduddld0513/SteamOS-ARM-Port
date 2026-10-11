@@ -42,17 +42,19 @@ def patch_stock_pe(name, pe):
     hdr = struct.unpack_from("<I", pe, 0x3c)[0]
     count = struct.unpack_from("<H", pe, hdr + 6)[0]
     table = hdr + 24 + struct.unpack_from("<H", pe, hdr + 20)[0]
-    rva = int(manifest["rva"], 0)
-    before, after = bytes.fromhex(manifest["before"]), bytes.fromhex(manifest["after"])
-    matches = []
-    for i in range(count):
-        _, va, size, offset = struct.unpack_from("<IIII", pe, table + 40 * i + 8)
-        if va <= rva and rva + len(before) <= va + size:
-            matches.append(offset + rva - va)
-    need(len(matches) == 1, "stock PE patch RVA is not uniquely file-backed")
-    offset = matches[0]
-    need(pe[offset:offset + len(before)] == before, "stock PE patch instruction mismatch")
-    result = pe[:offset] + after + pe[offset + len(before):]
+    result = pe
+    for site in manifest.get("sites", [manifest]):
+        rva = int(site["rva"], 0)
+        before, after = bytes.fromhex(site["before"]), bytes.fromhex(site["after"])
+        matches = []
+        for i in range(count):
+            _, va, size, offset = struct.unpack_from("<IIII", result, table + 40 * i + 8)
+            if va <= rva and rva + len(before) <= va + size:
+                matches.append(offset + rva - va)
+        need(len(matches) == 1, "stock PE patch RVA is not uniquely file-backed")
+        offset = matches[0]
+        need(result[offset:offset + len(before)] == before, "stock PE patch instruction mismatch")
+        result = result[:offset] + after + result[offset + len(before):]
     need(hashlib.sha256(result).hexdigest() == manifest["output_sha256"],
          "stock PE patch output hash mismatch")
     return result, manifest

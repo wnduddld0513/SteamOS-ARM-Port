@@ -34,6 +34,31 @@ def regular(path):
     assert not path.is_symlink() and stat.S_ISREG(path.stat().st_mode), path
 
 
+def verify_kernel_modules(root, kout):
+    """Require the installed module payload to match the selected kernel output."""
+    release = '7.2.6-tb520fu-steamos'
+    expected = kout / 'modules' / release
+    installed = root / 'usr/lib/modules' / release
+    regular(expected / 'vmlinuz')
+    if sha(expected / 'vmlinuz') != sha(kout / 'boot/Image'):
+        raise ValueError('kernel output Image differs from its module carrier')
+
+    def inventory(directory):
+        if not directory.is_dir():
+            raise ValueError(f'module directory missing: {directory}')
+        entries = {}
+        for path in directory.rglob('*'):
+            name = path.relative_to(directory).as_posix()
+            if path.is_symlink():
+                entries[name] = ('link', os.readlink(path))
+            elif path.is_file():
+                entries[name] = ('file', sha(path))
+        return entries
+
+    if inventory(installed) != inventory(expected):
+        raise ValueError('installed modules differ from the selected kernel output; rebuild the rootfs')
+
+
 def write(path, text):
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(text)
@@ -127,6 +152,7 @@ def main():
         identity = json.loads((rootsrc / 'usr/share/steamos-arm/tb520fu.json').read_text())
         assert identity['device'] == 'lenovo,tb520fu' and identity['source_commit'] == source_commit
         assert sha(bootsrc / 'Image') == sha(kout / 'boot/Image'), 'source image kernel differs'
+        verify_kernel_modules(rootsrc, kout)
         run('mkfs.ext4', '-F', '-L', 'userdata', '-U', root_uuid, '-m', '1', '-E', 'lazy_itable_init=0,lazy_journal_init=0', raw)
         run('mkfs.fat', '-F', '32', '-S', '4096', '-s', '1', '-n', 'TB520BOOT', sup)
         for image, p, fs in ((raw, target, 'ext4'), (sup, boot, 'vfat')):

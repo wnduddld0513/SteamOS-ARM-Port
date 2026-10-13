@@ -1,4 +1,4 @@
-# SteamOS ARM for TB520FU
+# SteamOS ARM Port for TB520FU
 
 > [!WARNING]
 > Boot logs show SteamOS userspace starting, but display output is still broken. GRUB and Linux kernel loading messages appear, then the screen turns off and no picture is displayed. A working desktop or Game Mode has not been confirmed. This port is experimental.

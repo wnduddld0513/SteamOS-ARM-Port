@@ -1,149 +1,59 @@
-<p align="center">
-  <a href="https://steamos-arm-port.github.io/">
-    <img src=".github/assets/logo.svg" alt="SteamOS ARM Port" width="112">
-  </a>
-</p>
-
-<h1 align="center">SteamOS ARM Port for TB520FU</h1>
-
-<p align="center">Unofficial SteamOS for Snapdragon handhelds</p>
-
-<p align="center">
-  Valve's SteamOS for ARM, the one made for the Steam Frame, set up for handhelds:
-  Game Mode, the KDE desktop, PC games through FEX and Proton, and Android apps.
-</p>
-
-<p align="center">
-  <a href="https://github.com/hashtagbasit/SteamOS-ARM-Port/releases"><img alt="Latest release" src="https://img.shields.io/github/v/release/hashtagbasit/SteamOS-ARM-Port?include_prereleases&style=flat&color=7c5cf0&label=release"></a>
-  <a href="https://steamos-arm-port.github.io/"><img alt="Documentation" src="https://img.shields.io/badge/docs-steamos--arm--port.github.io-18181a?style=flat"></a>
-  <a href="LICENSE"><img alt="GPL-2.0 license" src="https://img.shields.io/badge/license-GPL--2.0-18181a?style=flat"></a>
-  <a href="https://discord.gg/EP53nZYvg"><img alt="Discord" src="https://img.shields.io/badge/chat-Discord-5865F2?style=flat&amp;logo=discord&amp;logoColor=white"></a>
-</p>
-
-<p align="center">
-  <a href="https://steamos-arm-port.github.io/getting-started/install/">Install it</a>
-  ·
-  <a href="https://steamos-arm-port.github.io/devices/">Supported devices</a>
-  ·
-  <a href="https://steamos-arm-port.github.io/downloads/">Downloads</a>
-  ·
-  <a href="https://steamos-arm-port.github.io/help/known-issues/">Known issues</a>
-</p>
-
-### TB520FU development
-
-This repository contains the TB520FU port for the Lenovo Yoga Tab Plus (Snapdragon 8 Gen 3). Development takes place on `tb520fu`. The TB520FU kernel, Tianma and BOE device trees, UEFI boot image, ARM64 runtime and USB image have been built locally. Boot and hardware operation on the tablet remain untested.
-
-Start with the [TB520FU guide](docs/tb520fu.md). TB520FU uses a separate experimental UEFI and USB boot path; the upstream ABL flashing and internal installation instructions below do not apply to this device. Other device recipes are retained from the upstream project.
-
-The `main` branch adds an opt-in, separate TB520FU image recipe using
-[our TB520FU kernel port](https://github.com/wnduddld0513/linux-tb520fu/tree/main).
-It includes Tianma and BOE panel configurations (2944×1840, currently 120 Hz).
-Existing device builders and overlays are unchanged. The Linux 7.2.6 kernel,
-modules, both panel DTBs and dedicated [TB520FU UEFI boot image](external-and-mods/tb520fu/uefi/README.md)
-have been compiled and inspected. The ARM64 sensor/input/audio runtime and USB
-image have also been built and checked. The completed image and UEFI boot image are local build artifacts and have not been published to GitHub Releases.
-Linux boot and hardware operation on the tablet remain untested.
-The initial DEBUG UEFI reached DXE on hardware but lost display near ClockDxe.
-A [display restoration and persistent logging build](docs/tb520fu-uefi-debug.md)
-is available locally for the next temporary boot test.
-See [docs/tb520fu.md](docs/tb520fu.md) for the dedicated paths and limitations.
+# SteamOS ARM for Lenovo TB520FU
 
 > [!WARNING]
-> This is a community project, not affiliated with or endorsed by Valve.
-> The upstream installation path uses the ROCKNIX ABL bootloader. Getting that
-> wrong can leave your device unable to boot or lose your data. Back up first
-> and follow the [install guide](https://steamos-arm-port.github.io/getting-started/install/)
-> step by step.
+> Boot logs show SteamOS userspace starting, but display output is still broken. GRUB and Linux kernel loading messages appear, then the screen turns off and no picture is displayed. A working desktop or Game Mode has not been confirmed. This port is experimental.
 
-## About
+This fork ports the TB321FU Linux and SteamOS integration to the Lenovo Yoga Tab Plus (TB520FU, lapis, Snapdragon 8 Gen 3 / SM8650). It adapts the boot process, kernel and userspace configuration to TB520FU using the tablet's own stock device trees, firmware and hardware settings.
 
-Valve's ARM build of SteamOS is made for a VR headset, so out of the box a lot
-of it gets in the way on a handheld: services that keep crashing, the UI stuck
-on the slow cores, the GPU not clocking up, standby that drains the battery. I
-turned off what a handheld doesn't need and fixed the rest, the long version
-is in [HOW-IT-WORKS.md](docs/HOW-IT-WORKS.md).
+Development takes place on the `tb520fu` branch. The [TB520FU installation and build guide](docs/tb520fu.md) describes the current internal UFS layout and known limitations.
 
-What you get:
+## Current status
 
-- Game Mode and Desktop Mode, with the controller showing up as a Steam Deck pad
-- x86 PC games through FEX and ARM64 Proton, plus Epic, GOG and Amazon through Heroic
-- Loadout, which installs emulators and apps picked for your SoC
-- Sleep that lasts and quiet fan curves
-- Updates through Steam, no reflashing
-- Lossless Scaling frame gen, Decky and the performance overlay
-- Android apps with the Play Store
-- A dashboard on the bottom screen of the AYN Thor and AYANEO Pocket DS
+| Component | Status |
+| --- | --- |
+| Dedicated TB520FU UEFI | Starts; boot menu and hardware buttons work |
+| Internal UFS and GRUB | Detected; panel selection works |
+| Linux 7.2.6 | Starts and prints boot messages |
+| SteamOS userspace | Startup confirmed in captured logs |
+| Desktop / Game Mode display | No usable output after boot messages |
+| Remaining hardware | Full operation under SteamOS remains unverified |
 
-## Devices
+The kernel and OS have been built locally. Successful compilation and userspace startup do not establish a working graphical session.
 
-### Handhelds
+## Installation
 
-| SoC | Devices | Status |
-|---|---|---|
-| Snapdragon 8 Elite | AYN Odin 3, KONKR Pocket FIT Elite | Stable |
-| Snapdragon 8 Gen 3 | KONKR Pocket FIT, AYANEO Pocket S2 / S2 Pro | Stable |
-| Snapdragon 8 Gen 2 | AYN Odin 2 / Mini / Portal / Thor, AYANEO Pocket ACE / DMG / DS / EVO / S 1K / S 2K, Retroid Pocket 6 / Nova | Stable |
+The current path boots from internal storage and does not require a USB boot drive.
 
-There's one image per SoC, you pick your device in the ABL menu and it sets
-itself up. I only own a Pocket FIT, so if you have one of the others please
-[let me know how it runs](https://github.com/hashtagbasit/SteamOS-ARM-Port/issues).
+| Image | Partition | Purpose |
+| --- | --- | --- |
+| `boot.img` | `boot_a` | TB520FU UEFI |
+| `super.img` | `super` | FAT32 boot filesystem with GRUB, kernel and DTBs |
+| `userdata.simg` | `userdata` | ext4 SteamOS system and home directory |
 
-### Phones & tablets
+Installation replaces Android system and user data and overwrites the selected boot image. Use a matching image bundle, back up first, and follow the [internal installation instructions](docs/tb520fu.md#install-on-internal-storage). The guide also covers compatible `super.img`-only updates.
 
-| Device | SoC | Status |
-|---|---|---|
-| Lenovo Legion Y700 Gen 3 (TB321FU) | Snapdragon 8 Gen 3 | Testing |
-| Lenovo Yoga Tab Plus (TB520FU) | Snapdragon 8 Gen 3 | Experimental TB520FU build — [TB520FU guide](docs/tb520fu.md) |
-| Lenovo Legion Y700 Gen 4 (TB322FC) | Snapdragon 8 Elite | Testing |
-| REDMAGIC 6 (NX669J) | Snapdragon 888 | Build it yourself ([guide](docs/redmagic6.md)) |
+## Display configuration
 
-The Lenovo tablets boot from a USB drive and install to internal storage,
-nobody has run them on a real tablet yet. If you have one and want to help,
-ask on [Discord](https://discord.gg/EP53nZYvg) and see the
-[Lenovo page](https://steamos-arm-port.github.io/devices/lenovo/).
+Tianma and BOE NT36532 panels have separate device trees and stock initialization sequences. Both are configured for 2944 x 1840 in landscape at 120 Hz, with dual DSI and DSC 1.1 SCR1. Select the fitted panel in GRUB; Tianma is the default. Automatic detection and additional refresh rates are not implemented.
 
-## Documentation
+Native display output, touch and pen alignment, brightness behavior and suspend/resume still need validation. See the [hardware inventory](https://github.com/wnduddld0513/linux-tb520fu/blob/main/tb520fu/HARDWARE.md) for implementation scope and remaining work.
 
-Everything lives on the [website](https://steamos-arm-port.github.io/).
+## Source and building
 
-| I want to… | Guide |
-|---|---|
-| Install it | [Flash to a microSD card](https://steamos-arm-port.github.io/getting-started/install/) |
-| Check my device | [Supported devices](https://steamos-arm-port.github.io/devices/) |
-| Move it to internal storage | [Internal storage](https://steamos-arm-port.github.io/getting-started/internal-storage/) |
-| Update | [Updates](https://steamos-arm-port.github.io/using/updates/) |
-| Get help | [FAQ](https://steamos-arm-port.github.io/help/faq/) · [Troubleshooting](https://steamos-arm-port.github.io/help/troubleshooting/) |
-| Report a bug | [GitHub issues](https://github.com/hashtagbasit/SteamOS-ARM-Port/issues) |
+The [TB520FU kernel repository](https://github.com/wnduddld0513/linux-tb520fu) supplies the patches, device trees and kernel configuration. This OS branch pins kernel commit [`fcf8cd2`](https://github.com/wnduddld0513/linux-tb520fu/commit/fcf8cd2513b429fa54ac418c33ced27d1ed0815e).
 
-## Building
+```bash
+git clone --branch tb520fu https://github.com/wnduddld0513/SteamOS-ARM-Port.git
+cd SteamOS-ARM-Port
+bash tools/setup-fork.sh
+```
 
-The images are built from this repo on an ARM64 Linux machine, see
-[docs/building.md](docs/building.md). Issues and pull requests are welcome,
-and for help with installing come say hi on [Discord](https://discord.gg/EP53nZYvg).
+Follow the [build instructions](docs/tb520fu.md#build-from-source) for the kernel, dedicated UEFI, ARM64 runtime and internal-install images. Stock firmware is supplied locally and verified against the [firmware manifest](external-and-mods/tb520fu/firmware-manifest.json). Firmware binaries and local build outputs are not committed to Git.
 
-## Supporting the project
+For boot diagnostics, see [logs and verification](docs/tb520fu.md#logs-and-verification). Include captured kernel and journal logs when reporting the display failure through this fork's [issues](https://github.com/wnduddld0513/SteamOS-ARM-Port/issues).
 
-<p align="left">
-  <a href="https://ko-fi.com/aimalb"><img src="https://img.shields.io/badge/Ko--fi-Buy%20me%20a%20coffee-ff5e5b?style=for-the-badge&logo=kofi&logoColor=white" alt="Ko-fi"></a>
-  <a href="https://paypal.me/Basit2000"><img src="https://img.shields.io/badge/PayPal-Basit2000-00457c?style=for-the-badge&logo=paypal&logoColor=white" alt="PayPal"></a>
-</p>
+## Credits and license
 
-Any amount raised will be used to buy devices to support and boost development, a star helps too!
+Based on [SteamOS ARM Port](https://github.com/hashtagbasit/SteamOS-ARM-Port) and the [TB321FU Linux port](https://github.com/enij90/armada-tb321fu), with contributions from GUF296, Project Silicium and the projects listed in [CREDITS.md](CREDITS.md).
 
-Have a device you'd like to see supported? Sending one over for long term
-development is the fastest way to get it there, message me on
-[Discord](https://discord.gg/EP53nZYvg).
-
-## Credits
-
-The kernels and device support come from [ROCKNIX](https://github.com/ROCKNIX/distribution).
-The full list of projects and people is in [CREDITS.md](CREDITS.md).
-
-## License
-
-My scripts and overlays are GPL-2.0, everything in `external-and-mods/` keeps
-its own license. See [LICENSE](LICENSE).
-
-Steam and SteamOS are trademarks of Valve Corporation, used here only to say
-what this is based on. Please don't ask Valve for help with it.
+See [LICENSE](LICENSE) for project and component licenses. This is an unofficial community port and is not affiliated with or endorsed by Valve or Lenovo.

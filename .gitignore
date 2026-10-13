@@ -103,3 +103,7 @@ _agent_*
 # TB520FU local build inputs and outputs
 /external-and-mods/tb520fu/local/
 /tb520fu-work/
+
+# Local AI agent context files
+/AGENTS.md
+

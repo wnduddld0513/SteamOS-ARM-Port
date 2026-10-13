@@ -30,6 +30,21 @@
   <a href="https://steamos-arm-port.github.io/help/known-issues/">Known issues</a>
 </p>
 
+### TB520FU development
+
+The `main` branch adds an opt-in, separate TB520FU image recipe using
+[our TB520FU kernel port](https://github.com/wnduddld0513/linux-tb520fu/tree/main).
+It includes Tianma and BOE panel configurations (2944×1840, currently 120 Hz).
+Existing device builders and overlays are unchanged. The Linux 7.2.6 kernel,
+modules, both panel DTBs and dedicated [TB520FU UEFI boot image](external-and-mods/tb520fu/uefi/README.md)
+have been compiled and inspected. The ARM64 sensor/input/audio runtime and USB
+image have also been built and checked. The completed image and UEFI boot image are local build artifacts and have not been published to GitHub Releases.
+Linux boot and hardware operation on the tablet remain untested.
+The initial DEBUG UEFI reached DXE on hardware but lost display near ClockDxe.
+A [display restoration and persistent logging build](docs/tb520fu-uefi-debug.md)
+is available locally for the next temporary boot test.
+See [docs/tb520fu.md](docs/tb520fu.md) for the dedicated paths and limitations.
+
 > [!WARNING]
 > This is a community project, not affiliated with or endorsed by Valve.
 > The upstream installation path uses the ROCKNIX ABL bootloader. Getting that
@@ -80,29 +95,14 @@ itself up. I only own a Pocket FIT, so if you have one of the others please
 | Device | SoC | Status |
 |---|---|---|
 | Lenovo Legion Y700 Gen 3 (TB321FU) | Snapdragon 8 Gen 3 | Testing |
+| Lenovo Yoga Tab Plus (TB520FU) | Snapdragon 8 Gen 3 | Experimental TB520FU build — [TB520FU guide](docs/tb520fu.md) |
 | Lenovo Legion Y700 Gen 4 (TB322FC) | Snapdragon 8 Elite | Testing |
-| Lenovo Yoga Tab Plus / YOGA Pad Pro AI元启 (TB520FU) | Snapdragon 8 Gen 3 | Experimental TB520FU build — [TB520FU guide](docs/tb520fu.md) |
 | REDMAGIC 6 (NX669J) | Snapdragon 888 | Build it yourself ([guide](docs/redmagic6.md)) |
 
 The Lenovo tablets boot from a USB drive and install to internal storage,
 nobody has run them on a real tablet yet. If you have one and want to help,
 ask on [Discord](https://discord.gg/EP53nZYvg) and see the
 [Lenovo page](https://steamos-arm-port.github.io/devices/lenovo/).
-
-### TB520FU development
-
-The `main` branch adds an opt-in, separate TB520FU image recipe using
-[our TB520FU kernel port](https://github.com/wnduddld0513/linux-tb520fu/tree/main).
-It includes Tianma and BOE panel configurations (2944×1840, currently 120 Hz).
-Existing device builders and overlays are unchanged. The Linux 7.2.6 kernel,
-modules, both panel DTBs and dedicated [TB520FU UEFI boot image](external-and-mods/tb520fu/uefi/README.md)
-have been compiled and inspected. The ARM64 sensor/input/audio runtime and USB
-image have also been built and checked. The completed image and UEFI boot image are local build artifacts and have not been published to GitHub Releases.
-Linux boot and hardware operation on the tablet remain untested.
-The initial DEBUG UEFI reached DXE on hardware but lost display near ClockDxe.
-A [display restoration and persistent logging build](docs/tb520fu-uefi-debug.md)
-is available locally for the next temporary boot test.
-See [docs/tb520fu.md](docs/tb520fu.md) for the dedicated paths and limitations.
 
 ## Documentation
 

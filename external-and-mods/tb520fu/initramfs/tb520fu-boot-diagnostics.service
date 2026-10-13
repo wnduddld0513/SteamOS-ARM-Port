@@ -1,0 +1,13 @@
+[Unit]
+Description=TB520FU bring-up log capture
+DefaultDependencies=no
+After=systemd-journald.socket
+Before=systemd-udev-trigger.service sysinit.target
+Conflicts=shutdown.target
+Before=shutdown.target
+ConditionKernelCommandLine=tb520fu.diagnostics=1
+
+[Service]
+Type=simple
+ExecStart=/bin/sh /etc/tb520fu-boot-diagnostics.sh
+TimeoutStopSec=3

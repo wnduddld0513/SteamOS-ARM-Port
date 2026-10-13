@@ -67,9 +67,9 @@ APRIORI DXE {
   INF Binaries/tb520fu/UsbfnDwc3Dxe/UsbfnDwc3Dxe.inf
   INF Binaries/tb520fu/XhciPciEmulation/XhciPciEmulation.inf
   INF Binaries/tb520fu/XhciDxe/XhciDxe.inf
-  INF MdeModulePkg/Bus/Usb/UsbBusDxe/UsbBusDxe.inf
+  INF Binaries/tb520fu/UsbBusDxe/UsbBusDxe.inf
   INF MdeModulePkg/Bus/Usb/UsbKbDxe/UsbKbDxe.inf
-  INF MdeModulePkg/Bus/Usb/UsbMassStorageDxe/UsbMassStorageDxe.inf
+  INF Binaries/tb520fu/UsbMassStorageDxe/UsbMassStorageDxe.inf
   INF Binaries/tb520fu/UsbConfigDxe/UsbConfigDxe.inf
   INF Binaries/tb520fu/ButtonsDxe/ButtonsDxe.inf
   INF Binaries/tb520fu/TsensDxe/TsensDxe.inf

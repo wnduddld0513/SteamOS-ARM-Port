@@ -450,6 +450,18 @@
       "depex_sha256": null
     },
     {
+      "name": "UsbBusDxe",
+      "guid": "240612b7-a063-11d4-9a3a-0090273fc14d",
+      "pe_sha256": "ab18cf76a00729f075a9416ecc9817c0ba2b3615e79b1ce86fc6dc5fd59001b3",
+      "depex_sha256": null
+    },
+    {
+      "name": "UsbMassStorageDxe",
+      "guid": "9fb4b4a7-42c0-4bcd-8540-9bcc6711f83e",
+      "pe_sha256": "87dd27b6ed1183d3910b025dc440946061a4030a070fd8942bf54b1a8aea4fe8",
+      "depex_sha256": null
+    },
+    {
       "name": "UsbMsdDxe",
       "guid": "5af77f10-90df-4e7e-8325-a17ec09d5443",
       "pe_sha256": "bdf09fed17e3d70d6f10a48110760c0b18d6feae4a3bbcc0327e2f0683443b17",
@@ -464,33 +476,8 @@
     {
       "name": "UsbConfigDxe",
       "guid": "cd823a4d-7dec-4531-ae5d-4134fa4127b8",
-      "pe_sha256": "4d1672431e7f7e0a74670008ba31809fa3364667754470589e29dcfba66a1675",
-      "depex_sha256": "ee32169774c787d62e03f2d39f9f266977871fec5c433e46b4c03e29b8abd17e",
-      "binary_patch": {
-        "module": "UsbConfigDxe",
-        "input_sha256": "c56a7783d544d0b1446c5add31c94dd8d8baa9db75b8201b57fb45dc04a3c253",
-        "output_sha256": "4d1672431e7f7e0a74670008ba31809fa3364667754470589e29dcfba66a1675",
-        "sites": [
-          {
-            "rva": "0x143f0",
-            "before": "0000000003000000",
-            "after": "0000000001000000",
-            "meaning": "Select host mode (1) only for physical USB core 0. Leave the absent second core disabled (0), as in TB520FU stock; the live DT has one DWC3 controller at 0x0a600000.",
-            "evidence": "Our mode array is `03 00 00 00` immediately before the ASCII \"usbc\" struct base at 0x143F8 (stride 0x130), the same placement as bitra/9707f (`03 03` before \"usbc\" at 0x15360). bitra UsbConfigDxe.hostmode.efi and 9707f UsbConfigDxe.patched.efi change exactly those bytes 03 -> 01, and our whole mode-switch block 0x4480-0x4680 is byte-identical to giulia's stock build.",
-            "reference": "https://github.com/Project-Silicium/Device-Binaries/blob/main/bitra/QcomPkg/Drivers/UsbConfigDxe/UsbConfigDxe.hostmode.efi"
-          },
-          {
-            "rva": "0x47a4",
-            "before": "a0035e38e1031f2a00013fd6a0831ff8",
-            "after": "a0035e382100805200013fd6a0831ff8",
-            "meaning": "Pass mode argument 1 instead of 0 to the USB core start entry (`mov w1,wzr ; blr x8` becomes `mov w1,#1 ; blr x8`) on the host start path the mode byte selects.",
-            "evidence": "Same edit exists in bitra UsbConfigDxe.hostmode.efi (both copies of the call, at 0x4638 and 0x472C); our build has this one copy at 0x47A8. The driver's own fallback start path at 0x47D8 already passes w1 = 1 to the local UsbStartController, so 1 is the value this code treats as \"start\".",
-            "reference": "https://github.com/Project-Silicium/Device-Binaries/blob/main/bitra/QcomPkg/Drivers/UsbConfigDxe/UsbConfigDxe.hostmode.efi"
-          }
-        ],
-        "limitations": "Host selection alone does not establish USB enumeration or VBUS. PMIC transfers have been restored with ownership checks, but need tablet verification. No Y703 or bitra GPIO/power data is imported.",
-        "boot_tested": false
-      }
+      "pe_sha256": "c56a7783d544d0b1446c5add31c94dd8d8baa9db75b8201b57fb45dc04a3c253",
+      "depex_sha256": "ee32169774c787d62e03f2d39f9f266977871fec5c433e46b4c03e29b8abd17e"
     },
     {
       "name": "UsbInitDxe",
@@ -1038,9 +1025,7 @@
     "ConPlatformDxe": "MdeModulePkg/Universal/Console/ConPlatformDxe/ConPlatformDxe.inf",
     "ConSplitterDxe": "MdeModulePkg/Universal/Console/ConSplitterDxe/ConSplitterDxe.inf",
     "GraphicsConsoleDxe": "MdeModulePkg/Universal/Console/GraphicsConsoleDxe/GraphicsConsoleDxe.inf",
-    "UsbBusDxe": "MdeModulePkg/Bus/Usb/UsbBusDxe/UsbBusDxe.inf",
-    "UsbKbDxe": "MdeModulePkg/Bus/Usb/UsbKbDxe/UsbKbDxe.inf",
-    "UsbMassStorageDxe": "MdeModulePkg/Bus/Usb/UsbMassStorageDxe/UsbMassStorageDxe.inf"
+    "UsbKbDxe": "MdeModulePkg/Bus/Usb/UsbKbDxe/UsbKbDxe.inf"
   },
   "configuration_count": 41,
   "compile_performed": false,

@@ -111,6 +111,12 @@ def main():
         if item.get("depex_sha256"):
             assert sha(next(b for t, b in by_guid[item["guid"]] if t == 19)) == item["depex_sha256"]
     assert built["SPMI"] == (mu / "Binaries/tb520fu/SPMI/SPMI.efi").read_bytes()
+    for name in ("UsbConfigDxe", "UsbBusDxe", "UsbMassStorageDxe"):
+        assert built[name] == source[name], "native TB USB driver mismatch: " + name
+        for image in (ref[name], built[name]):
+            assert b"QcomPkg/" in image, "expected Qualcomm USB driver: " + name
+    assert ref["UsbConfigDxe"][0x143b4] == built["UsbConfigDxe"][0x143f4] == 3
+    assert ref["UsbConfigDxe"][0x47a8:0x47ac] == built["UsbConfigDxe"][0x47a8:0x47ac] == bytes.fromhex("e1031f2a")
     assert b"BootManagerMenuApp" in b"".join(built.values())
     report = {"reference": ref_info, "built": built_info,
               "reference_ffs_entries": len(ref_entries), "built_ffs_entries": len(built_entries),
@@ -122,7 +128,8 @@ def main():
               "hardware_boot_tested": False}
     args.output.write_text(json.dumps(report, indent=2) + "\n")
     print(f"Compared {len(ref)} reference and {len(built)} built PE modules; {len(changes)} shared stock names.")
-    print("SPMI/Buttons .text identical in Y703 reference and TB stock; all 71 built stock/raw/DEPEX entries verified.")
+    print(f"SPMI/Buttons .text identical in Y703 reference and TB stock; all {len(inventory['stock_modules'])} built stock/raw/DEPEX entries verified.")
+    print("Native TB USB drivers verified; UsbConfig mode and core-start argument match the working Y703 reference.")
     print("Boot image gzip payload exactly matches the freshly built BootShim and FD.")
 
 

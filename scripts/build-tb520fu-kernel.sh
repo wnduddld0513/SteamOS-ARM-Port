@@ -13,6 +13,7 @@ pkg="$exported/packages/kernel"
 [[ "$(sed -n 's/^VERSION=//p' "$pkg/BASE.env")" == "$TB520FU_KERNEL_VERSION" ]] ||
     tb520fu_die "kernel version differs from source lock"
 # Keep the full TB520FU patch series; do not mix ROCKNIX/Y700 patch sets.
+# Boot clock, regulator and panel fixes are included in the source pin.
 cat "$TB520FU_REPO_ROOT/external-and-mods/kernel-common/steamos.config" >> "$pkg/config/armada-kernel.config.overrides"
 printf '\nCONFIG_LOCALVERSION="-tb520fu-steamos"\nCONFIG_LOCALVERSION_AUTO=n\n' >> "$pkg/config/armada-kernel.config.overrides"
 bb="${TB520FU_BUSYBOX:-/bin/busybox}"
@@ -23,6 +24,10 @@ strings "$bb" | grep findfs >/dev/null || tb520fu_die "BusyBox lacks findfs"
 ird="$work/initramfs"; mkdir -p "$ird/bin" "$ird/dev" "$ird/proc" "$ird/sys" "$ird/newroot"
 install -m0755 "$bb" "$ird/bin/busybox"
 install -m0755 "$TB520FU_REPO_ROOT/external-and-mods/tb520fu/initramfs/init" "$ird/init"
+install -m0644 "$TB520FU_REPO_ROOT/external-and-mods/tb520fu/initramfs/"tb520fu-boot-diagnostics.{sh,service} "$ird/"
+# The kernel opens /dev/console before /init mounts devtmpfs.
+[[ -c "$ird/dev/console" ]] || mknod -m0600 "$ird/dev/console" c 5 1
+[[ -c "$ird/dev/null" ]] || mknod -m0600 "$ird/dev/null" c 1 3
 printf 'CONFIG_INITRAMFS_SOURCE="%s"\nCONFIG_INITRAMFS_ROOT_UID=0\nCONFIG_INITRAMFS_ROOT_GID=0\nCONFIG_BLK_DEV_INITRD=y\nCONFIG_RD_GZIP=y\nCONFIG_DEVTMPFS=y\nCONFIG_DEVTMPFS_MOUNT=y\nCONFIG_OVERLAY_FS=y\nCONFIG_EXT4_FS=y\nCONFIG_SCSI=y\nCONFIG_BLK_DEV_SD=y\nCONFIG_USB=y\nCONFIG_USB_XHCI_HCD=y\nCONFIG_USB_XHCI_PLATFORM=y\nCONFIG_USB_DWC3=y\nCONFIG_USB_DWC3_QCOM=y\nCONFIG_USB_DWC3_DUAL_ROLE=y\nCONFIG_USB_STORAGE=y\nCONFIG_USB_UAS=y\n' "$ird" >> "$pkg/config/armada-kernel.config.overrides"
 # DRM_MSM is built in and probes before switching root. Put its exact stock
 # microcode and both touch variants in the initramfs as well as the rootfs.
@@ -62,7 +67,7 @@ path.write_text("\n".join(line for i, (line, match) in enumerate(zip(lines, keys
 PY
 # Resume is opt-in and must match the pinned source and effective fragment.
 # merge_config.sh still resolves and validates the configuration on every run.
-recipe_sha="$( { printf '%s\n' "$TB520FU_SOURCE_COMMIT"; cat "$pkg/config/armada-kernel.config.overrides"; sha256sum "$ird/bin/busybox" "$ird/init"; } | sha256sum | cut -d' ' -f1)"
+recipe_sha="$( { printf '%s\n' "$TB520FU_SOURCE_COMMIT"; cat "$pkg/config/armada-kernel.config.overrides"; sha256sum "$ird/bin/busybox" "$ird/init" "$ird/tb520fu-boot-diagnostics.sh" "$ird/tb520fu-boot-diagnostics.service"; } | sha256sum | cut -d' ' -f1)"
 resume=()
 if [[ "${TB520FU_RESUME:-0}" == 1 ]]; then
     [[ -f "$work/build/TB520FU-RECIPE.sha256" && "$(cat "$work/build/TB520FU-RECIPE.sha256")" == "$recipe_sha" && -f "$work/build/linux-$TB520FU_KERNEL_VERSION/.config" ]] || tb520fu_die "resume recipe does not match this pinned build"

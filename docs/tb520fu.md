@@ -30,7 +30,7 @@ USB 이미지 SHA256: `a463eb599beb0853872dcfe58c6899f36195d6edc5c36a7817d943c9b
 ## 커널·화면·입력
 
 커널 소스는 [linux-tb520fu](https://github.com/wnduddld0513/linux-tb520fu/tree/main)의
-`54ed573a816532658f411e0cabf93072740976e2`으로 고정했습니다. 해당 소스의 전체 패치 series,
+`fcf8cd2513b429fa54ac418c33ced27d1ed0815e`으로 고정했습니다. 해당 소스의 전체 패치 series,
 DT, 설정을 사용하고 SteamOS용 설정과 외부 USB 루트 UUID를 처리하는 initramfs를 더합니다.
 내장 DRM의 초기 probing에 필요한 Adreno 마이크로코드와 두 터치 펌웨어도 initramfs에 담습니다.
 ROCKNIX/Y700 커널 패치를 이 커널 위에 다시 섞지 않습니다.

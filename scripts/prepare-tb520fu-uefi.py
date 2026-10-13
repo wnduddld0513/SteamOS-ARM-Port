@@ -33,8 +33,7 @@ def patch_stock_pe(name, pe):
     manifests = {"PmicDxe": "pmic-warm-boot.json", "ClockDxe": "clock-display-handoff.json",
                  "UFSDxe": "ufs-device-wakeup.json", "SPMI": "spmi-second-stage.json",
                  "TzDxeLA": "tz-second-stage.json", "FeatureEnablerDxe": "feature-second-stage.json",
-                 "RscDxe": "rsc-second-stage.json", "ButtonsDxe": "buttons-power-enter.json",
-                 "UsbConfigDxe": "usb-host-mode.json"}
+                 "RscDxe": "rsc-second-stage.json", "ButtonsDxe": "buttons-power-enter.json"}
     if name not in manifests:
         return pe, None
     manifest = json.loads((PORT / "patches" / manifests[name]).read_text())
@@ -211,6 +210,10 @@ def memory_map(xbl):
 # Standard PI/UEFI services use Mu's source implementations.
 # Keep stock DiskIoDxe/PartitionDxe: Qualcomm callers require GPT record and
 # partition-label protocols absent from the generic Mu partition driver.
+# Match the working Y703 USB stack with TB520FU's own Qualcomm bus/storage
+# drivers. Its UsbConfigDxe retains native mode 3 and the core-start argument 0;
+# do not apply the older bitra host-forcing patch to this Lanai firmware.
+# Qualcomm UsbBusDxe also supplies its scheduler-based root-port enumeration.
 REPLACE = {
     # Preserve ABL scanout; avoid a second panel initialization during bring-up.
     "DisplayDxe": "SiliciumPkg/Drivers/SimpleFbDxe/SimpleFbDxe.inf",
@@ -239,9 +242,7 @@ REPLACE = {
     "ConPlatformDxe": "MdeModulePkg/Universal/Console/ConPlatformDxe/ConPlatformDxe.inf",
     "ConSplitterDxe": "MdeModulePkg/Universal/Console/ConSplitterDxe/ConSplitterDxe.inf",
     "GraphicsConsoleDxe": "MdeModulePkg/Universal/Console/GraphicsConsoleDxe/GraphicsConsoleDxe.inf",
-    "UsbBusDxe": "MdeModulePkg/Bus/Usb/UsbBusDxe/UsbBusDxe.inf",
     "UsbKbDxe": "MdeModulePkg/Bus/Usb/UsbKbDxe/UsbKbDxe.inf",
-    "UsbMassStorageDxe": "MdeModulePkg/Bus/Usb/UsbMassStorageDxe/UsbMassStorageDxe.inf",
 }
 SKIP = {"VerifiedBootDxe", "FvSimpleFileSystem", "FvDxe"}
 RAW = {"SecParti.cfg", "uefipil.cfg", "QcomChargerCfg.cfg",
@@ -265,7 +266,8 @@ def prepare(mu, stock, require_pin=True):
     for patch_name in ("dxe-dispatch-trace.patch", "gic-unhandled-irq.patch",
                       "bootmenu-drain-keys.patch",
                       "except-fault-line.patch",
-                      "bootmenu-unable-to-boot.patch", "spmi-abort-recovery.patch"):
+                       "bootmenu-unable-to-boot.patch", "spmi-abort-recovery.patch",
+                       "usb-storage-retry.patch"):
         patch = PORT / "patches" / patch_name
         if subprocess.run(["git", "-C", str(mu), "apply", "--ignore-whitespace", "--reverse", "--check", str(patch)],
                           stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode:
@@ -273,6 +275,8 @@ def prepare(mu, stock, require_pin=True):
             subprocess.run(["git", "-C", str(mu), "apply", "--ignore-whitespace", str(patch)], check=True)
     shutil.copy2(PORT / "patches/spmi-abort-recovery.h",
                  mu / "Mu_Basecore/UefiCpuPkg/Library/CpuExceptionHandlerLib/AArch64/Tb520fuSpmiRecovery.h")
+    shutil.copy2(PORT / "patches/usb-storage-diagnostics.h",
+                 mu / "Common/Mu/PcBdsPkg/MsBootPolicy/Tb520fuUsbDiagnostics.h")
     platform = mu / "Platforms/Lenovo/tb520fuPkg"
     platform.parent.mkdir(parents=True, exist_ok=True)
     shutil.copytree(PORT / "Platforms/Lenovo/tb520fuPkg", platform, dirs_exist_ok=not require_pin)

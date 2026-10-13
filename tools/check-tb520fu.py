@@ -12,8 +12,8 @@ import tempfile
 import tomllib
 
 ROOT = Path(__file__).resolve().parents[1]
-BASE = '9499fec5c9eb607cccfc6b67cb406e74d624e96d'
-PIN = '54ed573a816532658f411e0cabf93072740976e2'
+BASE = '4673fa6bfc8b6a598ef799ed0e88f98a9b045285'
+PIN = 'fcf8cd2513b429fa54ac418c33ced27d1ed0815e'
 
 def main():
     ap=argparse.ArgumentParser(description=__doc__)
@@ -39,7 +39,11 @@ def main():
         for p in folder.rglob('*.toml'): tomllib.loads(p.read_text())
     for p in (ROOT/'external-and-mods/tb520fu/uefi').rglob('*.json'): json.loads(p.read_text())
     uefi=json.loads((ROOT/'external-and-mods/tb520fu/uefi/stock-inventory.json').read_text())
-    assert len(uefi['stock_modules']) == 71 and len(uefi['memory_regions']) == 43
+    assert len(uefi['stock_modules']) == 73 and len(uefi['memory_regions']) == 43
+    usb = {e['name']: e for e in uefi['stock_modules']}
+    for name in ('UsbBusDxe', 'UsbMassStorageDxe', 'UsbConfigDxe'):
+        assert name in usb and name not in uefi['standard_source_services']
+        assert not usb[name].get('binary_patch'), name
     assert uefi['compile_performed'] is False and uefi['boot_tested'] is False
     mem={m['name']: m for m in uefi['memory_regions']}
     assert mem['FD Reserved']['address'] == 0xA7000000 and mem['FD Reserved']['length'] == 0x100000
@@ -111,11 +115,12 @@ def main():
         mu=a.uefi_prepared.resolve()
         lock=json.loads((ROOT/'external-and-mods/tb520fu/uefi/source-lock.json').read_text())
         assert subprocess.check_output(['git','-C',str(mu),'rev-parse','HEAD'],text=True).strip() == lock['mu_commit']
-        for patch_name in ('dxe-dispatch-trace.patch', 'gic-unhandled-irq.patch', 'spmi-abort-recovery.patch'):
+        for patch_name in ('dxe-dispatch-trace.patch', 'gic-unhandled-irq.patch', 'spmi-abort-recovery.patch', 'usb-storage-retry.patch'):
             subprocess.run(['git', '-C', str(mu), 'apply', '--ignore-whitespace',
                             '--reverse', '--check',
                             str(ROOT/'external-and-mods/tb520fu/uefi/patches'/patch_name)], check=True)
         assert (mu/'Mu_Basecore/UefiCpuPkg/Library/CpuExceptionHandlerLib/AArch64/Tb520fuSpmiRecovery.h').read_bytes() == (ROOT/'external-and-mods/tb520fu/uefi/patches/spmi-abort-recovery.h').read_bytes()
+        assert (mu/'Common/Mu/PcBdsPkg/MsBootPolicy/Tb520fuUsbDiagnostics.h').read_bytes() == (ROOT/'external-and-mods/tb520fu/uefi/patches/usb-storage-diagnostics.h').read_bytes()
         actual=json.loads((mu/'TB520FU-PREPARED.json').read_text())
         assert actual == uefi
         for entry in actual['stock_modules']:
@@ -134,14 +139,14 @@ def main():
             if src.is_file() and '__pycache__' not in src.parts:
                 assert src.read_bytes() == (mu/'Platforms/Lenovo/tb520fuPkg'/src.relative_to(template)).read_bytes(), str(src)
         assert (mu/'Resources/Configs/tb520fu.toml').read_bytes() == (ROOT/'external-and-mods/tb520fu/uefi/Resources/Configs/tb520fu.toml').read_bytes()
-        print('Prepared UEFI source: 71 module/raw hashes, DEPEX, 43 memory regions and all platform source files match')
+        print('Prepared UEFI source: 73 module/raw hashes, DEPEX, 43 memory regions and all platform source files match')
     # Exercise push restrictions without contacting or mutating any Git remote.
     hook=ROOT/'.githooks/pre-push'
-    refs='refs/heads/main '+('1'*40)+' refs/heads/main '+('0'*40)+'\n'
+    refs='refs/heads/tb520fu '+('1'*40)+' refs/heads/tb520fu '+('0'*40)+'\n'
     for remote, data, accepted in (
         ('https://github.com/wnduddld0513/SteamOS-ARM-Port.git',refs,True),
         ('https://github.com/hashtagbasit/SteamOS-ARM-Port.git',refs,False),
-        ('https://github.com/wnduddld0513/SteamOS-ARM-Port.git',refs.replace('refs/heads/main','refs/heads/tb520fu'),False)):
+        ('https://github.com/wnduddld0513/SteamOS-ARM-Port.git',refs.replace('refs/heads/tb520fu','refs/heads/main'),False)):
         result=subprocess.run(['sh',str(hook),'origin',remote],input=data,text=True,capture_output=True)
         assert (result.returncode == 0) == accepted
     print(f'Shell syntax: {len(scripts)} scripts; Python/TOML/JSON parsed; installer isolation/idempotence passed')

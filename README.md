@@ -38,7 +38,7 @@
 > step by step.
 
 
-This repository contains the TB520FU port for the Lenovo Yoga Tab Plus / YOGA Pad Pro AI元启 (Snapdragon 8 Gen 3). Development takes place on `main`. The TB520FU kernel, Tianma and BOE device trees, UEFI boot image, ARM64 runtime and USB image have been built locally. Boot and hardware operation on the tablet remain untested.
+This repository contains the TB520FU port for the Lenovo Yoga Tab Plus / YOGA Pad Pro AI元启 (Snapdragon 8 Gen 3). Development takes place on `tb520fu`. The TB520FU kernel, Tianma and BOE device trees, UEFI boot image, ARM64 runtime and USB image have been built locally. Boot and hardware operation on the tablet remain untested.
 
 Start with the [TB520FU guide](docs/tb520fu.md). TB520FU uses a separate experimental UEFI and USB boot path; the upstream ABL flashing and internal installation instructions below do not apply to this device. Other device recipes are retained from the upstream project.
 

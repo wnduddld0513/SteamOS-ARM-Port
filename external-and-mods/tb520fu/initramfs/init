@@ -1,35 +1,58 @@
 #!/bin/busybox sh
-# External image only: resolve its explicit filesystem UUID.
-# No STORAGE/userdata fallback and no writes to the Android GPT.
+# Resolve the explicitly selected root filesystem without changing the GPT.
 export PATH=/bin:/sbin
 /bin/busybox --install -s /bin
 mount -t devtmpfs devtmpfs /dev
 mount -t proc proc /proc
 mount -t sysfs sysfs /sys
+# Reopen descriptors after devtmpfs is available, even if the initial console
+# could not be opened before /init started.
+if [ -c /dev/console ]; then
+    exec </dev/console >/dev/console 2>&1
+else
+    exec </dev/null >/dev/kmsg 2>&1
+fi
+log() { printf '%s\n' "TB520FU init: $*" >/dev/kmsg; }
+fail() {
+    log "$*; keeping init alive for diagnostics"
+    log "Available block devices:"
+    cat /proc/partitions >/dev/kmsg
+    if [ -c /dev/console ]; then
+        /bin/sh
+    fi
+    while :; do sleep 60; done
+}
 mkdir -p /newroot
 rootarg=""
 for arg in $(cat /proc/cmdline); do
     case "$arg" in root=UUID=*) rootarg="${arg#root=}";; esac
 done
-if [ -z "$rootarg" ]; then
-    echo "TB520FU: explicit root=UUID= required" >/dev/kmsg
-    exec /bin/sh
-fi
+[ -n "$rootarg" ] || fail "explicit root=UUID= required"
+log "waiting for $rootarg"
 rootdev=""
 for i in $(seq 1 120); do
     rootdev="$(findfs "$rootarg" 2>/dev/null)" && break
+    if [ $((i % 10)) -eq 0 ]; then
+        log "still waiting for root ($((i / 2)) seconds)"
+    fi
     sleep 0.5
 done
-if [ -z "$rootdev" ] || ! mount -t ext4 -o rw "$rootdev" /newroot; then
-    echo "TB520FU: could not mount $rootarg" >/dev/kmsg
-    exec /bin/sh
-fi
+[ -n "$rootdev" ] || fail "root filesystem not found: $rootarg"
+log "mounting $rootdev"
+mount -t ext4 -o rw "$rootdev" /newroot || fail "could not mount $rootdev"
 o=/newroot/var/lib/overlays/etc
 mkdir -p "$o/upper" "$o/work"
-if ! mount -t overlay overlay -o "lowerdir=/newroot/etc,upperdir=$o/upper,workdir=$o/work" /newroot/etc; then
-    echo "TB520FU: /etc overlay failed" >/dev/kmsg
-    exec /bin/sh
-fi
+mount -t overlay overlay -o "lowerdir=/newroot/etc,upperdir=$o/upper,workdir=$o/work" /newroot/etc || fail "/etc overlay failed"
+# Install the explicitly requested logger into the existing /etc overlay.
+case " $(cat /proc/cmdline) " in
+    *" tb520fu.diagnostics=1 "*)
+        cp /tb520fu-boot-diagnostics.sh /newroot/etc/tb520fu-boot-diagnostics.sh || fail "diagnostic script copy failed"
+        cp /tb520fu-boot-diagnostics.service /newroot/etc/systemd/system/tb520fu-boot-diagnostics.service || fail "diagnostic service copy failed"
+        mkdir -p /newroot/etc/systemd/system/sysinit.target.wants
+        ln -sf ../tb520fu-boot-diagnostics.service /newroot/etc/systemd/system/sysinit.target.wants/tb520fu-boot-diagnostics.service
+        ;;
+esac
+log "root mounted; starting systemd"
 mount --move /dev /newroot/dev
 mount --move /proc /newroot/proc
 mount --move /sys /newroot/sys

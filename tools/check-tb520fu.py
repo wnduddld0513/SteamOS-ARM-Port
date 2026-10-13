@@ -13,7 +13,7 @@ import tomllib
 
 ROOT = Path(__file__).resolve().parents[1]
 BASE = '4673fa6bfc8b6a598ef799ed0e88f98a9b045285'
-PIN = 'fcf8cd2513b429fa54ac418c33ced27d1ed0815e'
+PIN = 'f0daedc104c710f2e4c9cde1d654a40d4854bbf2'
 
 def main():
     ap=argparse.ArgumentParser(description=__doc__)

@@ -135,6 +135,11 @@ def install(root, payloads, runtime):
         'etc/inputplumber/devices.d/03-ayaneo-pocket-s2.yaml',
     ]
     upper = 'var/lib/overlays/etc/upper/'
+    # KONKR disables Plasma's power button because konkrd owns it. TB520FU
+    # masks that daemon, so restore the shared policy in both /etc layers.
+    power_policy = REPO / 'steamos-overlay/etc/xdg/powerdevilrc'
+    overlay_files['etc/xdg/powerdevilrc'] = power_policy
+    overlay_files[upper + 'xdg/powerdevilrc'] = power_policy
     remove += [upper + name.removeprefix('etc/') for name in remove if name.startswith('etc/')]
     user_units = ('konkr-volume.service', 'konkr-focusfix.service',
                   'konkr-android.service', 'konkr-android-setup.service')

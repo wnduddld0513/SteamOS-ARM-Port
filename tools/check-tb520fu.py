@@ -29,7 +29,8 @@ def main():
     print(f'Existing Git file contents preserved: {preserved}')
     scripts=[ROOT/'make-steamos-tb520fu.sh', *ROOT.glob('scripts/*tb520fu*.sh'),
              ROOT/'tools/setup-fork.sh',ROOT/'.githooks/pre-push',
-             ROOT/'external-and-mods/tb520fu/initramfs/init']
+             ROOT/'external-and-mods/tb520fu/initramfs/init',
+             ROOT/'external-and-mods/tb520fu/initramfs/tb520fu-boot-diagnostics.sh']
     for p in scripts:
         subprocess.run(['bash','-n',str(p)],check=True)
         for body in re.findall(r"<<'PY'\n(.*?)\nPY(?:\n|$)", p.read_text(), re.S): ast.parse(body)
@@ -80,8 +81,15 @@ def main():
         sentinel=r/'usr/lib/firmware/ath12k/WCN7850/hw2.0/amss.bin'
         sentinel.parent.mkdir(parents=True); sentinel.write_bytes(b'other-device-firmware')
         blobs={module.PRIVATE_FW+'/qcom/sm8650/lenovo/tb520fu/test.bin':b'tb520fu'}
+        power_paths = [r / prefix / 'xdg/powerdevilrc' for prefix in
+                       ('etc', 'var/lib/overlays/etc/upper')]
+        for p in power_paths:
+            p.parent.mkdir(parents=True, exist_ok=True)
+            p.write_text('[AC][SuspendAndShutdown]\nPowerButtonAction=0\n')
         module.install(r,blobs,{})
         module.install(r,blobs,{})
+        expected_power = (ROOT/'steamos-overlay/etc/xdg/powerdevilrc').read_bytes()
+        assert all(p.read_bytes() == expected_power for p in power_paths)
         assert sentinel.read_bytes()==b'other-device-firmware'
         assert (r/'etc/systemd/system/konkrd.service').readlink()==Path('/dev/null')
         assert (r/'usr/lib/systemd/user/gamescope-session.service.d/90-tb520fu.conf').is_file()

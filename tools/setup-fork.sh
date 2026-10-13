@@ -8,7 +8,7 @@ if [[ "$(git branch --show-current)" != tb520fu ]]; then
     echo "Switch to the tb520fu branch before running this script." >&2
     exit 1
 fi
-fork_url=https://github.com/wnduddld0513/SteamOS-ARM-Port.git
+fork_url=https://github.com/wnduddld0513/SteamOS-ARM-Port-TB520FU.git
 if ! git remote | grep -qx origin; then
     git remote add origin "$fork_url"
 fi

@@ -3,7 +3,7 @@
 
 # SteamOS ARM for Lenovo TB520FU
 
-This branch targets the Lenovo Yoga Tab Plus / YOGA Pad Pro AI Yuanqi (TB520FU, lapis, Snapdragon 8 Gen 3 / SM8650). Development takes place on [`tb520fu`](https://github.com/wnduddld0513/SteamOS-ARM-Port/tree/tb520fu).
+This branch targets the Lenovo Yoga Tab Plus / YOGA Pad Pro AI Yuanqi (TB520FU, lapis, Snapdragon 8 Gen 3 / SM8650). Development takes place on [`tb520fu`](https://github.com/wnduddld0513/SteamOS-ARM-Port-TB520FU/tree/tb520fu).
 
 The current installation uses internal UFS storage. A USB boot drive is not required. The earlier external USB image and RAM partition handoff instructions are not the current installation path.
 
@@ -101,8 +101,8 @@ See the [kernel hardware inventory](https://github.com/wnduddld0513/linux-tb520f
 Build on a Linux filesystem. On an x86 host, use the ARM64 cross compiler for the kernel and ARM64 QEMU/binfmt support for userspace chroots. The kernel initramfs requires a static ARM64 BusyBox with `findfs`. Follow the [build environment guide](building.md) and the pinned Mu project's toolchain requirements for UEFI.
 
 ```bash
-git clone --branch tb520fu https://github.com/wnduddld0513/SteamOS-ARM-Port.git
-cd SteamOS-ARM-Port
+git clone --branch tb520fu https://github.com/wnduddld0513/SteamOS-ARM-Port-TB520FU.git
+cd SteamOS-ARM-Port-TB520FU
 bash tools/setup-fork.sh
 
 export STEAMOS_WORK=/work/tb520fu

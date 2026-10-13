@@ -144,9 +144,9 @@ def main():
     hook=ROOT/'.githooks/pre-push'
     refs='refs/heads/tb520fu '+('1'*40)+' refs/heads/tb520fu '+('0'*40)+'\n'
     for remote, data, accepted in (
-        ('https://github.com/wnduddld0513/SteamOS-ARM-Port.git',refs,True),
+        ('https://github.com/wnduddld0513/SteamOS-ARM-Port-TB520FU.git',refs,True),
         ('https://github.com/hashtagbasit/SteamOS-ARM-Port.git',refs,False),
-        ('https://github.com/wnduddld0513/SteamOS-ARM-Port.git',refs.replace('refs/heads/tb520fu','refs/heads/main'),False)):
+        ('https://github.com/wnduddld0513/SteamOS-ARM-Port-TB520FU.git',refs.replace('refs/heads/tb520fu','refs/heads/main'),False)):
         result=subprocess.run(['sh',str(hook),'origin',remote],input=data,text=True,capture_output=True)
         assert (result.returncode == 0) == accepted
     print(f'Shell syntax: {len(scripts)} scripts; Python/TOML/JSON parsed; installer isolation/idempotence passed')

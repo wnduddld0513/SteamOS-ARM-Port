@@ -43,14 +43,14 @@ Native display output, touch and pen alignment, brightness behavior and suspend/
 The [TB520FU kernel repository](https://github.com/wnduddld0513/linux-tb520fu) supplies the patches, device trees and kernel configuration. This OS branch pins kernel commit [`fcf8cd2`](https://github.com/wnduddld0513/linux-tb520fu/commit/fcf8cd2513b429fa54ac418c33ced27d1ed0815e).
 
 ```bash
-git clone --branch tb520fu https://github.com/wnduddld0513/SteamOS-ARM-Port.git
-cd SteamOS-ARM-Port
+git clone --branch tb520fu https://github.com/wnduddld0513/SteamOS-ARM-Port-TB520FU.git
+cd SteamOS-ARM-Port-TB520FU
 bash tools/setup-fork.sh
 ```
 
 Follow the [build instructions](docs/tb520fu.md#build-from-source) for the kernel, dedicated UEFI, ARM64 runtime and internal-install images. Stock firmware is supplied locally and verified against the [firmware manifest](external-and-mods/tb520fu/firmware-manifest.json). Firmware binaries and local build outputs are not committed to Git.
 
-For boot diagnostics, see [logs and verification](docs/tb520fu.md#logs-and-verification). Include captured kernel and journal logs when reporting the display failure through this fork's [issues](https://github.com/wnduddld0513/SteamOS-ARM-Port/issues).
+For boot diagnostics, see [logs and verification](docs/tb520fu.md#logs-and-verification). Include captured kernel and journal logs when reporting the display failure through this fork's [issues](https://github.com/wnduddld0513/SteamOS-ARM-Port-TB520FU/issues).
 
 ## Credits and license
 

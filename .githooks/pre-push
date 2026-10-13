@@ -2,9 +2,9 @@
 # This WSL checkout publishes only the TB520FU branch to its own fork.
 set -eu
 case "${2:-}" in
-    https://github.com/wnduddld0513/SteamOS-ARM-Port|https://github.com/wnduddld0513/SteamOS-ARM-Port.git|git@github.com:wnduddld0513/SteamOS-ARM-Port.git|ssh://git@github.com/wnduddld0513/SteamOS-ARM-Port.git) ;;
+    https://github.com/wnduddld0513/SteamOS-ARM-Port-TB520FU|https://github.com/wnduddld0513/SteamOS-ARM-Port-TB520FU.git|git@github.com:wnduddld0513/SteamOS-ARM-Port-TB520FU.git|ssh://git@github.com/wnduddld0513/SteamOS-ARM-Port-TB520FU.git) ;;
     *)
-        echo "Push blocked: destination must be wnduddld0513/SteamOS-ARM-Port." >&2
+        echo "Push blocked: destination must be wnduddld0513/SteamOS-ARM-Port-TB520FU." >&2
         exit 1
         ;;
 esac

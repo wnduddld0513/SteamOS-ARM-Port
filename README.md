@@ -3,7 +3,7 @@
 > [!WARNING]
 > Boot logs show SteamOS userspace starting, but display output is still broken. GRUB and Linux kernel loading messages appear, then the screen turns off and no picture is displayed. A working desktop or Game Mode has not been confirmed. This port is experimental.
 
-This fork ports the TB321FU Linux and SteamOS integration to the Lenovo Yoga Tab Plus (TB520FU, lapis, Snapdragon 8 Gen 3 / SM8650). It adapts the boot process, kernel and userspace configuration to TB520FU using the tablet's own stock device trees, firmware and hardware settings.
+This fork ports the TB321FU Linux and SteamOS integration to the Lenovo Yoga Tab Plus (TB520FU, SM8650). It adapts the boot process, kernel and userspace configuration to TB520FU using the tablet's own stock device trees, firmware and hardware settings.
 
 Development takes place on the `tb520fu` branch. The [TB520FU installation and build guide](docs/tb520fu.md) describes the current internal UFS layout and known limitations.
 

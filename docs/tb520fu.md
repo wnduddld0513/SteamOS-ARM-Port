@@ -83,7 +83,7 @@ The display failure described at the top still applies after a successful flash.
 
 ## Display and hardware configuration
 
-The kernel is pinned to [linux-tb520fu at `fcf8cd2`](https://github.com/wnduddld0513/linux-tb520fu/commit/fcf8cd2513b429fa54ac418c33ced27d1ed0815e), using Linux 7.2.6 and the `7.2.6-tb520fu-steamos` release name.
+The kernel is pinned to [linux-tb520fu at `972c5ce`](https://github.com/wnduddld0513/linux-tb520fu/commit/972c5ce4d2955bb0382a2101f4e22c5185cea6ba), using Linux 7.2.6 and the `7.2.6-tb520fu-steamos` release name.
 
 | Panel | Native DTB | Touch firmware |
 | --- | --- | --- |

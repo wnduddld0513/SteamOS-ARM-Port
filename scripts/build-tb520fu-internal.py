@@ -121,7 +121,7 @@ def main():
     assert sha(uefi) == a.uefi_sha256, 'UEFI hash mismatch'
     assert uefi.read_bytes()[:8] == b'ANDROID!'
     source_commit = (kout / 'TB520FU-SOURCE').read_text().strip()
-    assert source_commit == 'e4bbdb123022a3ad396df77ebe353d7e8050cf94'
+    assert source_commit == '972c5ce4d2955bb0382a2101f4e22c5185cea6ba'
     config = (kout / 'config-7.2.6-tb520fu-steamos').read_text()
     for key in ('SCSI_UFSHCD', 'SCSI_UFS_QCOM', 'EXT4_FS', 'OVERLAY_FS', 'EFI_STUB'):
         assert f'CONFIG_{key}=y\n' in config, key

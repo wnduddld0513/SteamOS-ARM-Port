@@ -54,10 +54,11 @@ done
 for p in "$TB520FU_REPO_ROOT/external-and-mods/InputPlumber/"000[12]-*.patch; do
     git -C "$build/inputplumber" apply "$p"
 done
-p="$build/port/packages/tb321fu-sensors/specs/libssc-0001-max-sample-rate.patch"
-if ! git -C "$build/libssc" apply --reverse --check "$p" 2>/dev/null; then
-    git -C "$build/libssc" apply "$p"
-fi
+for p in "$build/port/packages/tb321fu-sensors/specs/"libssc-*.patch; do
+    if ! git -C "$build/libssc" apply --reverse --check "$p" 2>/dev/null; then
+        git -C "$build/libssc" apply "$p"
+    fi
+done
 sed -i -e 's#Y700_REGISTRY_ROOT#QCOM_SNS_REGISTRY_ROOT#g' \
     -e 's#/var/lib/y700-sns/persist/sensors/registry#/var/lib/qcom-sns/persist/sensors/registry#g' "$build/hexagonrpc/hexagonrpcd/apps_std.c"
 # Frame's packaged Cargo is too old for the pinned version-4 Cargo.lock.

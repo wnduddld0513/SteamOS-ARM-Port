@@ -15,7 +15,7 @@ QCA_FIRMWARE = (
     'qcom/sm8650/lenovo/tb520fu/hmtbtfw20.tlv',
     'qcom/sm8650/lenovo/tb520fu/hmtnv20_Lapis.bin',
 )
-SOURCE_COMMIT = 'f0daedc104c710f2e4c9cde1d654a40d4854bbf2'
+SOURCE_COMMIT = 'e4bbdb123022a3ad396df77ebe353d7e8050cf94'
 FIRMWARE_SHA = '315f7d7f349fef84fbe05211fbbc55eaad3d93c750326bc80baca6e849da4328'
 MASKED = (
     'konkrd.service', 'konkr-sleep.service', 'konkr-pd-kick.service',
@@ -25,7 +25,8 @@ MASKED = (
     # Deckard's EEPROM MAC writer; TB520FU has no such EEPROM.
     'set-bluetooth-mac-address.service',
     # The common SM8650 kernel has no sched_ext, so scx.service never runs
-    # there. The TB520FU kernel enables it; scx_lavd then stalls the tablet.
+    # there. Earlier TB520FU kernels enabled it and scx_lavd stalled the
+    # tablet; keep the unit masked even though the kernel now disables it.
     'scx.service',
     'steamos-arm-vpower.service', 'steamos-arm-tablet-boot-ok.service',
     'steamos-arm-tablet-firmware.service', 'steamos-arm-update.service',

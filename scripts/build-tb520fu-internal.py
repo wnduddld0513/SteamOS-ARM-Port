@@ -187,7 +187,7 @@ def main():
         cmdline = (f'root=UUID={root_uuid} rootfstype=ext4 rw rootwait '
                    'steamos.bootlabel=super firmware_class.path=/usr/lib/firmware/steamos-arm/tb520fu '
                    'efi=novamap,debug fw_devlink.sync_state=timeout drm_client_lib.active=none '
-                   'earlycon=efifb keep_bootcon console=tty0 fbcon=nodefer loglevel=8 '
+                   'earlycon=efifb console=tty0 fbcon=nodefer loglevel=4 '
                    'printk.time=1 consoleblank=0 initcall_debug '
                    'log_buf_len=4M tb520fu.diagnostics=1')
         # Match the working Y703 test-7 EFI-stub boot path. The RAM-partition

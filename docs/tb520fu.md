@@ -154,3 +154,5 @@ python3 scripts/install-tb520fu.py --check-firmware \
 ```
 
 TB520FU uses its own build entry points, overlay, firmware namespace and UEFI configuration. Other device recipes retain upstream behavior. Generic SoC OTA and repartition services are disabled in the TB520FU image; Steam client updates are separate.
+
+`scx.service` is masked. The common SM8650 kernel is built without sched_ext, so the service's `/sys/kernel/sched_ext` condition never lets it start there. The TB520FU kernel enables sched_ext. In every captured boot of kernel `f0daedc`, logging stopped 2–5 seconds after `sched_ext: BPF scheduler "lavd_…" enabled`. That happened before Gamescope committed its first frame. Deckard's `set-bluetooth-mac-address.service` is also masked because it targets an EEPROM this tablet lacks. QCA Bluetooth firmware is installed under the `qca/` prefix that btqca requests.

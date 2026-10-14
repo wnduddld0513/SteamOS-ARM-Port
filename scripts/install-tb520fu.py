@@ -11,6 +11,10 @@ import tarfile
 REPO = Path(__file__).resolve().parents[1]
 DEVICE = REPO / 'external-and-mods/tb520fu'
 PRIVATE_FW = 'usr/lib/firmware/steamos-arm/tb520fu'
+QCA_FIRMWARE = (
+    'qcom/sm8650/lenovo/tb520fu/hmtbtfw20.tlv',
+    'qcom/sm8650/lenovo/tb520fu/hmtnv20_Lapis.bin',
+)
 SOURCE_COMMIT = 'f0daedc104c710f2e4c9cde1d654a40d4854bbf2'
 FIRMWARE_SHA = '315f7d7f349fef84fbe05211fbbc55eaad3d93c750326bc80baca6e849da4328'
 MASKED = (
@@ -18,6 +22,11 @@ MASKED = (
     'pocket-s2-controller.service', 'sm8550-fixpad.service',
     'sm8550-inputplumber-ext-hid.service', 'sm8550-audio-setup.service',
     'sm8550-bluetooth-setup.service', 'steamos-arm-power.service',
+    # Deckard's EEPROM MAC writer; TB520FU has no such EEPROM.
+    'set-bluetooth-mac-address.service',
+    # The common SM8650 kernel has no sched_ext, so scx.service never runs
+    # there. The TB520FU kernel enables it; scx_lavd then stalls the tablet.
+    'scx.service',
     'steamos-arm-vpower.service', 'steamos-arm-tablet-boot-ok.service',
     'steamos-arm-tablet-firmware.service', 'steamos-arm-update.service',
     'steamos-arm-update-cleanup.service',
@@ -45,6 +54,17 @@ def leaf_destination(root, name):
         raise ValueError('destination parent escapes rootfs: ' + name)
     return dest
 
+def firmware_destination(name):
+    if name.startswith('usr/lib/firmware/'):
+        name = name.removeprefix('usr/lib/firmware/')
+        # btqca prefixes both DT firmware-name entries with "qca/".
+        if name in QCA_FIRMWARE:
+            name = 'qca/' + name
+        return PRIVATE_FW + '/' + name
+    if name.startswith('usr/share/qcom/sm8650/Lenovo/tb520fu/'):
+        return name
+    raise ValueError('unexpected firmware namespace: ' + name)
+
 def firmware(archive):
     if hashlib.sha256(archive.read_bytes()).hexdigest() != FIRMWARE_SHA:
         raise ValueError('stock archive SHA256 differs from the pinned TB520FU archive')
@@ -66,12 +86,7 @@ def firmware(archive):
             data = tar.extractfile(m).read()
             if hashlib.sha256(data).hexdigest() != spec['sha256']:
                 raise ValueError('firmware member hash mismatch: ' + m.name)
-            if m.name.startswith('usr/lib/firmware/'):
-                target = PRIVATE_FW + '/' + m.name.removeprefix('usr/lib/firmware/')
-            elif m.name.startswith('usr/share/qcom/sm8650/Lenovo/tb520fu/'):
-                target = m.name
-            else:
-                raise ValueError('unexpected firmware namespace: ' + m.name)
+            target = firmware_destination(m.name)
             payloads[target] = data
     return payloads
 
@@ -109,6 +124,16 @@ def write_file(root, name, data, mode=0o644):
     p.write_bytes(data)
     p.chmod(mode)
 
+def mask_system_services(root, units):
+    paths = [leaf_destination(root, prefix + unit) for unit in units
+             for prefix in ('etc/systemd/system/',
+                            'var/lib/overlays/etc/upper/systemd/system/')]
+    for path in paths:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        if path.exists() or path.is_symlink():
+            path.unlink()
+        path.symlink_to('/dev/null')
+
 def install(root, payloads, runtime):
     root = root.resolve(strict=True)
     if root == Path('/') or not (root / '.tb520fu-rootfs').is_file() or not (root / 'usr/bin/bash').is_file():
@@ -134,6 +159,7 @@ def install(root, payloads, runtime):
         'etc/inputplumber/devices.d/02-konkr-pocketfit.yaml',
         'etc/inputplumber/devices.d/03-ayaneo-pocket-s2.yaml',
     ]
+    remove += [PRIVATE_FW + '/' + name for name in QCA_FIRMWARE]
     upper = 'var/lib/overlays/etc/upper/'
     # KONKR disables Plasma's power button because konkrd owns it. TB520FU
     # masks that daemon, so restore the shared policy in both /etc layers.
@@ -182,12 +208,7 @@ def install(root, payloads, runtime):
             path.symlink_to('/dev/null')
     # /etc is persisted through SteamOS's overlay: mirror masks and config there.
     upper = 'var/lib/overlays/etc/upper/'
-    for unit in MASKED:
-        for prefix in ('etc/systemd/system/', upper + 'systemd/system/'):
-            path = leaf_destination(root, prefix + unit)
-            path.parent.mkdir(parents=True, exist_ok=True)
-            if path.exists() or path.is_symlink(): path.unlink()
-            path.symlink_to('/dev/null')
+    mask_system_services(root, MASKED)
     for unit in tb_units:
         for prefix in ('usr/lib/systemd/system/multi-user.target.wants/',
                        'etc/systemd/system/multi-user.target.wants/',
